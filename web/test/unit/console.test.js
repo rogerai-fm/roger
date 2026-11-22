@@ -4,7 +4,7 @@
 //   - a failed /account is the ONLY thing that redirects to login
 //   - a /console error with a confirmed session shows the fault state, never redirects
 //   - consumer and owner empty states, counters and the lineage table
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/svelte";
 import Console from "#lib/console/ConsoleApp.svelte";
 import words from "../fixtures/console-words.json";
@@ -24,7 +24,12 @@ let replaced;
 beforeEach(() => {
   replaced = [];
   Object.defineProperty(window, "location", { configurable: true, value: { replace: (u) => replaced.push(u), pathname: "/console.html", search: "" } });
+  // Freeze the wall clock (Date only, so waitFor's timers still run): a receipt stamped
+  // "30 seconds ago" must still read "30s" when the row renders, even on a slow runner.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-20T12:00:00Z"));
 });
+afterEach(() => vi.useRealTimers());
 
 describe("console boot", () => {
   it("logged out: /account fails -> login, nothing else fetched", async () => {

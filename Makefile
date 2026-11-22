@@ -143,7 +143,7 @@ cover-gate-fast:
 	@go build ./...
 	@go vet ./...
 	@node web/build.mjs >/dev/null
-	@ver=$$(sed -n 's/^\(const\|var\) Version = "\([0-9][^"]*\)".*/\2/p' cmd/rogerai/main.go | head -n1); \
+	@ver=$$(sed -n 's/^\(const\|var\) Version = "\([0-9][^"]*\)".*/\2/p' internal/buildinfo/buildinfo.go | head -n1); \
 		count=$$(grep -o 'data-cli-version>v[^<]*<' web/dist/manual.html | grep -c "^data-cli-version>v$$ver<$$" || true); \
 		newest=$$(sed -n '/id="schangelog"/,$$p' web/dist/manual.html | grep -o 'man-plate__k">v[^<]*<' | head -n1); \
 		if [ "$$count" -eq 2 ] && [ "$$newest" = "man-plate__k\">v$$ver<" ]; then echo "[cover-gate-fast] OK - manual release metadata matches v$$ver"; \
