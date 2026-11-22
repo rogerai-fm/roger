@@ -232,7 +232,7 @@ test("only released artifacts present download controls", () => {
     /16K saliency calibration/,
     /On air as wave-pico-293m/,
     /Architecture and data design/,
-    /Release build gated/,
+    /Fire controller and fire vision on air as specialized models (?:&middot;|·) chat off the market/,   // Nano, founder 2026-11-21
   ]) assert.match(page, stage);
   assert.doesNotMatch(page, /href="[^"]*(?:placeholder|coming-soon)[^"]*"/i);
 });

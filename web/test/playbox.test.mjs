@@ -524,8 +524,10 @@ test("deck: the brain is named honestly and no benchmark figures leak", () => {
   assert.ok(!html.includes("(350M)"), "the retired ~350M size guess must not return");
   assert.ok(htmlFlat.includes("targets 0.8&ndash;1.5B") || htmlFlat.includes("targets 0.8–1.5B"),
     "Wave Nano's locked tier band must be stated");
-  // founder ruling 2026-10-21: Nano's 1.45B release build is gated, so its size is stated, never guessed
-  assert.ok(htmlFlat.includes("1.45B scratch build has passed our release gate"), "Nano's gated build is stated as gated, not on the band");
+  // founder 2026-11-21: Nano's fire controller and fire vision are on the market as specialized
+  // models; Nano chat stays off until it passes the release gate. Its size is stated, never guessed
+  assert.ok(htmlFlat.includes("1.45B scratch build has two fire models on air, the fire controller and fire vision, as specialized models, not chat models. Nano chat stays off the market until it passes the release gate."),
+    "Nano's state is stated: fire models on air, chat off, no return date");
   assert.ok(htmlFlat.includes("edge tier that runs on a Pi"),
     "Wave Pico must be named as the Pi-class edge tier");
   assert.ok(!/MCU-class edge tier/.test(htmlFlat),

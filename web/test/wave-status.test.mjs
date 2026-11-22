@@ -76,6 +76,14 @@ test("wave-status: every tier carries the required fields with the right types",
     assert.equal(t.onAirBand !== null, t.stage === "on-air" || t.stage === "released",
       `${at}: an on-air band exactly when the stage is on air or later`);
     assert.equal(t.publicCheckpoint, t.stage === "released", `${at}: a public checkpoint only when released`);
+    // A tier may carry more than one band (Nano: the fire controller plus fire vision). The extra bands
+    // follow the same rule as the main one: only when the tier is on air or later.
+    if ("alsoOnAir" in t) {
+      assert.ok(Array.isArray(t.alsoOnAir) && t.alsoOnAir.length > 0, `${at}: alsoOnAir is a non-empty list`);
+      for (const b of t.alsoOnAir) assert.match(b, /^[a-z0-9-]+$/, `${at}: alsoOnAir band ${b}`);
+      assert.ok(t.stage === "on-air" || t.stage === "released", `${at}: extra bands only when on air`);
+      assert.ok(!t.alsoOnAir.includes(t.onAirBand), `${at}: the main band is not repeated`);
+    }
     if ("ruling" in t) assert.equal(t.ruling, "pending", `${at}: the only ruling value is "pending"`);
     // The file lives in the public repository. What disagrees is computed from the labels
     // (the ledger below), so no prose note spells it out: the flag is bare.
@@ -176,8 +184,8 @@ test("plate: the homepage Labs plate names the Spectrum and the live stages of P
   const d = data();
   const w = (id) => d.stageWords[tierById(id).stage];
   assert.equal(plateOf(dist("index.html")), `ROGERAI LABS THE WAVE SPECTRUM PICO ${w("pico")} · NANO ${w("nano")}`);
-  assert.equal(plateOf(dist("index.html")), "ROGERAI LABS THE WAVE SPECTRUM PICO ON AIR · NANO GATED",
-    "today (founder ruling 2026-10-21): Pico on air, Nano gated");
+  assert.equal(plateOf(dist("index.html")), "ROGERAI LABS THE WAVE SPECTRUM PICO ON AIR · NANO ON AIR",
+    "today (founder 2026-11-21): Pico on air; Nano's two fire models on the market since 2026-11-20 20:27 PT");
 });
 
 test("plate: the status words come from the stage tokens, not hand-typed copy", () => {
@@ -320,9 +328,8 @@ const IMPLIES = {
     "prototype &middot; foundations measured, growth loop in development",
   ],
   gated: [
-    // founder ruling 2026-10-21: Nano's release build is gated, not on the band
-    "GATED", "Gated", "Release build gated &middot; not on the band yet", "Scratch &middot; gated",
-    "0.83&ndash;2.9 GB &middot; gated", "Wave Nano 1.45B, 0.83 to 2.9 GB, gated",
+    "GATED", "Gated", "Scratch &middot; gated",
+    "Release build gated &middot; not on the band yet",   // Giga (main, 2026-11)
     "EDGE CLASS · WAYPOINT TRAINED", "TRAINED", "250–300M · waypoint", "WAYPOINT", "Waypoint trained",
     "WAYPOINT TRAINED", "Wave Pico has a trained waypoint build, certified against our own release gate",
     "Certifying the waypoint &middot; 300M retrain next", "Scratch &middot; waypoint trained",
@@ -339,6 +346,11 @@ const IMPLIES = {
     "293M, from scratch, on air now",
     "on air as a free band, <code>wave-pico-293m</code>; weights not published yet",
     "Wave Pico (293M) is on air right now as a free band",
+    // founder 2026-11-21: Nano's fire controller and fire vision on the market since 2026-11-20
+    // 20:27 PT, behind market guards, as specialized models; Nano chat stays off the market
+    "Fire controller and fire vision on air as specialized models &middot; chat off the market",
+    "874&ndash;2,899 MB &middot; fire models on air",
+    "Wave Nano 1.45B, 874 to 2,899 MB, fire models on air, chat off the market",
   ],
   released: [],
 };
@@ -377,14 +389,19 @@ test("ledger: the pending set today (update this when the founder rules)", () =>
     ["exa"]);
 });
 
-// Founder ruling 2026-10-21: Pico is on air (the v6 release, wave-pico-293m) and Nano's
-// release build is gated. Both rulings are recorded, so neither tier is pending, and no page
-// may still describe the old stage.
-test("ruling 2026-10-21: Pico on air, Nano gated, and no page still says otherwise", () => {
+// Founder ruling 2026-10-21: Pico is on air (the v6 release, wave-pico-293m). Founder
+// ruling 2026-11-19 22:54 PT took Nano's three bands off the market for safety (R.477). Founder
+// decision 2026-11-21: the fire controller and fire vision went back on the market 2026-11-20 at
+// 20:27 PT behind market guards, as specialized models (R.482); Nano chat stays off until it
+// passes the release gate. Recorded, so no tier is pending, and no page may describe an old stage.
+test("rulings 2026-10-21 and 2026-11-21: Pico on air, Nano's fire models on air, Nano chat off, and no page still says otherwise", () => {
   assert.equal(tierById("pico").stage, "on-air");
   assert.equal(tierById("pico").onAirBand, "wave-pico-293m");
-  assert.equal(tierById("nano").stage, "gated");
-  assert.equal(tierById("nano").onAirBand, null, "Nano is not on the band");
+  // founder 2026-11-21: exactly the two fire bands are on the market; chat is not a band
+  assert.equal(tierById("nano").stage, "on-air");
+  assert.equal(tierById("nano").onAirBand, "wave-nano-fire-controller", "the fire controller is on the market");
+  assert.deepEqual(tierById("nano").alsoOnAir, ["wave-nano-fire-vision"], "and fire vision beside it, nothing else");
+  assert.equal(tierById("nano").publicCheckpoint, false, "no Nano weights are published");
   assert.equal(tierById("micro").stage, "training", "Micro's from-scratch 7B run started (ruling 2026-10-21)");
   assert.equal(tierById("micro").publicCheckpoint, false);
   assert.equal(tierById("giga").stage, "gated", "Giga stays gated");
@@ -392,6 +409,9 @@ test("ruling 2026-10-21: Pico on air, Nano gated, and no page still says otherwi
   for (const id of ["pico", "nano", "micro"]) assert.notEqual(tierById(id).ruling, "pending", `${id} is ruled`);
   const STALE = [/certified 100M-class/i, /Certifying the waypoint/i, /300M retrain next/i, /WAYPOINT TRAINED/,
     /queued behind Pico/i, /NEXT BUILD/, /Nano is in training/i, /Wave Nano is in training/i,
+    /scratch build has passed our release gate and is not on the band/,
+    /Nano is on air/i, /on air as (the free band )?wave-nano/i, /three free bands/i, /roger use wave-nano/i,
+    /wave-nano-chat/, /temporarily off the market/i, /safety checks and guards are added/i, /NANO GATED/,
     /150&ndash;180 MB/, /150-180 MB/, /~165 MB/, /\b165 MB quantized/, /Nano 0\.8-1\.5B/,
     /Wave Micro planned/i, /Micro is on the plan/i, /Scratch pipeline standing up/i, /Scratch &middot; planned/,
     /Wave Micro, 7 to 8 billion, an on-site server, planned/, /PLANNED TIERS/];

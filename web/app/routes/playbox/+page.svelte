@@ -291,8 +291,9 @@
                   and framing ship as one unit.</p>
                 <p class="dk__surfnote"><b>Wave Nano</b> is the brain in these devices, the
                   gateway tier of the Wave Spectrum. The tier targets 0.8&ndash;1.5B. Its
-                  1.45B scratch build has passed our release gate and is not on the band
-                  yet.</p>
+                  1.45B scratch build has two fire models on air, the fire controller and
+                  fire vision, as specialized models, not chat models. Nano chat stays off the
+                  market until it passes the release gate.</p>
                 <p class="dk__surfnote"><b>Wave Pico</b> is the
                   edge tier that runs on a Pi. It is scratch-trained at 293M, on air as
                   the free band wave-pico-293m, and it runs with no GPU.</p>

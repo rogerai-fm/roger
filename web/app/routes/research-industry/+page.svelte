@@ -206,7 +206,7 @@
 
         <!-- The wildfire use case, built with FireDefense Systems (named with their
              agreement). What runs today is stated as it is: the mast is shown in the
-             film, Pico is on air, Nano is gated (web/src/data/wave-status.json). -->
+             film, Pico is on air, Nano's two fire models are on air and Nano chat is off (web/src/data/wave-status.json). -->
         <div class="device-contract">
           <p><b>Use case: an edge fire watch.</b> Built with FireDefense Systems, a separate
             company that designs and installs exterior wildfire sprinkler systems for homes.
@@ -219,7 +219,7 @@
           <p><b>Where it runs.</b> The design puts the models on the mast, on its own
             battery, with no network required. Wave Pico, on air today as wave-pico-293m,
             is the tier meant to keep the always-on watch. The threat call, which fuses
-            gas, image, wind and slope, is Wave Nano work, and Nano is gated, not yet on air. In a
+            gas, image, wind and slope, is Wave Nano work. Nano&rsquo;s fire controller and fire vision are on air behind market guards, as specialized models, not chat models; Nano chat stays off the market until it passes the release gate. In a
             wildfire the towers and the power tend to go before the fire arrives, so a model
             that has to reach a datacenter to think has already lost.</p>
           <p><b>What it never does.</b> It would alert the owner first, and a message that cannot

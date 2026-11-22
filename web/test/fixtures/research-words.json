@@ -50,8 +50,8 @@
   ]
  },
  "broadcasts-how-llms-work.html": {
-  "sha": "12b61da0b7235a4a6e3f86c6daceafaf6a9d4ffda88b9a4da938d4e8ff7ea189",
-  "length": 11764,
+  "sha": "c0cfc28ce00210b06b4b5f9f8b806b2a441b7023f11cdcc1e3093d4e60e9ad44",
+  "length": 11797,
   "hrefs": [
    "/broadcasts.html",
    "/research-wave-family.html",
@@ -74,8 +74,8 @@
   ]
  },
  "broadcasts-jev-vs-wave.html": {
-  "sha": "27f37a99df61dd689785135ff2784e35d3e1b999f802f76a587509e2ad205252",
-  "length": 11197,
+  "sha": "b956e5de6507af349619df6ab8f491b1cf0360104493a47adc69c214fa0d4891",
+  "length": 11208,
   "hrefs": [
    "/broadcasts.html",
    "/research-wave-family.html"
@@ -181,8 +181,8 @@
   ]
  },
  "research-hardware.html": {
-  "sha": "59e393f01a210034b855e23b4c420b94c1fa2ca653f0186d791e60ff5c968ff4",
-  "length": 8470,
+  "sha": "a104670e5104045e7f7f8deb0b6fe090979c0e960676225b1844be59edd4e44b",
+  "length": 8505,
   "hrefs": [
    "/research.html",
    "/research-models.html",
@@ -207,8 +207,8 @@
   ]
  },
  "research-industry.html": {
-  "sha": "6a7f0073045d093cb1f9a2e1768d9c39cf316cc0128b289e3d4503785ac246ee",
-  "length": 8818,
+  "sha": "14a4dea3e650b308b3382bd7f1e65a353bbbbafe610480cadca059dd117b983e",
+  "length": 8938,
   "hrefs": [
    "/research.html",
    "#market-oilgas",
@@ -236,8 +236,8 @@
   ]
  },
  "research-models.html": {
-  "sha": "d8af7d820684d2b300005cb7316e106c413cbbf10b66b60239ede490f649cf74",
-  "length": 6418,
+  "sha": "3083494aacafd5cf5aa89414a8bb36abd2c941c090bb5d8818e13fbc844ac695",
+  "length": 6459,
   "hrefs": [
    "/research.html",
    "/research-wave-pico.html",
@@ -256,7 +256,7 @@
   ]
  },
  "research-wave-family.html": {
-  "sha": "b68e57314c0de6c5095af9baa5624ae48d55a5131a6cd7c43af52f157c221e2d",
+  "sha": "5ba4214e5044ce5f66a6912e5648dad74b009ce46a915b6aae68196e16733ac7",
   "length": 17303,
   "hrefs": [
    "/research.html",
@@ -270,8 +270,8 @@
   ]
  },
  "research-wave-nano.html": {
-  "sha": "ee79246676ceeaf43db1c8cb8a3c6d2931449cd5fd9339c176700013410b0fe0",
-  "length": 9859,
+  "sha": "a5f3a8054a137190f50d60c97d6a73794f33bf6fe640105956ae540d0597c502",
+  "length": 18879,
   "hrefs": [
    "/research-models.html",
    "#measured",
@@ -283,8 +283,8 @@
   ]
  },
  "research-wave-pico.html": {
-  "sha": "01446530aef0d41c5547b1d7071c22340680d588805a37311da5db727f730a86",
-  "length": 8319,
+  "sha": "727a8596f351af7f502dcf398fbd37f75455e52df3fb569a62e53c57340b2c21",
+  "length": 8586,
   "hrefs": [
    "/research-models.html",
    "#run",
@@ -296,7 +296,7 @@
   ]
  },
  "research.html": {
-  "sha": "da6ad3030eedde7e609b306ac105931dae0079eae0eab40f9f165bf3f20c4d07",
+  "sha": "953a69e2fd404261213364d2e49db70e758a6d1a96ea238839aff1b8bb17d51f",
   "length": 5301,
   "hrefs": [
    "/research-models.html",
