@@ -225,7 +225,8 @@ func newTestReregistrar(broker string) *reregistrar {
 
 // TestReregisterSingleFlight: N pollers that all observe the same generation and
 // call recover() concurrently trigger EXACTLY ONE re-register, and afterward the
-// shared token holder hands out the fresh token at the new generation.
+// shared token holder hands out the SAME token at the new generation (a re-register is
+// idempotent: features/multinode/rereg_loop.feature, "recover re-sends the current token").
 func TestReregisterSingleFlight(t *testing.T) {
 	var regs int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -243,7 +244,7 @@ func TestReregisterSingleFlight(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := 0; i < n; i++ {
 		wg.Add(1)
-		go func() { defer wg.Done(); rr.recover(gen0, stop) }()
+		go func() { defer wg.Done(); rr.recover(gen0, http.StatusNotFound, stop) }()
 	}
 	wg.Wait()
 
@@ -254,8 +255,8 @@ func TestReregisterSingleFlight(t *testing.T) {
 	if gen1 != gen0+1 {
 		t.Errorf("generation should advance by 1: gen0=%d gen1=%d", gen0, gen1)
 	}
-	if tok1 == tok0 {
-		t.Error("token should be refreshed after re-register")
+	if tok1 != tok0 {
+		t.Error("the token must NOT rotate on a re-register (it re-poisons lagging broker instances)")
 	}
 }
 
@@ -273,11 +274,11 @@ func TestReregisterAlreadyRecovered(t *testing.T) {
 	_, gen0 := rr.curToken()
 	stop := make(chan struct{})
 
-	rr.recover(gen0, stop) // first recovery advances the generation
+	rr.recover(gen0, http.StatusNotFound, stop) // first recovery advances the generation
 	if got := atomic.LoadInt32(&regs); got != 1 {
 		t.Fatalf("first recover should register once, got %d", got)
 	}
-	rr.recover(gen0, stop) // a laggard still holding gen0 must no-op
+	rr.recover(gen0, http.StatusNotFound, stop) // a laggard still holding gen0 must no-op
 	if got := atomic.LoadInt32(&regs); got != 1 {
 		t.Errorf("stale-generation recover must not re-register again, got %d", got)
 	}
@@ -350,7 +351,7 @@ func TestReregisterBackoffBounded(t *testing.T) {
 		reregisterBackoff = saved
 	}()
 
-	go func() { rr.recover(gen0, stop); close(done) }()
+	go func() { rr.recover(gen0, http.StatusNotFound, stop); close(done) }()
 	select {
 	case <-done:
 	case <-time.After(10 * time.Second):
@@ -380,7 +381,7 @@ func TestReregisterStopUnblocks(t *testing.T) {
 	stop := make(chan struct{})
 
 	done := make(chan struct{})
-	go func() { rr.recover(gen0, stop); close(done) }()
+	go func() { rr.recover(gen0, http.StatusNotFound, stop); close(done) }()
 	time.Sleep(50 * time.Millisecond)
 	close(stop)
 	select {
@@ -498,7 +499,7 @@ func TestHeartbeatSelfHeals(t *testing.T) {
 	if status != http.StatusNotFound {
 		t.Fatalf("setup: first heartbeat should 404, got %d", status)
 	}
-	rr.recover(gen, stop)
+	rr.recover(gen, http.StatusNotFound, stop)
 	if got := atomic.LoadInt32(&registers); got != 1 {
 		t.Errorf("heartbeat 404 should re-register once, got %d", got)
 	}

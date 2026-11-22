@@ -278,7 +278,7 @@ func TestReregisterStopBeforeLoop(t *testing.T) {
 	stop := make(chan struct{})
 	close(stop) // already stopped before recover runs
 
-	rr.recover(gen0, stop)
+	rr.recover(gen0, http.StatusNotFound, stop)
 	if regs.Load() != 0 {
 		t.Errorf("recover must not register when stop is already closed, got %d registers", regs.Load())
 	}
@@ -315,7 +315,7 @@ func TestReregisterConfidentialDropsClaimNoTEE(t *testing.T) {
 	_, gen0 := rr.curToken()
 	stop := make(chan struct{})
 
-	rr.recover(gen0, stop)
+	rr.recover(gen0, http.StatusNotFound, stop)
 	if _, gen1 := rr.curToken(); gen1 != gen0+1 {
 		t.Errorf("re-register should succeed (as standard) even without a TEE; gen=%d", gen1)
 	}
