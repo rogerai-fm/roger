@@ -249,8 +249,9 @@ release:
 	done
 	@command -v sha256sum >/dev/null 2>&1 && (cd bin && sha256sum roger-* > checksums.txt && echo "wrote bin/checksums.txt") || true
 
-demo: build
+demo:
 	@test -d cmd/rogerai-broker || { echo "make demo runs the broker, whose source is in the private repo"; exit 1; }
+	@$(MAKE) --no-print-directory build
 	@bash scripts/demo.sh
 
 kill:
