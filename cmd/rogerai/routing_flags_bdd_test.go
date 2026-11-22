@@ -213,7 +213,7 @@ type rfState struct {
 	feeRate      string
 	defaultCap   string
 	ceiling      string
-	brokerLog    bytes.Buffer
+	brokerLog    rfBuf // written by the broker process while steps read it
 
 	rec      *rfRecorder
 	stations []*rfStation
@@ -252,6 +252,11 @@ func (b *rfBuf) Write(p []byte) (int, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return b.b.Write(p)
+}
+func (b *rfBuf) Reset() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.b.Reset()
 }
 func (b *rfBuf) String() string {
 	b.mu.Lock()
@@ -308,24 +313,55 @@ func (s *rfState) ensureBroker() error {
 	seed := make([]byte, 32)
 	_, _ = rand.Read(seed)
 	s.adminKey = hex.EncodeToString(seed)
-	port := rfFreePort(s.t)
-	s.brokerURL = fmt.Sprintf("http://127.0.0.1:%d", port)
-	if err := s.startBrokerProc(port); err != nil {
-		return err
+	// rfFreePort only suggests a port: another test process can bind it before the broker does.
+	// When the broker loses that race it exits with "address already in use"; try a fresh port.
+	var lost []string // each lost attempt's port and log, for the error if every attempt loses
+	for attempt := 0; attempt < 5; attempt++ {
+		port := rfFreePort(s.t)
+		s.brokerURL = fmt.Sprintf("http://127.0.0.1:%d", port)
+		if err := s.startBrokerProc(port); err != nil {
+			return err
+		}
+		up, lostBind := s.awaitBrokerUp()
+		if up {
+			s.rec = newRfRecorder(s.brokerURL)
+			s.writeConfig(map[string]any{})
+			return nil
+		}
+		if !lostBind {
+			break
+		}
+		_ = s.brokerCmd.Process.Kill()
+		_ = s.brokerCmd.Wait()
+		s.brokerCmd = nil
+		lost = append(lost, fmt.Sprintf("port %d: %s", port, s.brokerLog.String()))
+		s.brokerLog.Reset() // the next attempt must not see this attempt's bind error
 	}
+	return fmt.Errorf("broker did not come up: %s%s", strings.Join(lost, ""), s.brokerLog.String())
+}
+
+// rfHealthClient has a short timeout: if something else holds the port and never answers, a bare
+// http.Get would wait forever.
+var rfHealthClient = &http.Client{Timeout: 2 * time.Second}
+
+// awaitBrokerUp polls /health for up to 15 s. It stops early, with lostBind set, when the broker
+// logged that its port was already taken.
+func (s *rfState) awaitBrokerUp() (up, lostBind bool) {
 	deadline := time.Now().Add(15 * time.Second)
 	for time.Now().Before(deadline) {
-		if resp, err := http.Get(s.brokerURL + "/health"); err == nil {
+		// The bind error is checked first: whatever holds the port may answer /health itself.
+		if strings.Contains(s.brokerLog.String(), "address already in use") {
+			return false, true
+		}
+		if resp, err := rfHealthClient.Get(s.brokerURL + "/health"); err == nil {
 			resp.Body.Close()
 			if resp.StatusCode == 200 {
-				s.rec = newRfRecorder(s.brokerURL)
-				s.writeConfig(map[string]any{})
-				return nil
+				return true, false
 			}
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	return fmt.Errorf("broker did not come up: %s", s.brokerLog.String())
+	return false, false
 }
 
 // startBrokerProc starts the real broker binary on port with the harness env plus brokerEnv.
@@ -370,15 +406,8 @@ func (s *rfState) restartBroker() error {
 	if err := s.startBrokerProc(port); err != nil {
 		return err
 	}
-	deadline := time.Now().Add(15 * time.Second)
-	for time.Now().Before(deadline) {
-		if resp, err := http.Get(s.brokerURL + "/health"); err == nil {
-			resp.Body.Close()
-			if resp.StatusCode == 200 {
-				return nil
-			}
-		}
-		time.Sleep(50 * time.Millisecond)
+	if up, _ := s.awaitBrokerUp(); up {
+		return nil
 	}
 	return fmt.Errorf("broker did not come back: %s", s.brokerLog.String())
 }

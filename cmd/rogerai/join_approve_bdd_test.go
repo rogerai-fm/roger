@@ -114,14 +114,29 @@ func (s *approveBDD) reset() error {
 	p.Plane().SetPairPoll(50 * time.Millisecond)
 	go func() { _ = p.Serve() }()
 	s.t.Cleanup(func() { _ = p.Close() })
-	for i := 0; i < 100 && !toweradmin.Running(s.dir); i++ {
-		time.Sleep(10 * time.Millisecond)
+	// Wait for what the owner's screens read. Serve writes the on-air record and starts the admin
+	// socket in its own goroutine, and the TUI and console list a Tower only once both are there
+	// (ownerJoinHooks), so a slow start must not pass silently.
+	for end := time.Now().Add(10 * time.Second); !s.ownersSee(); time.Sleep(10 * time.Millisecond) {
+		if time.Now().After(end) {
+			return fmt.Errorf("the Tower did not appear on its owner's screens within 10 s")
+		}
 	}
 	st, _ := tower.Open(s.dir)
 	s.fp, _ = st.JoinFingerprint()
 	s.runs, s.owner, s.ownerLine, s.rawBodies, s.middleAddr, s.middleFP = nil, "", "", nil, "", ""
 	pairWaitFor = localplane.PairLifetime
 	return nil
+}
+
+// ownersSee reports whether this Tower is listed for its owner, as the TUI and console list it.
+func (s *approveBDD) ownersSee() bool {
+	for _, t := range ownerJoinHooks().Towers() {
+		if t.Dir == s.dir {
+			return toweradmin.Running(s.dir)
+		}
+	}
+	return false
 }
 
 // ask runs `roger join <addr> <name>` in the background, as a client or a station.
