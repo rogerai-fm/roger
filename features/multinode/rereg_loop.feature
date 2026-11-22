@@ -1,4 +1,4 @@
-# Share-node re-registration loop (2026-11-17..19): "broker restarted - re-registered node <id>"
+# APPROVED by the founder 2026-11-19, confirmed 2026-11-22 (one line on purpose: the tests select scenarios by line). Share-node re-registration loop (2026-11-17..19): "broker restarted - re-registered node <id>"
 # 45 to 86 times a minute on one station after a power outage, and a burst of 1 to 8 on every
 # normal restart of any share, against a broker that had NOT restarted.
 #
