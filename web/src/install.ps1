@@ -31,7 +31,7 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$Repo  = 'rogerai-fyi/roger'
+$Repo  = 'rogerai-fm/roger'
 $Bin   = 'roger'    # the command + the release asset prefix (renamed from 'rogerai' in v4.7.0)
 $Alias = 'rogerai'  # back-compat alias installed alongside, so old muscle memory still works
 

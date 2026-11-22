@@ -128,7 +128,7 @@ test("brand: the Organization JSON-LD carries sameAs for our four properties", (
   const same = org.sameAs ?? [];
   for (const u of [
     "https://apps.apple.com/us/app/rogerai-fm/id6785743752",
-    "https://github.com/rogerai-fyi",
+    "https://github.com/rogerai-fm",
     "https://x.com/RogerAI_fm",
     "https://huggingface.co/rogerai-fyi",
   ]) {

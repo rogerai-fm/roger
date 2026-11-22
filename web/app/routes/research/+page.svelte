@@ -496,7 +496,7 @@
            Open Air Waves.</p>
         <div class="research-actions research-actions--lead">
           <a class="research-button" href="https://huggingface.co/rogerai-fyi">Weights</a>
-          <a class="research-button" href="https://github.com/rogerai-fyi/roger">Source</a>
+          <a class="research-button" href="https://github.com/rogerai-fm/roger">Source</a>
           <a class="research-button" href="/broadcasts.html">Open Air Waves</a>
           <a class="research-button" href="mailto:labs@rogerai.fm">Contact Labs</a>
         </div>

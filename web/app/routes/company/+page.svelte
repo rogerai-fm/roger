@@ -92,7 +92,7 @@
             <p>Available as a CLI, an OpenAI-compatible API, and an iOS app.</p>
             <dl>
               <div><dt>Evaluate</dt><dd><a href="/models.html">Live models</a> · <a href="/manual.html">Manual</a></dd></div>
-              <div><dt>Source</dt><dd><a href="https://github.com/rogerai-fyi/roger">github.com/rogerai-fyi/roger</a></dd></div>
+              <div><dt>Source</dt><dd><a href="https://github.com/rogerai-fm/roger">github.com/rogerai-fm/roger</a></dd></div>
             </dl>
           </article>
           <article class="tint-panel co-card">
@@ -216,7 +216,7 @@
              <b>Legal.</b> <a href="mailto:legal@rogerai.fm">legal@rogerai.fm</a></p>
           <p><b>The work itself.</b> The source is public and the notebook is open. Reading
              either tells you more than a sales call would.
-             <a href="https://github.com/rogerai-fyi/roger">Source</a> ·
+             <a href="https://github.com/rogerai-fm/roger">Source</a> ·
              <a href="/broadcasts.html">Open Air Waves</a></p>
         </div>
       </div>

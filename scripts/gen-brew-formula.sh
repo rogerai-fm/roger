@@ -24,7 +24,7 @@
 #   scripts/gen-brew-formula.sh 5.2.1 dist/checksums.txt Formula/roger.rb   # CI: from dist/
 set -euo pipefail
 
-OWNER_REPO="rogerai-fyi/roger"
+OWNER_REPO="rogerai-fm/roger"
 
 die() { echo "gen-brew-formula: $*" >&2; exit 1; }
 
@@ -120,7 +120,7 @@ read -r -d '' CASK <<EOF || true
 # DO NOT EDIT - re-run the generator to refresh it for a newer release.
 #
 # Submission stub for the OFFICIAL Homebrew cask tap (Homebrew/homebrew-cask). Our own tap
-# (rogerai-fyi/homebrew-tap) ships a FORMULA; this cask is the artifact you PR into
+# (rogerai-fm/homebrew-tap) ships a FORMULA; this cask is the artifact you PR into
 # homebrew-cask once the gates in packaging/homebrew-cask/README.md are clear, so macOS +
 # Linux users get a true zero-trust \`brew install roger\` with no third-party tap.
 cask "roger" do

@@ -45,7 +45,7 @@
         <div class="research-actions research-actions--lead">
           <a class="research-button" href="#roles">See open roles</a>
           <a class="research-button" href="/research.html">Read the research</a>
-          <a class="research-button" href="https://github.com/rogerai-fyi/roger">Read the source</a>
+          <a class="research-button" href="https://github.com/rogerai-fm/roger">Read the source</a>
         </div>
       </div>
     </section>

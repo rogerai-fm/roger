@@ -26,7 +26,7 @@ const APP_STORE_URL = "https://apps.apple.com/us/app/rogerai-fm/id6785743752";
 test("no old-slug store URL survives anywhere on the page - captions included", () => {
   // audit 2026-09-02: hrefs moved to the renamed slug but a visible caption didn't.
   // the caption form has no /id suffix - match the slug path itself (the bare
-  // string "rogerai-fyi" stays legitimate as the GitHub org elsewhere on the page)
+  // string "rogerai-fm" stays legitimate as the GitHub org elsewhere on the page)
   assert.doesNotMatch(app, /apps\.apple\.com\/us\/app\/rogerai-fyi/, "the retired slug is gone");
 });
 
@@ -140,7 +140,7 @@ test("app.html ships the roger install command in a copy box, before the closing
 
   // the Windows path and a raw-binary fallback, same as the homepage
   assert.match(app, /install\.ps1 \| iex/, "the Windows PowerShell installer is offered");
-  assert.match(app, /github\.com\/rogerai-fyi\/roger\/releases/, "a download-a-binary fallback is offered");
+  assert.match(app, /github\.com\/rogerai-fm\/roger\/releases/, "a download-a-binary fallback is offered");
 
   // The "On Windows" note MUST carry data-alt-note, or site.js's class-based flip skips it
   // and a Windows visitor sees the PowerShell command twice with no macOS/Linux fallback.

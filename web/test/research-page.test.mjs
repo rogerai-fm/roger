@@ -217,7 +217,7 @@ test("evidence and local-use promises stay explicit", () => {
   const html = read("research.html");
   assert.match(html, /href="\/broadcasts\.html"/);
   assert.match(html, /href="https:\/\/huggingface\.co\/rogerai-fyi"/);
-  assert.match(html, /href="https:\/\/github\.com\/rogerai-fyi\/roger"/);
+  assert.match(html, /href="https:\/\/github\.com\/rogerai-fm\/roger"/);
 });
 
 test("only released artifacts present download controls", () => {

@@ -31,7 +31,7 @@ const DIST = path.join(WEB, "dist");
 // promise: if the site links it, a stranger must be able to open it.
 const OWNED = [
   /^https:\/\/huggingface\.co\/rogerai-fyi\/[A-Za-z0-9._/#-]+$/,
-  /^https:\/\/github\.com\/rogerai-fyi\/[A-Za-z0-9._/-]+$/,
+  /^https:\/\/github\.com\/rogerai-fm\/[A-Za-z0-9._/-]+$/,
 ];
 
 const TIMEOUT_MS = 15000;

@@ -306,15 +306,15 @@
         <div class="run__grid">
           <div class="run__row">
             <span class="run__k">Linux &middot; amd64</span>
-            <span class="run__v"><a href="https://github.com/rogerai-fyi/roger/releases/latest/download/roger-tower-linux-amd64">roger-tower-linux-amd64 &darr;</a></span>
+            <span class="run__v"><a href="https://github.com/rogerai-fm/roger/releases/latest/download/roger-tower-linux-amd64">roger-tower-linux-amd64 &darr;</a></span>
           </div>
           <div class="run__row">
             <span class="run__k">Linux &middot; arm64</span>
-            <span class="run__v"><a href="https://github.com/rogerai-fyi/roger/releases/latest/download/roger-tower-linux-arm64">roger-tower-linux-arm64 &darr;</a></span>
+            <span class="run__v"><a href="https://github.com/rogerai-fm/roger/releases/latest/download/roger-tower-linux-arm64">roger-tower-linux-arm64 &darr;</a></span>
           </div>
           <div class="run__row">
             <span class="run__k">Verify</span>
-            <span class="run__v"><a href="https://github.com/rogerai-fyi/roger/releases/latest/download/checksums.txt">checksums.txt</a>
+            <span class="run__v"><a href="https://github.com/rogerai-fm/roger/releases/latest/download/checksums.txt">checksums.txt</a>
               &middot; check with <code class="inline">sha256sum -c</code> before you run it</span>
           </div>
         </div>

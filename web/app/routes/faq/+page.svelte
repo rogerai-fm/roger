@@ -635,7 +635,7 @@
           <a class="research-button" data-lets-talk aria-expanded="false"
              href="mailto:labs@rogerai.fm?subject=A%20question%20about%20RogerAI">Let&rsquo;s talk</a>
           <a class="research-button" href="/manual.html#s9">Every command</a>
-          <a class="research-button" href="https://github.com/rogerai-fyi/roger">Source</a>
+          <a class="research-button" href="https://github.com/rogerai-fm/roger">Source</a>
         </div>
       </div>
     </section>

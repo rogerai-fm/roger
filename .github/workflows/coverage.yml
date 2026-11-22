@@ -112,7 +112,7 @@ jobs:
 
       # 4) Publish the report to gh-pages/coverage (main only) — BEFORE the gate, so a red
       #    gate never hides it. keep_files:false replaces coverage/ (cleans the earlier dump).
-      #    -> https://rogerai-fyi.github.io/roger/coverage/coverage.html
+      #    -> https://rogerai-fm.github.io/roger/coverage/coverage.html
       - name: publish report to Pages
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4

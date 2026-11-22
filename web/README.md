@@ -164,7 +164,7 @@ The rationale for the tech choices is in **[`TECH.md`](TECH.md)**.
 ## install.sh
 
 A real POSIX installer: detects OS/arch, downloads the matching
-`rogerai-<os>-<arch>` asset from `github.com/rogerai-fyi/roger` releases into
+`rogerai-<os>-<arch>` asset from `github.com/rogerai-fm/roger` releases into
 `~/.local/bin`, and prints a PATH hint. If no release is published yet (or the
 asset is missing for a platform), it degrades gracefully with a clear
 "build from source" message instead of failing silently. Override the version

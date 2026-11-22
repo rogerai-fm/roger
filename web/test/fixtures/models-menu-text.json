@@ -54,9 +54,9 @@
    "/models.html",
    "/voices.html",
    "/manual.html#sTower",
-   "https://github.com/rogerai-fyi/roger/releases/latest/download/roger-tower-linux-amd64",
-   "https://github.com/rogerai-fyi/roger/releases/latest/download/roger-tower-linux-arm64",
-   "https://github.com/rogerai-fyi/roger/releases/latest/download/checksums.txt",
+   "https://github.com/rogerai-fm/roger/releases/latest/download/roger-tower-linux-amd64",
+   "https://github.com/rogerai-fm/roger/releases/latest/download/roger-tower-linux-arm64",
+   "https://github.com/rogerai-fm/roger/releases/latest/download/checksums.txt",
    "/payouts.html",
    "/manual.html#sTower",
    "/manual.html#sTower",
@@ -75,7 +75,7 @@
    "/pricing.html#why",
    "/models.html",
    "mailto:labs@rogerai.fm?subject=Integration%20request",
-   "https://github.com/rogerai-fyi/roger",
+   "https://github.com/rogerai-fm/roger",
    "/research-hardware.html",
    "/faq.html"
   ]

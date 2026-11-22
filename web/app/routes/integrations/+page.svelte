@@ -241,7 +241,7 @@ OPENAI_API_KEY=&lt;grant key&gt;</code></pre></div>
         <div class="research-actions research-actions--lead">
           <a class="research-button" data-lets-talk aria-expanded="false"
              href="mailto:labs@rogerai.fm?subject=Integration%20request">Let&rsquo;s talk</a>
-          <a class="research-button" href="https://github.com/rogerai-fyi/roger">Source</a>
+          <a class="research-button" href="https://github.com/rogerai-fm/roger">Source</a>
           <a class="research-button" href="/research-hardware.html">Hardware</a>
           <a class="research-button" href="/faq.html">FAQ</a>
         </div>

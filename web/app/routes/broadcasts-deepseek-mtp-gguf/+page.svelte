@@ -208,7 +208,7 @@
           </ul>
           <p>
             Everything shipped. The llama.cpp patches are on our
-            <a href="https://github.com/rogerai-fyi/llama.cpp" rel="noopener">public fork</a>
+            <a href="https://github.com/rogerai-fm/llama.cpp" rel="noopener">public fork</a>
             (branch <code>dsv4-mtp</code>; llama.cpp's maintainers have native V4 MTP support on their roadmap, and our branch runs it today). The GGUFs, the only DeepSeek
             GGUFs we know of with a working MTP head, are on
             <a href="https://huggingface.co/rogerai-fyi/DeepSeek-V4-Flash-MTP-GGUF" rel="noopener">Hugging Face</a>.

@@ -47,8 +47,8 @@
         <a href="/faq.html">FAQ</a>
         <a data-lets-talk aria-expanded="false" href="mailto:labs@rogerai.fm?subject=Hello%20from%20the%20website">Let&rsquo;s talk</a>
         <a href="/manual.html">Manual</a>
-        <a href="https://github.com/rogerai-fyi/roger">GitHub</a>
-        <a href="https://github.com/rogerai-fyi/roger/releases">Releases</a>
+        <a href="https://github.com/rogerai-fm/roger">GitHub</a>
+        <a href="https://github.com/rogerai-fm/roger/releases">Releases</a>
       </div>
       <div class="footer__group">
         <small class="footer__heading">Community</small>

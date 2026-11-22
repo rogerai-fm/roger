@@ -52,11 +52,11 @@
       <h2 id="report-vulnerability">Report a vulnerability</h2>
       <p>Please report security issues <b>privately</b> - do not open a public issue or PR.</p>
       <p>Preferred: GitHub private vulnerability reporting on the repo
-        (<a href="https://github.com/rogerai-fyi/roger/security">Security &rarr; Report a
+        (<a href="https://github.com/rogerai-fm/roger/security">Security &rarr; Report a
         vulnerability</a>). Or email <a href="mailto:security@rogerai.fm">security@rogerai.fm</a>.</p>
       <p>We aim to acknowledge within 72 hours. Please include reproduction steps and impact;
         we will coordinate a fix and a disclosure timeline with you. Full policy:
-        <a href="https://github.com/rogerai-fyi/roger/blob/main/SECURITY.md">SECURITY.md</a>.
+        <a href="https://github.com/rogerai-fm/roger/blob/main/SECURITY.md">SECURITY.md</a>.
         Machine-readable contact: <a href="/.well-known/security.txt">/.well-known/security.txt</a>
         (RFC 9116).</p>
     </section>

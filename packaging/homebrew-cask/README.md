@@ -1,6 +1,6 @@
 # Homebrew cask — the zero-trust upgrade path
 
-Our tap ([`rogerai-fyi/homebrew-tap`](https://github.com/rogerai-fyi/homebrew-tap)) ships a
+Our tap ([`rogerai-fm/homebrew-tap`](https://github.com/rogerai-fm/homebrew-tap)) ships a
 **formula** that works today on macOS + Linux. Its one cost is a one-time `brew trust`, which
 Homebrew 6 requires for **any** third-party tap.
 

@@ -1,6 +1,6 @@
 # RogerAI
 
-[![coverage](https://rogerai-fyi.github.io/roger/coverage/badge.svg)](https://rogerai-fyi.github.io/roger/coverage/packages.html)
+[![coverage](https://rogerai-fm.github.io/roger/coverage/badge.svg)](https://rogerai-fm.github.io/roger/coverage/packages.html)
 
 ```
              ·   ˙   ·
@@ -32,7 +32,7 @@ Or via **Homebrew** (macOS + Linux). Homebrew 6+ makes you trust a third-party t
 it's a single line:
 
 ```
-brew trust rogerai-fyi/homebrew-tap && brew install rogerai-fyi/homebrew-tap/roger
+brew trust rogerai-fm/homebrew-tap && brew install rogerai-fm/homebrew-tap/roger
 ```
 
 Then just run `roger` for the interactive radio (browse stations, tune in, test, copy the

@@ -30,7 +30,7 @@ jobs:
     # first ships in the PR is guaranteed 404, and the gate would block the very
     # change that satisfies it.
     # Scheduled runs happen on the public repo only, so they are not run twice.
-    if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.repository == 'rogerai-fyi/roger')
+    if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.repository == 'rogerai-fm/roger')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

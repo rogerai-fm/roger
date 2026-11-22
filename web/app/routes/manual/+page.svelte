@@ -187,7 +187,7 @@
 
             <p>Prefer Homebrew? The tap serves the same release binary on macOS and Linux.
               Homebrew asks you to trust a third-party tap once, so it is a single line:</p>
-            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> brew trust rogerai-fyi/homebrew-tap &amp;&amp; brew install rogerai-fyi/homebrew-tap/roger</pre></div>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> brew trust rogerai-fm/homebrew-tap &amp;&amp; brew install rogerai-fm/homebrew-tap/roger</pre></div>
 
             <span class="man-fig">FIG. 1 - PLATFORMS</span>
             <div class="man-plate">
@@ -207,7 +207,7 @@
 
             <h3>Build from source</h3>
             <p>The whole client is one Go binary in the public repo. With a Go toolchain:</p>
-            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> git clone https://github.com/rogerai-fyi/roger
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> git clone https://github.com/rogerai-fm/roger
 <span class="code-block__prompt" aria-hidden="true">$</span> cd roger
 <span class="code-block__prompt" aria-hidden="true">$</span> go build -o roger ./cmd/rogerai</pre></div>
           </section>
@@ -919,10 +919,10 @@
             <p>Prefer to fetch and place the binary yourself? Pull it straight from the latest
               release and verify it against the published checksums before you run it.</p>
             <div class="man-plate">
-              <div class="man-plate__row"><span class="man-plate__k">Linux amd64</span><span class="man-plate__v"><a href="https://github.com/rogerai-fyi/roger/releases/latest/download/roger-linux-amd64">roger-linux-amd64 &darr;</a></span></div>
-              <div class="man-plate__row"><span class="man-plate__k">Linux arm64</span><span class="man-plate__v"><a href="https://github.com/rogerai-fyi/roger/releases/latest/download/roger-linux-arm64">roger-linux-arm64 &darr;</a></span></div>
-              <div class="man-plate__row"><span class="man-plate__k">Checksums</span><span class="man-plate__v"><a href="https://github.com/rogerai-fyi/roger/releases/latest/download/checksums.txt">checksums.txt</a> - verify with <code>sha256sum -c</code>, then <code>chmod +x</code> and move onto your <code>PATH</code></span></div>
-              <div class="man-plate__row"><span class="man-plate__k">All releases</span><span class="man-plate__v"><a href="https://github.com/rogerai-fyi/roger/releases">github.com/rogerai-fyi/roger/releases</a></span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Linux amd64</span><span class="man-plate__v"><a href="https://github.com/rogerai-fm/roger/releases/latest/download/roger-linux-amd64">roger-linux-amd64 &darr;</a></span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Linux arm64</span><span class="man-plate__v"><a href="https://github.com/rogerai-fm/roger/releases/latest/download/roger-linux-arm64">roger-linux-arm64 &darr;</a></span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Checksums</span><span class="man-plate__v"><a href="https://github.com/rogerai-fm/roger/releases/latest/download/checksums.txt">checksums.txt</a> - verify with <code>sha256sum -c</code>, then <code>chmod +x</code> and move onto your <code>PATH</code></span></div>
+              <div class="man-plate__row"><span class="man-plate__k">All releases</span><span class="man-plate__v"><a href="https://github.com/rogerai-fm/roger/releases">github.com/rogerai-fm/roger/releases</a></span></div>
             </div>
 
             <h3>Bring it up</h3>

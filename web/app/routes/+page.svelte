@@ -113,7 +113,7 @@
         <InstallBox id='installCmd'>curl <span class="tok">-fsSL</span> https://rogerai.fm/install.sh <span class="tok">| sh</span></InstallBox>
         <div class="install__meta">
           <span id="installNote">macOS · Linux - no account needed to browse</span>
-          <a class="install__alt" href="https://github.com/rogerai-fyi/roger/releases">or download a binary &rarr;</a>
+          <a class="install__alt" href="https://github.com/rogerai-fm/roger/releases">or download a binary &rarr;</a>
         </div>
         <div class="install__meta">
           <span id="installNoteWin" data-alt-note>On Windows (PowerShell): <code class="inline">irm https://rogerai.fm/install.ps1 | iex</code></span>

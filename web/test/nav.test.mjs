@@ -131,7 +131,7 @@ test("marketing top bar: order is Models·Research·Company | App | Manual·Sour
     "/models.html", "/research.html", "/company.html",
     "/app.html",
     "/manual.html",
-    "https://github.com/rogerai-fyi/roger",   // Source (ghost)
+    "https://github.com/rogerai-fm/roger",   // Source (ghost)
     "/login.html",
   ], "the decluttered marketing bar renders the exact target link set, in order");
 });

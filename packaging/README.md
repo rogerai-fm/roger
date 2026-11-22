@@ -18,7 +18,7 @@ stand-ins that hand off to `roger tower`; the package managers below install `ro
    Release with the raw binaries + `checksums.txt` (the exact names `web/install.sh`
    fetches), and pushes the **Scoop manifest** to its repo.
 3. **brew** - renders `Formula/roger.rb` from that release's `checksums.txt` (via
-   `scripts/gen-brew-formula.sh`) and pushes it to `rogerai-fyi/homebrew-tap`. This is a
+   `scripts/gen-brew-formula.sh`) and pushes it to `rogerai-fm/homebrew-tap`. This is a
    **formula, not a cask**, and it's NOT done by GoReleaser - see the Homebrew section below.
 4. **winget** - opens a PR to `microsoft/winget-pkgs` (only when enabled; see below).
 
@@ -31,20 +31,20 @@ TAP_GITHUB_TOKEN=dummy goreleaser release --snapshot --clean --skip=publish
 ## One-time setup (owner action required)
 
 ### 1. Homebrew + Scoop repos + token
-- [x] `rogerai-fyi/homebrew-tap` created (public, `main`) - **formula** lands in `Formula/roger.rb`.
-- [x] `rogerai-fyi/scoop-bucket` created (public, `main`) - manifest lands in `bucket/roger.json`.
+- [x] `rogerai-fm/homebrew-tap` created (public, `main`) - **formula** lands in `Formula/roger.rb`.
+- [x] `rogerai-fm/scoop-bucket` created (public, `main`) - manifest lands in `bucket/roger.json`.
 - [x] `TAP_GITHUB_TOKEN` secret set on the `roger` repo (`contents:write` on both tap repos).
   The default `GITHUB_TOKEN` can't push cross-repo, so this is required. To rotate it:
   1. Fine-grained PAT: https://github.com/settings/tokens?type=beta -> Resource owner
-     `rogerai-fyi`, Repository access = only `homebrew-tap` + `scoop-bucket`,
+     `rogerai-fm`, Repository access = only `homebrew-tap` + `scoop-bucket`,
      Repository permissions -> Contents: **Read and write**. (Or a classic PAT with `repo`.)
-  2. Store it: `gh secret set TAP_GITHUB_TOKEN --repo rogerai-fyi/roger --body <TOKEN>`
+  2. Store it: `gh secret set TAP_GITHUB_TOKEN --repo rogerai-fm/roger --body <TOKEN>`
 
 Then users install with:
 
 ```sh
-brew trust rogerai-fyi/homebrew-tap && brew install rogerai-fyi/homebrew-tap/roger   # macOS + Linux
-scoop bucket add rogerai https://github.com/rogerai-fyi/scoop-bucket && scoop install roger  # Windows
+brew trust rogerai-fm/homebrew-tap && brew install rogerai-fm/homebrew-tap/roger   # macOS + Linux
+scoop bucket add rogerai https://github.com/rogerai-fm/scoop-bucket && scoop install roger  # Windows
 ```
 
 #### Formula, not cask — and why we generate it ourselves
@@ -83,11 +83,11 @@ winget needs a **first manual submission**, then the workflow keeps it updated:
 
 - [x] `bownux/winget-pkgs` fork created (winget-releaser opens PRs from it).
 - [x] Add secret **`WINGET_TOKEN`** = a classic PAT on the **bownux** account with
-  `public_repo` scope: `gh secret set WINGET_TOKEN --repo rogerai-fyi/roger --body <TOKEN>`.
+  `public_repo` scope: `gh secret set WINGET_TOKEN --repo rogerai-fm/roger --body <TOKEN>`.
   (The fork owner and the PAT owner must match - both `bownux`.)
 - [ ] Bootstrap the package id `RogerAI.Roger` once (after a real release exists):
   ```sh
-  wingetcreate new https://github.com/rogerai-fyi/roger/releases/download/vX.Y.Z/roger-windows-amd64.exe
+  wingetcreate new https://github.com/rogerai-fm/roger/releases/download/vX.Y.Z/roger-windows-amd64.exe
   ```
   Set `PackageIdentifier: RogerAI.Roger`, installer type **portable**. Submit the PR.
 - [ ] Flip repo **variable** `PUBLISH_WINGET=true`. From then on each release auto-opens an
@@ -145,10 +145,10 @@ roger version   # smoke test
 ```
 
 **Publish it for others** (optional): put the same `$OV` tree in a git repo (e.g.
-`rogerai-fyi/gentoo-overlay`), commit, push. Consumers then run:
+`rogerai-fm/gentoo-overlay`), commit, push. Consumers then run:
 
 ```sh
-eselect repository add roger git https://github.com/rogerai-fyi/gentoo-overlay.git
+eselect repository add roger git https://github.com/rogerai-fm/gentoo-overlay.git
 emerge --sync roger && emerge net-misc/roger-bin
 ```
 
@@ -173,7 +173,7 @@ emerge --sync roger && emerge net-misc/roger-bin
   2. In App Store Connect → Users and Access → Integrations → keys, create an **API key**
      (Developer role). `MACOS_NOTARY_ISSUER_ID` = the issuer UUID, `MACOS_NOTARY_KEY_ID` = the
      key id, `MACOS_NOTARY_KEY` = `base64 -i AuthKey_XXXX.p8`.
-  3. `gh secret set MACOS_SIGN_P12 --repo rogerai-fyi/roger < <(base64 -i cert.p12)` (and the
+  3. `gh secret set MACOS_SIGN_P12 --repo rogerai-fm/roger < <(base64 -i cert.p12)` (and the
      other four). The next `v*` release then ships signed, notarized darwin binaries.
 - **Windows** (still deferred): unsigned `.exe` triggers SmartScreen. Fix later with an
   Authenticode cert or Azure Trusted Signing, wired into the GoReleaser build.

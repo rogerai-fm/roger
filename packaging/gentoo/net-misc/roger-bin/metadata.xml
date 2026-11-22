@@ -11,6 +11,6 @@
 		LLM/voice models. This package installs the prebuilt release binary.
 	</longdescription>
 	<upstream>
-		<remote-id type="github">rogerai-fyi/roger</remote-id>
+		<remote-id type="github">rogerai-fm/roger</remote-id>
 	</upstream>
 </pkgmetadata>

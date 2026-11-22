@@ -16,10 +16,10 @@ jobs:
   # must pass on the tagged commit before any binary is built (v4.15.0 shipped while the
   # gate was red on main - this closes that hole).
   gate:
-    # Releases are cut on the public repo (rogerai-fyi/roger), from the exported tree: the
+    # Releases are cut on the public repo (rogerai-fm/roger), from the exported tree: the
     # binaries are built from public source and the installers download from its releases.
     # A v* tag in the private source repo must not publish anything there.
-    if: github.repository == 'rogerai-fyi/roger'
+    if: github.repository == 'rogerai-fm/roger'
     runs-on: ubuntu-latest
     env:
       GOTOOLCHAIN: local
@@ -115,7 +115,7 @@ jobs:
   # SHAs come straight from the release checksums.txt (the same file web/install.sh trusts),
   # so the formula can't drift from the binaries. Skips pre-releases (tags with a `-`), just
   # like the winget job and the old cask's `skip_upload: auto`.
-  #   Install: brew trust rogerai-fyi/homebrew-tap && brew install rogerai-fyi/homebrew-tap/roger
+  #   Install: brew trust rogerai-fm/homebrew-tap && brew install rogerai-fm/homebrew-tap/roger
   brew:
     needs: release
     runs-on: ubuntu-latest
@@ -127,7 +127,7 @@ jobs:
           # Read this repo's release asset (checksums.txt).
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Cross-repo push to the tap - same token goreleaser uses for Scoop (contents:write
-          # on rogerai-fyi/homebrew-tap). Missing it fails only this job, not the release.
+          # on rogerai-fm/homebrew-tap). Missing it fails only this job, not the release.
           TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
@@ -135,7 +135,7 @@ jobs:
           gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
              --pattern checksums.txt --dir .
           scripts/gen-brew-formula.sh "$version" checksums.txt roger.rb
-          git clone "https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/rogerai-fyi/homebrew-tap.git" tap
+          git clone "https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/rogerai-fm/homebrew-tap.git" tap
           mkdir -p tap/Formula
           cp roger.rb tap/Formula/roger.rb
           cd tap

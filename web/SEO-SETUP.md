@@ -7,7 +7,7 @@ the CLI. Do them in this order; the first two are the high-leverage ones.
 ---
 
 ## 0. Merge PR #18 (deploys everything)
-<https://github.com/rogerai-fyi/roger/pull/18> - merging it deploys the SEO baseline + the first
+<https://github.com/rogerai-fm/roger/pull/18> - merging it deploys the SEO baseline + the first
 article. The web app rebuilds `node build.mjs` on deploy. After it's live, confirm:
 `https://rogerai.fm/sitemap.xml` returns XML (not a 404) and
 `https://rogerai.fm/broadcasts-run-local-llm.html` loads.

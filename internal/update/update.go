@@ -24,7 +24,7 @@ import (
 )
 
 // Repo is the GitHub repo that publishes rogerai releases.
-const Repo = "rogerai-fyi/roger"
+const Repo = "rogerai-fm/roger"
 
 // checkTTL is how long a cached version-check result is reused (~daily).
 const checkTTL = 20 * time.Hour

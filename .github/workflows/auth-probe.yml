@@ -12,7 +12,7 @@ permissions:
 jobs:
   probe:
     # Scheduled probes run on the public repo only, so they are not run twice.
-    if: ${{ github.repository == 'rogerai-fyi/roger' }}
+    if: ${{ github.repository == 'rogerai-fm/roger' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

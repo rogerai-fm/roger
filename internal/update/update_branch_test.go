@@ -32,7 +32,7 @@ func assetTuple(name, url string) struct {
 // default seam body is exercised, not just the test override.
 func TestLatestReleaseURLDefault(t *testing.T) {
 	got := latestReleaseURL()
-	want := "https://api.github.com/repos/rogerai-fyi/roger/releases/latest"
+	want := "https://api.github.com/repos/rogerai-fm/roger/releases/latest"
 	if got != want {
 		t.Fatalf("latestReleaseURL() = %q, want %q", got, want)
 	}

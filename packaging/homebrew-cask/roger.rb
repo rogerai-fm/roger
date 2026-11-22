@@ -2,7 +2,7 @@
 # DO NOT EDIT - re-run the generator to refresh it for a newer release.
 #
 # Submission stub for the OFFICIAL Homebrew cask tap (Homebrew/homebrew-cask). Our own tap
-# (rogerai-fyi/homebrew-tap) ships a FORMULA; this cask is the artifact you PR into
+# (rogerai-fm/homebrew-tap) ships a FORMULA; this cask is the artifact you PR into
 # homebrew-cask once the gates in packaging/homebrew-cask/README.md are clear, so macOS +
 # Linux users get a true zero-trust `brew install roger` with no third-party tap.
 cask "roger" do
@@ -15,7 +15,7 @@ cask "roger" do
          arm64_linux:  "5710fd239665298ca8fb7202ac7c2caea86ebe255af6dc052f11caeeea019988",
          x86_64_linux: "a6640ed0d04fc4541347cafb1463f086347824eb25505845874ed5ec69cf5b36"
 
-  url "https://github.com/rogerai-fyi/roger/releases/download/v#{version}/roger-#{os}-#{arch}"
+  url "https://github.com/rogerai-fm/roger/releases/download/v#{version}/roger-#{os}-#{arch}"
   name "RogerAI"
   desc "Two-way radio for GPUs: consume and share LLM/voice models over the broker"
   homepage "https://rogerai.fm/"

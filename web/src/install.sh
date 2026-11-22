@@ -11,7 +11,7 @@
 # =====================================================================
 set -eu
 
-REPO="rogerai-fyi/roger"
+REPO="rogerai-fm/roger"
 # Which component to install. There is ONE program, `roger`; a Tower operator runs
 # `roger tower ...`. ROGERAI_COMPONENT=tower or =tower-local still works: it installs roger and,
 # for this one release on Linux (where the old binaries shipped), the matching stand-in

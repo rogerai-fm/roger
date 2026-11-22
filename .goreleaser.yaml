@@ -127,7 +127,7 @@ checksum:
 
 release:
   github:
-    owner: rogerai-fyi
+    owner: rogerai-fm
     name: roger
   # GoReleaser generates the release notes itself from the `changelog` block below
   # (GitHub compare API) - the equivalent of the old action's generate_release_notes.
@@ -144,9 +144,9 @@ changelog:
 # a FORMULA, not a cask: the formula installs the SAME raw per-arch binary this release ships,
 # works on Linux Homebrew too (casks are macOS-only - and RogerAI providers run on Linux GPU
 # boxes), and needs no `--cask` flag. So the formula is rendered by scripts/gen-brew-formula.sh
-# and pushed to rogerai-fyi/homebrew-tap by the `brew` job in .github/workflows/release.yml,
+# and pushed to rogerai-fm/homebrew-tap by the `brew` job in .github/workflows/release.yml,
 # straight from this release's checksums.txt. Install:
-#   brew trust rogerai-fyi/homebrew-tap && brew install rogerai-fyi/homebrew-tap/roger
+#   brew trust rogerai-fm/homebrew-tap && brew install rogerai-fm/homebrew-tap/roger
 #
 # Gatekeeper is a non-issue for the formula: Homebrew's formula downloader doesn't set the
 # macOS quarantine xattr and the Go linker ad-hoc-signs darwin binaries, so the unsigned CLI
@@ -156,14 +156,14 @@ changelog:
 # trust path and needs an OSI licence; PolyForm Perimeter is source-available, not OSI.
 
 # ---- Scoop (Windows) -----------------------------------------------------------------
-# Generates bucket/roger.json and pushes it to rogerai-fyi/scoop-bucket on each release.
-#   scoop bucket add rogerai https://github.com/rogerai-fyi/scoop-bucket
+# Generates bucket/roger.json and pushes it to rogerai-fm/scoop-bucket on each release.
+#   scoop bucket add rogerai https://github.com/rogerai-fm/scoop-bucket
 #   scoop install roger
 scoops:
   - name: roger
     ids: [winzip]
     repository:
-      owner: rogerai-fyi
+      owner: rogerai-fm
       name: scoop-bucket
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     directory: bucket
