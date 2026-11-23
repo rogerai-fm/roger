@@ -105,10 +105,12 @@ Feature: Core knows roughly where each Tower and each Station is, from addresses
     And the node's typed region plays no part
 
   Scenario: The address behind a trusted proxy is the client's, never a header from the internet
-    Given the broker runs behind the host proxy that overwrites the client address header
-    When a node self-attaches and sends its own copy of that header
-    Then Core uses the address the trusted proxy supplied
-    And the node's copy is ignored
+    # Reworded 2026-11-22 with founder approval (roger-core PR #6): the broker believes a
+    # forwarding header only from a proxy named in ROGERAI_TRUSTED_PROXIES.
+    Given the broker runs behind a host proxy it is told to trust
+    When a node self-attaches and sends its own client address headers
+    Then Core uses the address the trusted proxy recorded
+    And the node's copies are ignored
 
   Scenario: A Station that attaches from a private address has an unknown location
     Given a node self-attaches from a loopback or private address
