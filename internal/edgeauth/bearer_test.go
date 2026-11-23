@@ -83,7 +83,7 @@ func TestABearerProofIsBoundToItsRequest(t *testing.T) {
 	require.ErrorIs(t, err, edgeauth.ErrUnknownMachine)
 	// And a proof for another authority's root does not verify here.
 	foreign := bearerReq(t, local, code)
-	foreign.JoinProof = edgeauth.JoinProof(code, "00"+local.Descriptor().Fingerprint[2:], foreign)
+	foreign.JoinProof = edgeauth.JoinProof(code, flipFirstHex(local.Descriptor().Fingerprint), foreign)
 	_, err = local.Issue(foreign)
 	require.ErrorIs(t, err, edgeauth.ErrUnknownMachine)
 }
@@ -130,4 +130,13 @@ func TestAnAnswerNamesItsEdge(t *testing.T) {
 	require.Equal(t, "home", edgeauth.EdgeLabel("home"))
 	require.Equal(t, "", edgeauth.EdgeLabel("ho\x1b[31mme"), "a name with control characters is not shown")
 	require.Equal(t, "", edgeauth.EdgeLabel(string(make([]byte, 65))), "an overlong name is not shown")
+}
+
+// flipFirstHex changes the first hex digit, so the result always differs from s ("00"+s[2:] did
+// not, 1 time in 256).
+func flipFirstHex(s string) string {
+	if s[0] == '0' {
+		return "1" + s[1:]
+	}
+	return "0" + s[1:]
 }

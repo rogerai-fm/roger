@@ -126,7 +126,7 @@ func TestAllAuthFailuresAreOneUniform401(t *testing.T) {
 	// Four distinct failure modes.
 	unsigned := httptest.NewRequest(http.MethodGet, "/discover", nil)
 	badSig := signedReq(t, good, http.MethodGet, "/discover", nil)
-	badSig.Header.Set(protocol.HeaderSig, "00"+badSig.Header.Get(protocol.HeaderSig)[2:]) // corrupt one byte
+	badSig.Header.Set(protocol.HeaderSig, flipFirstHex(badSig.Header.Get(protocol.HeaderSig))) // corrupt one byte, always
 	unadmitted := signedReq(t, unadmittedPriv, http.MethodGet, "/discover", nil)
 	revokedReq := signedReq(t, revoked, http.MethodGet, "/discover", nil)
 
@@ -150,4 +150,13 @@ func TestDiscoverRefusesNonGet(t *testing.T) {
 	rec := httptest.NewRecorder()
 	srv.Handler().ServeHTTP(rec, signedReq(t, priv, http.MethodPost, "/discover", nil))
 	require.Equal(t, http.StatusMethodNotAllowed, rec.Code)
+}
+
+// flipFirstHex changes the first hex digit, so the result always differs from s. Overwriting the
+// first byte with "00" left a valid signature unchanged whenever it already began with 00 (1 in 256).
+func flipFirstHex(s string) string {
+	if s[0] == '0' {
+		return "1" + s[1:]
+	}
+	return "0" + s[1:]
 }
