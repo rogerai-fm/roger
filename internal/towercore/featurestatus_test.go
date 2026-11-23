@@ -28,6 +28,8 @@ package towercore_test
 // has quietly implemented and left mislabelled.
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -144,12 +146,18 @@ func contractReferences(t *testing.T) map[string]int {
 	out := map[string]int{}
 	root := repoRoot(t)
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if errors.Is(err, fs.ErrNotExist) {
+			// Other packages' tests build into the tree while this walks it (web/dist's temp
+			// files, CI flake 2026-11-23): a file that vanished between the listing and the
+			// lstat was never a Go file of ours.
+			return nil
+		}
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
 			// Vendored and build output would only add references we did not write.
-			if name := info.Name(); name == "vendor" || name == "node_modules" || name == ".git" {
+			if name := info.Name(); name == "vendor" || name == "node_modules" || name == ".git" || path == filepath.Join(root, "web", "dist") {
 				return filepath.SkipDir
 			}
 			return nil
