@@ -1427,7 +1427,7 @@ rogerai.fm/roger/v7/internal/client/rc.go:581:				Done					100.0%
 rogerai.fm/roger/v7/internal/client/rc.go:584:				Run					100.0%
 rogerai.fm/roger/v7/internal/client/rc.go:591:				Stop					100.0%
 rogerai.fm/roger/v7/internal/client/rc.go:602:				Disable					100.0%
-rogerai.fm/roger/v7/internal/client/rc.go:610:				pollLoop				79.3%
+rogerai.fm/roger/v7/internal/client/rc.go:610:				pollLoop				82.8%
 rogerai.fm/roger/v7/internal/client/rc.go:662:				eventPump				100.0%
 rogerai.fm/roger/v7/internal/client/rc.go:684:				postEvents				100.0%
 rogerai.fm/roger/v7/internal/client/routing.go:80:			ValidPref				0.0%
@@ -3835,7 +3835,7 @@ rogerai.fm/roger/v7/internal/toweradmin/toweradmin.go:295:		RevokeClientNamed			
 rogerai.fm/roger/v7/internal/toweradmin/toweradmin.go:301:		RevokeStation				100.0%
 rogerai.fm/roger/v7/internal/towercli/earnings.go:23:			cmdEarnings				100.0%
 rogerai.fm/roger/v7/internal/towercli/hub.go:132:			tlsWanted				100.0%
-rogerai.fm/roger/v7/internal/towercli/hub.go:138:			runHubInBackground			86.5%
+rogerai.fm/roger/v7/internal/towercli/hub.go:138:			runHubInBackground			87.1%
 rogerai.fm/roger/v7/internal/towercli/hub.go:545:			registerHubNodes			100.0%
 rogerai.fm/roger/v7/internal/towercli/hub.go:595:			limitConns				100.0%
 rogerai.fm/roger/v7/internal/towercli/hub.go:604:			Accept					100.0%
