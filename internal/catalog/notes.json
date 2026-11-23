@@ -1,0 +1,33 @@
+[
+  {
+    "id": "wave-nano-chat",
+    "summary": "Wave Nano 1.45B in a plain chat format, for questions about industrial telemetry, equipment and plant systems.",
+    "best_at": "Conversation about industrial telemetry and equipment, SQL, and short technical writing.",
+    "not_for": "General knowledge and trivia: it is weak there at this size.",
+    "base_model": "Wave Nano 1.45B",
+    "page": "/research-wave-nano.html"
+  },
+  {
+    "id": "wave-nano-fire-controller",
+    "summary": "Fire-decision adapter on Wave Nano 1.45B. Reads one fire-site tick and returns an alert decision.",
+    "best_at": "From a canonicalized fire-site tick: the alert level, who to notify, missing inputs and tool plans. Refuses unsafe overrides and hands off after an acknowledgement.",
+    "not_for": "Chat, or ticks the caller has not canonicalized. Tested on simulated fire scenarios, the served build and recorded readings from one installed site; not yet proven across many sites.",
+    "base_model": "Wave Nano 1.45B",
+    "page": "/research-wave-nano.html"
+  },
+  {
+    "id": "wave-nano-fire-vision",
+    "summary": "Wave Nano-VL fire module. Confirms or rules out smoke in one camera frame or crop.",
+    "best_at": "A yes or no smoke check on a single frame, or on the crop a tile detector flagged.",
+    "not_for": "Video, or deciding what to do on its own. It does not carry over yet to cameras unlike the ones it learned on. Read the license note on the model page before commercial use.",
+    "base_model": "Wave Nano 1.45B",
+    "page": "/research-wave-nano.html"
+  },
+  {
+    "id": "wave-pico-293m",
+    "summary": "Wave Pico 293M. Reads one industrial telemetry channel and names the instrument fault or the process state.",
+    "best_at": "One channel at a time from Modbus, Sparkplug B, Prometheus, InfluxDB, Datadog or syslog. Answers only above a measured confidence gate and escalates below it.",
+    "not_for": "Root-cause chains, which it reads at chance. Process state is its weakest family.",
+    "page": "/research-wave-pico.html"
+  }
+]
