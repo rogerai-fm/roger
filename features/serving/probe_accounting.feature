@@ -88,6 +88,7 @@ Feature: Core's checks are counted as checks and cost as little as possible
     Then each instance probes on its own schedule, as today, and no instance probes faster than today
 
   # --- R3: tool-call checks back off ----------------------------------------------------------
+  # 2026-11-23: 48 hours for the 6th, then 7 days (a founder-approved revision of that day).
 
   Scenario Outline: A model that has not earned "tools" is re-checked on a growing interval
     Given the model has failed or not answered <n> tool-call checks in a row
@@ -98,8 +99,9 @@ Feature: Core's checks are counted as checks and cost as little as possible
       | 1 | 20 minutes |
       | 2 | 40 minutes |
       | 3 | 80 minutes |
-      | 6 | 24 hours   |
-      | 9 | 24 hours   |
+      | 6 | 48 hours   |
+      | 7 | 7 days     |
+      | 9 | 7 days     |
 
   Scenario: A passing tool-call check resets the back-off
     Given the model has failed 4 tool-call checks in a row
@@ -192,7 +194,10 @@ Feature: Core's checks are counted as checks and cost as little as possible
     When an instance that does not host the node passes a canary of the node
     Then the mark in the shared store is left as it was
 
-  Scenario: A curated station's mark is refreshed only from the instance's own verdict
+  # Since a founder-approved revision of 2026-11-23 (title reworded the same day), a persisted
+  # last tool-call pass within the weekly recheck plus a day also refreshes a curated mark. The
+  # stopped instance here left no tool record, so only an instance's own verdict can.
+  Scenario: A curated station's mark is refreshed from its own verdict or the shared record's last pass
     Given a curated station held on its slow lane, its model's mark written by an instance that has since stopped
     When a probe round comes on an instance that holds no verdict of its own
     Then the mark in the shared store is left as it was
