@@ -976,7 +976,7 @@ rogerai.fm/roger/v7/internal/agent/agent.go:249:			Link					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:253:			setLink					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:280:			newReregistrar				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:289:			curToken				100.0%
-rogerai.fm/roger/v7/internal/agent/agent.go:303:			recover					96.0%
+rogerai.fm/roger/v7/internal/agent/agent.go:303:			recover					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:407:			reregReason				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:417:			backoffFor				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:429:			finishBusy				100.0%
@@ -5346,7 +5346,7 @@ rogerai.fm/roger/v7/internal/tui/tui.go:4784:				atOnAirLimit				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4788:				hasSchedule				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4796:				pilotLamp				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4815:				marquee					91.7%
-rogerai.fm/roger/v7/internal/tui/tui.go:4836:				editorLivePreview			92.0%
+rogerai.fm/roger/v7/internal/tui/tui.go:4836:				editorLivePreview			96.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4885:				maskKey					100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4901:				modalFooter				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4922:				footer					92.3%
