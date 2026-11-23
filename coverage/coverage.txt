@@ -976,7 +976,7 @@ rogerai.fm/roger/v7/internal/agent/agent.go:249:			Link					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:253:			setLink					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:280:			newReregistrar				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:289:			curToken				100.0%
-rogerai.fm/roger/v7/internal/agent/agent.go:303:			recover					100.0%
+rogerai.fm/roger/v7/internal/agent/agent.go:303:			recover					96.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:407:			reregReason				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:417:			backoffFor				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:429:			finishBusy				100.0%
