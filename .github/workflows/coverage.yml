@@ -18,6 +18,9 @@ concurrency:
 jobs:
   coverage:
     runs-on: ubuntu-latest
+    # A guard, not a budget: one run of the suite takes about 30 minutes. Without this a hung
+    # setup step or service container could hold the runner for GitHub's 6-hour default.
+    timeout-minutes: 75
     env:
       GOTOOLCHAIN: local
       # Enables the networked vulnerability scenario in the executable release spec.
@@ -78,11 +81,27 @@ jobs:
           psql "$ROGERAI_TEST_DATABASE_URL" -c "CREATE SCHEMA IF NOT EXISTS rogerai;"
           psql "$ROGERAI_TEST_DATABASE_URL" -c "ALTER SYSTEM SET fsync = off" -c "ALTER SYSTEM SET synchronous_commit = off" -c "ALTER SYSTEM SET full_page_writes = off" -c "SELECT pg_reload_conf()"
 
-      # 1) Tests + coverage profile. Fails the job only if TESTS fail (not on low coverage).
-      # 45m per package: the broker package (routing slices 0-6 + two-instance state suites) is
-      # large and shares the runner with every other package (founder-approved 2026-10-08).
+      # 1) Tests + coverage profile + the gate's grading, in ONE run of the suite. The gate script
+      # runs go test itself (45m per package: the broker package is large and shares the runner,
+      # founder-approved 2026-10-08) and leaves cover.out behind, so the report steps reuse it
+      # instead of running the whole suite a second time (that second run was half of every
+      # coverage job). Failing TESTS fail this step and stop the job, as before. A coverage
+      # shortfall does not stop it here: it is recorded and turns the job red in the last step,
+      # after the report and badge are published, so a red gate never hides the report.
       - name: test + coverage
-        run: go test -timeout 45m -covermode=atomic -coverprofile=cover.out ./...
+        id: gate
+        run: |
+          set +e
+          scripts/cover-gate.sh 2>&1 | tee gate.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          # cover-gate.sh exits 1 only for a coverage shortfall; 2 is failing tests or a gate that
+          # could not run, and anything else is unexpected. All of those stop the job here.
+          if [ "$rc" != 0 ] && { [ "$rc" != 1 ] || [ ! -s cover.out ]; }; then
+            echo "::error::the test suite did not pass (or the gate could not run)"
+            exit 1
+          fi
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
 
       # 2) Build the report site — ONLY the html + the func summary (not the whole repo).
       - name: build report + badge
@@ -122,6 +141,9 @@ jobs:
           destination_dir: coverage
           keep_files: false
 
-      # 5) THE GATE — last, so it can go RED (sub-90%) without blocking the report/badge.
+      # 5) THE GATE's verdict, last, so it can go RED (sub-90%) without blocking the report/badge.
+      #    The grading itself ran in step 1 (gate.log above); this step only reports it.
       - name: coverage gate (90% bar, aim 95%)
-        run: scripts/cover-gate.sh
+        run: |
+          grep -E '^FAIL|\[cover\] gate' gate.log || true
+          exit "${{ steps.gate.outputs.rc }}"

@@ -1,11 +1,14 @@
 name: web
 # The site's own suite, the way make web-gate runs it locally: the guard suite over the built
 # site and the sources (node:test), the islands' component tests (vitest), then the browser
-# flows (Playwright, Chromium) over the built site. Runs on every push and pull request that
-# touches web/ (or this workflow), so a page can never regress its copy, its weight budget,
+# flows (Playwright, Chromium) over the built site. Runs on every push to main and every pull
+# request that touches web/ (or this workflow), so a page can never regress its copy, its weight budget,
 # its a11y or honesty guards, or an island's behavior without the check going red.
 on:
+  # Push runs on main only: a PR branch already runs this through pull_request, and a push
+  # trigger on every branch ran it twice for each PR push.
   push:
+    branches: [main]
     paths:
       - "web/**"
       - ".github/workflows/web.yml"

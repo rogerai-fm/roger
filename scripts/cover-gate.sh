@@ -11,6 +11,8 @@
 #
 # Self-coverage is used (each package's OWN tests cover it) — the honest per-package lens.
 # Usage: scripts/cover-gate.sh [MIN_TOTAL]   (default 90 — the GREEN bar; aim 95%+)
+# Exit codes: 0 gate passed; 1 the suite passed but coverage is below a floor; 2 the suite
+# failed or the gate could not run. CI tells 1 from 2 to publish the report on a shortfall only.
 set -uo pipefail
 
 # Founder policy: the GREEN bar is 90% (ratcheted up from 85 once every package cleared
@@ -31,7 +33,7 @@ PROFILE="$(mktemp -t rogerai-cover.XXXXXX)"
 # per-package extraction below match nothing, so every package silently skips its floor
 # and only the module total is enforced. Ask the toolchain instead.
 MOD="$(go list -m)"
-[ -n "$MOD" ] || { echo "[cover] cannot determine module path (go list -m)" >&2; exit 1; }
+[ -n "$MOD" ] || { echo "[cover] cannot determine module path (go list -m)" >&2; exit 2; }
 
 # Every package's floor is the 90% GREEN bar (aim 95%). No per-package exemptions — the
 # founder's rule is no green below the bar. Honestly-untestable glue (main()/serve loops)
@@ -104,7 +106,7 @@ if [ -z "${ROGERAI_TEST_DATABASE_URL:-}" ]; then
       PG_PORT="$("$RUNTIME" port "$PG_CT" 5432/tcp 2>/dev/null | head -1 | sed 's/.*://')"
       if [ -z "$PG_PORT" ]; then
         echo "[cover] ERROR: could not read the test Postgres host port" >&2
-        exit 1
+        exit 2
       fi
       # pg_isready can flip true while the postgres entrypoint is still creating
       # POSTGRES_DB on its temporary bootstrap server, so polling it then firing a
@@ -122,7 +124,7 @@ if [ -z "${ROGERAI_TEST_DATABASE_URL:-}" ]; then
       done
       if [ "$schema_ok" != 1 ]; then
         echo "[cover] ERROR: test Postgres never became ready / could not create the rogerai schema" >&2
-        exit 1
+        exit 2
       fi
       export ROGERAI_TEST_DATABASE_URL="postgres://postgres:test@127.0.0.1:$PG_PORT/roger_test?sslmode=disable"
     else
@@ -141,7 +143,7 @@ echo "[cover] running full suite with coverage…" >&2
 if ! out="$(go test -timeout 45m -covermode=atomic -coverprofile="$PROFILE" ./... 2>&1)"; then
   echo "$out"
   echo "[cover] FAIL: the test suite did not pass"
-  exit 1
+  exit 2
 fi
 
 fail=0

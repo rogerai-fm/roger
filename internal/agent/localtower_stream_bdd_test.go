@@ -442,6 +442,13 @@ func (s *stationStreamState) postsNonStream() error {
 }
 
 func (s *stationStreamState) returnedWhole() error {
+	// The plane wrapper records a call only after the handler returns, and the /local/complete
+	// handler hands the answer to the waiting consumer first, so the consumer can finish before
+	// the record lands (CI flake 2026-11-23: "0 posts to /local/complete"). Wait for it, then
+	// still require exactly one.
+	for deadline := time.Now().Add(2 * time.Second); len(s.callsTo("/local/complete")) == 0 && time.Now().Before(deadline); {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if n := len(s.callsTo("/local/complete")); n != 1 {
 		return fmt.Errorf("%d posts to /local/complete, want 1", n)
 	}
