@@ -143,3 +143,83 @@ Feature: Core's checks are counted as checks and cost as little as possible
   Scenario: A node does not pay for being browsed
     When consumers browse /discover or /market for the node's model every few seconds
     Then the node's checks stay within its cadence and its budget
+
+  # --- R6: restarts and the cap (drafted 2026-11-22 after the grok incident; founder said fix it) --
+  #
+  # On 2026-11-22 Core restarted nine times in nineteen hours. Each restart ran every share
+  # node's probe ramp again from the floor on the new instances, about eleven checks a node a
+  # restart, until the R4 day budget was spent. At the cap each freed slot went to the liveness
+  # canary and the tool-call check right behind it was refused, with no log line, so the "tools"
+  # mark of grok-4.5 and grok-4.6 lapsed and every request carrying tools got 503 for a day. The
+  # mark was also re-asserted only from the instance's own verdicts, which a restart empties.
+  # Four rules close it: a fresh shared reading replaces a restarted instance's ramp; a mark an
+  # instance inherits is re-asserted like its own; canaries never take the tool-call share of the
+  # day; and a check that is refused or fails says so in the log.
+  # Limits, accepted: readings are shared only between instances (Core runs two), so a single
+  # instance with a store still ramps from the floor after a restart; the canaries' day share is
+  # a new set in the store, so at the deploy every node's day of canaries starts over once.
+
+  Scenario: A restart does not run a node's ramp again
+    Given a node measured within the freshness window, its passing reading in the shared store
+    When an instance starts and its first probe round comes
+    Then it sends no check and takes the reading
+    And the node's next check is due one ceiling after that reading, at the ceiling cadence
+
+  Scenario: A restart does not run the ramp again for a node that is serving
+    Given a node measured within the freshness window, its passing reading in the shared store
+    And the node serves a request before the new instance's first probe round
+    When an instance starts and its first probe round comes
+    Then it sends no check and takes the reading
+    And the node's next check is due one ceiling after that reading, at the ceiling cadence
+
+  Scenario: A node with no fresh reading is ramped as today
+    Given a node whose last reading is older than the freshness window
+    When an instance starts and its first probe round comes
+    Then it sends a check at first sight and ramps from the floor, as today
+
+  Scenario: A restart keeps a verified tools mark
+    Given a model whose verified tools mark was written by an instance that has since stopped
+    When a new instance hosting the node passes a canary of the node
+    Then it re-asserts the mark in the shared store without having run a tool-call check itself
+
+  Scenario: A reading taken at start refreshes the marks it inherits
+    Given a model whose verified tools mark was written by an instance that has since stopped
+    When a new instance hosting the node takes the stopped instance's passing reading
+    Then it re-asserts the mark in the shared store
+
+  Scenario: An instance that does not host the node never re-asserts an inherited mark
+    Given a model whose verified tools mark was written by an instance that has since stopped
+    When an instance that does not host the node passes a canary of the node
+    Then the mark in the shared store is left as it was
+
+  Scenario: A curated station's mark is refreshed only from the instance's own verdict
+    Given a curated station held on its slow lane, its model's mark written by an instance that has since stopped
+    When a probe round comes on an instance that holds no verdict of its own
+    Then the mark in the shared store is left as it was
+    When a probe round comes on an instance that verified the model itself
+    Then it re-asserts the mark in the shared store
+
+  Scenario: A mark the host cleared is not brought back from an inherited copy
+    Given a model whose verified tools mark was written by an instance that has since stopped
+    And the instance hosting the node cleared the mark on a definitive regression
+    When a copy of the mark comes back from the store and the host passes a canary of the node
+    Then the mark in the shared store is left as it was
+    When the next tool-call check passes
+    Then it re-asserts the mark in the shared store
+
+  Scenario: Canaries never take the tool-call share of the day
+    Given the node's canaries have taken 54 of the day's 60 checks
+    When a canary and a tool-call check come due
+    Then the canary is refused and the tool-call check is sent
+    And the day still never exceeds 60 checks of all kinds
+
+  Scenario: A mark for a model the node no longer offers is left to lapse
+    Given a model whose verified tools mark was written by an instance that has since stopped
+    And the node no longer offers that model
+    When a new instance hosting the node passes a canary of the node
+    Then the mark in the shared store is left as it was
+
+  Scenario: A tool-call check that is refused or fails is logged
+    When a tool-call check is refused by the budget, answered with an error, or answered without a tool call
+    Then Core logs one line naming the node, the model and the reason
+    And a refusal is logged at most once an hour per node
