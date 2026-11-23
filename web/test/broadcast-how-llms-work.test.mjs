@@ -171,16 +171,23 @@ test("how-llms: every Wave claim says what wave-status.json says, and no more", 
   assert.doesNotMatch(body, /open weights|download (the )?weights|weights are (out|available|published)/i);
   // the size ladder: one row per ladder tier, in ledger order, the ledger's size and stage word for word
   const rows = [...html.matchAll(/<li class="llm-ladder__row[^"]*"><span class="llm-ladder__name">Wave (\w+)<\/span>[\s\S]*?<span class="llm-ladder__size">([^<]*)<\/span><span class="llm-ladder__fit">[^<]*<em>([^<]*)<\/em>/g)]
-    .map((m) => ({ name: m[1].toLowerCase(), size: m[2].replace(/&ndash;/g, "\u2013").replace(/&gt;/g, ">"), stage: m[3].replace(/ /g, "-") }));
+    .map((m) => ({ name: m[1].toLowerCase(), size: m[2].replace(/&ndash;/g, "\u2013").replace(/&gt;/g, ">"), stage: m[3] }));
   const ladder = ledger.tiers.filter((t) => t.kind === "tier");
   // a tier on air is drawn as live, exactly the tiers the ledger has on air
   const liveRows = [...html.matchAll(/<li class="llm-ladder__row llm-ladder__row--live"><span class="llm-ladder__name">Wave (\w+)/g)].map((m) => m[1].toLowerCase());
   assert.deepEqual(liveRows, ladder.filter((t) => t.stage === "on-air" || t.stage === "released").map((t) => t.id), "live rows are the on-air tiers");
   assert.deepEqual(rows.map((r) => r.name), ladder.map((t) => t.id), "every ladder tier, in order");
+  // A tier whose stage word is overridden in the ledger (Nano on air: FIRE ON AIR, founder
+  // 2026-11-22) says so in lowercase prose; every other row reads its stage in plain words.
+  const LOWER = { nano: "fire models on air" };
   rows.forEach((r, i) => {
-    assert.equal(r.size, ladder[i].size, `${r.name}: the ledger's size`);
-    assert.equal(r.stage, ladder[i].stage, `${r.name}: the ledger's stage`);
+    const t = ladder[i];
+    assert.equal(r.size, t.size, `${r.name}: the ledger's size`);
+    assert.equal(Boolean(t.stageWords?.[t.stage]), r.name in LOWER, `${r.name}: a lowercase override exactly when the ledger overrides the stage word`);
+    assert.equal(r.stage, LOWER[r.name] ?? t.stage.replace(/-/g, " "), `${r.name}: the ledger's stage`);
   });
+  assert.match(html, /Wave Nano, 0\.8 to 1\.5 billion, a gateway, fire models on air\./, "the ladder's aria text says the same for Nano");
+  assert.doesNotMatch(html, /a gateway, on air/, "never Nano on air as a whole");
   assert.match(html, /Microcontroller<\/span>[\s\S]{0,120}no model/, "no Wave tier runs on a microcontroller: it reads the sensor");
 });
 

@@ -1,7 +1,10 @@
 // Wave status: render a tier's status label from web/src/data/wave-status.json at build time.
 //
 //   {{wave:<tier>.<label>}}   e.g. {{wave:giga.research-models.chip}}
-//   {{wave-stage:<tier>}}     the tier's live stage as one public word, e.g. ON AIR
+//   {{wave-stage:<tier>}}     the tier's live stage as one public word, e.g. ON AIR. A tier's own
+//                             "stageWords" entry for its CURRENT stage wins over the shared word
+//                             (Nano on air reads FIRE ON AIR: only its two fire models are on
+//                             air, chat is not). Move the stage and the shared word returns.
 //   {{wave-band:<tier>}}      the tier's on-air band name; a tier with none fails the build
 //   {{wave-air:<tier>}}       "on" when the tier has an on-air band, else "off" (a status lamp)
 //
@@ -32,7 +35,7 @@ export function resolveWaveTokens(html, page, data) {
   }).replace(STAGE_RE, (_, tierId) => {
     const tier = data.tiers.find((t) => t.id === tierId);
     if (!tier) throw new Error(`${page}: unknown wave tier "${tierId}"`);
-    const word = data.stageWords?.[tier.stage];
+    const word = tier.stageWords?.[tier.stage] ?? data.stageWords?.[tier.stage];
     if (!word) throw new Error(`${page}: no stage word for "${tier.stage}" (${tierId})`);
     return word;
   }).replace(BAND_RE, (_, kind, tierId) => {

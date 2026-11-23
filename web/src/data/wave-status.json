@@ -121,6 +121,9 @@
       "kind": "tier",
       "size": "0.8–1.5B",
       "stage": "on-air",
+      "stageWords": {
+        "on-air": "FIRE ON AIR"
+      },
       "publicCheckpoint": false,
       "onAirBand": "wave-nano-fire-controller",
       "alsoOnAir": [
@@ -129,12 +132,12 @@
       "labels": {
         "research.scope": {
           "page": "research.html",
-          "text": "On air",
+          "text": "Fire models on air",
           "wired": true
         },
         "research-models.chip": {
           "page": "research-models.html",
-          "text": "ON AIR",
+          "text": "FIRE ON AIR",
           "wired": true
         },
         "research-models.stage": {
@@ -144,7 +147,7 @@
         },
         "wave-family.recipe": {
           "page": "research-wave-family.html",
-          "text": "Scratch &middot; on air",
+          "text": "Scratch &middot; fire models on air",
           "wired": true
         },
         "research-hardware.card": {

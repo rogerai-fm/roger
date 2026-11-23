@@ -62,7 +62,10 @@ The file is build input only and is not shipped.
 - **Stage words** (`facts.waveStage('<tier>')`) render the tier's live `stage` as one short
   public word from `stageWords` (`on-air` -> `ON AIR`, `training` -> `TRAINING`, ...). Nothing
   is typed per page: change a tier's `stage` and every stage word follows. The homepage Labs
-  plate reads its Pico and Nano status this way.
+  plate reads its Pico and Nano status this way. A tier may override the word for one stage
+  with its own `stageWords` map: Nano has `{"on-air": "FIRE ON AIR"}`, because only its two
+  fire models are on air and chat is not. The override applies only while the tier is in that
+  stage. The shared vocabulary is not changed for any other tier.
 - **Hand-typed labels** (`"wired": false`) are prose, JSON-LD, the Playbox JS, and the
   research-models stage lines (`test/research-hardware.test.mjs` reads those from source).
   Edit the page and the data file together; `test/wave-status.test.mjs` fails if they drift.

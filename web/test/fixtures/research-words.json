@@ -50,8 +50,8 @@
   ]
  },
  "broadcasts-how-llms-work.html": {
-  "sha": "c0cfc28ce00210b06b4b5f9f8b806b2a441b7023f11cdcc1e3093d4e60e9ad44",
-  "length": 11797,
+  "sha": "2abd109818520903db95ecf3d4616c806d9211bc279818f46d0c240cdaa840fb",
+  "length": 11807,
   "hrefs": [
    "/broadcasts.html",
    "/research-wave-family.html",
@@ -236,8 +236,8 @@
   ]
  },
  "research-models.html": {
-  "sha": "3083494aacafd5cf5aa89414a8bb36abd2c941c090bb5d8818e13fbc844ac695",
-  "length": 6459,
+  "sha": "05bc2680914fc9fba4a28a6602c23ca982b78fa4dac53be8d26d0387dfcbd5ec",
+  "length": 6467,
   "hrefs": [
    "/research.html",
    "/research-wave-pico.html",
@@ -256,8 +256,8 @@
   ]
  },
  "research-wave-family.html": {
-  "sha": "5ba4214e5044ce5f66a6912e5648dad74b009ce46a915b6aae68196e16733ac7",
-  "length": 17303,
+  "sha": "0ff2c7c00df0ff2e0c6b009870be57442260fbafdda30cc9ccc63cb3eb67432c",
+  "length": 17313,
   "hrefs": [
    "/research.html",
    "#infinite",
@@ -270,8 +270,8 @@
   ]
  },
  "research-wave-nano.html": {
-  "sha": "a5f3a8054a137190f50d60c97d6a73794f33bf6fe640105956ae540d0597c502",
-  "length": 18879,
+  "sha": "1c0c8fe099b031b1065d9741b0f7bdf205ad5a8303fda9a648d94074237b07b8",
+  "length": 18891,
   "hrefs": [
    "/research-models.html",
    "#measured",
@@ -296,8 +296,8 @@
   ]
  },
  "research.html": {
-  "sha": "953a69e2fd404261213364d2e49db70e758a6d1a96ea238839aff1b8bb17d51f",
-  "length": 5301,
+  "sha": "bfa12d345668f47581594d306f0c870d8a3f6a7177db9cd94d412b44548521ed",
+  "length": 5311,
   "hrefs": [
    "/research-models.html",
    "/research-wave-pico.html",

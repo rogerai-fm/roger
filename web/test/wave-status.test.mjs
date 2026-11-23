@@ -85,6 +85,16 @@ test("wave-status: every tier carries the required fields with the right types",
       assert.ok(!t.alsoOnAir.includes(t.onAirBand), `${at}: the main band is not repeated`);
     }
     if ("ruling" in t) assert.equal(t.ruling, "pending", `${at}: the only ruling value is "pending"`);
+    // A tier may override the shared stage word for a stage (Nano on air: FIRE ON AIR). The keys
+    // are stages from the vocabulary; the words are short, upper case, and keep the shared word.
+    if ("stageWords" in t) {
+      assert.ok(t.stageWords && typeof t.stageWords === "object" && Object.keys(t.stageWords).length > 0, `${at}: stageWords is a non-empty map`);
+      for (const [stage, word] of Object.entries(t.stageWords)) {
+        assert.ok(STAGES.includes(stage), `${at}: stageWords key "${stage}" is in the vocabulary`);
+        assert.match(word, /^[A-Z][A-Z ]{2,23}$/, `${at}: stageWords.${stage} is one short upper-case word group`);
+        assert.ok(word.endsWith(data().stageWords[stage]), `${at}: stageWords.${stage} still ends with the shared word`);
+      }
+    }
     // The file lives in the public repository. What disagrees is computed from the labels
     // (the ledger below), so no prose note spells it out: the flag is bare.
     assert.ok(!("conflict" in t), `${at}: no prose conflict note (the ledger computes it from the labels)`);
@@ -153,6 +163,12 @@ test("stage words: one short public word per stage, the same six as the vocabula
   });
 });
 
+test("stage words: only Nano overrides the shared word, and only while on air (founder 2026-11-22)", () => {
+  const overridden = data().tiers.filter((t) => "stageWords" in t).map((t) => [t.id, t.stageWords]);
+  assert.deepEqual(overridden, [["nano", { "on-air": "FIRE ON AIR" }]],
+    "Nano's only on-air bands are the two fire models; chat is off. Pico keeps the shared ON AIR");
+});
+
 const SFIX = {
   stageWords: { planned: "PLANNED", "on-air": "ON AIR", training: "TRAINING" },
   tiers: [{ id: "pico", stage: "on-air", labels: {} }, { id: "nano", stage: "training", labels: {} },
@@ -162,6 +178,18 @@ const SFIX = {
 test("resolver: a stage token renders the tier's stage word", () => {
   assert.equal(resolveWaveTokens("<i>PICO {{wave-stage:pico}} · NANO {{wave-stage:nano}}</i>", "index.html", SFIX),
     "<i>PICO ON AIR · NANO TRAINING</i>");
+});
+
+test("resolver: a tier's own stage word wins for its current stage, and only for that stage", () => {
+  const fix = structuredClone(SFIX);
+  fix.tiers[1] = { id: "nano", stage: "on-air", stageWords: { "on-air": "FIRE ON AIR" }, labels: {} };
+  assert.equal(resolveWaveTokens("PICO {{wave-stage:pico}} · NANO {{wave-stage:nano}}", "index.html", fix),
+    "PICO ON AIR · NANO FIRE ON AIR", "Pico keeps the shared word");
+  fix.tiers[1].stage = "training";
+  assert.equal(resolveWaveTokens("NANO {{wave-stage:nano}}", "index.html", fix), "NANO TRAINING",
+    "move the stage and the shared word returns");
+  fix.tiers[1].stage = "mystery";
+  assert.throws(() => resolveWaveTokens("{{wave-stage:nano}}", "index.html", fix), /mystery/);
 });
 
 test("resolver: a stage token for an unknown tier, or a stage with no word, fails the build", () => {
@@ -182,10 +210,10 @@ const SRC_INDEX = () => source("index.html");
 
 test("plate: the homepage Labs plate names the Spectrum and the live stages of Pico and Nano", () => {
   const d = data();
-  const w = (id) => d.stageWords[tierById(id).stage];
+  const w = (id) => { const t = tierById(id); return t.stageWords?.[t.stage] ?? d.stageWords[t.stage]; };
   assert.equal(plateOf(dist("index.html")), `ROGERAI LABS THE WAVE SPECTRUM PICO ${w("pico")} · NANO ${w("nano")}`);
-  assert.equal(plateOf(dist("index.html")), "ROGERAI LABS THE WAVE SPECTRUM PICO ON AIR · NANO ON AIR",
-    "today (founder 2026-11-21): Pico on air; Nano's two fire models on the market since 2026-11-20 20:27 PT");
+  assert.equal(plateOf(dist("index.html")), "ROGERAI LABS THE WAVE SPECTRUM PICO ON AIR · NANO FIRE ON AIR",
+    "today (founder 2026-11-22): Pico on air; only Nano's two fire models on air (on the market since 2026-11-20 20:27 PT), chat off");
 });
 
 test("plate: the status words come from the stage tokens, not hand-typed copy", () => {
@@ -351,6 +379,8 @@ const IMPLIES = {
     "Fire controller and fire vision on air as specialized models &middot; chat off the market",
     "874&ndash;2,899 MB &middot; fire models on air",
     "Wave Nano 1.45B, 874 to 2,899 MB, fire models on air, chat off the market",
+    // founder 2026-11-22: Nano's short labels name the fire models, so none reads Nano on air as a whole
+    "FIRE ON AIR", "Fire models on air", "Scratch &middot; fire models on air",
   ],
   released: [],
 };
@@ -389,6 +419,20 @@ test("ledger: the pending set today (update this when the founder rules)", () =>
     ["exa"]);
 });
 
+// An upper-case NANO followed, within its label, by a bare ON AIR (not FIRE ON AIR): the plate,
+// the Nano callsign ("WAVE NANO &middot; 1.45B &middot; ON AIR") and any new chip.
+const NANO_BARE_ON_AIR = /NANO(?:[^<a-z]|&middot;){0,40}(?<!FIRE )ON AIR/;
+
+test("stale wording: a bare NANO ON AIR is caught, the fire wording and Pico are not", () => {
+  for (const bad of ["PICO ON AIR · NANO ON AIR", "WAVE NANO &middot; 1.45B &middot; ON AIR", "NANO · ON AIR"]) {
+    assert.match(bad, NANO_BARE_ON_AIR, bad);
+  }
+  for (const ok of ["PICO ON AIR · NANO FIRE ON AIR", "WAVE NANO &middot; 1.45B &middot; FIRE ON AIR",
+    "WAVE PICO &middot; 293M &middot; ON AIR", "Wave Nano At a glance Status ON AIR"]) {
+    assert.doesNotMatch(ok, NANO_BARE_ON_AIR, ok);
+  }
+});
+
 // Founder ruling 2026-10-21: Pico is on air (the v6 release, wave-pico-293m). Founder
 // ruling 2026-11-19 22:54 PT took Nano's three bands off the market for safety (R.477). Founder
 // decision 2026-11-21: the fire controller and fire vision went back on the market 2026-11-20 at
@@ -414,7 +458,9 @@ test("rulings 2026-10-21 and 2026-11-21: Pico on air, Nano's fire models on air,
     /wave-nano-chat/, /temporarily off the market/i, /safety checks and guards are added/i, /NANO GATED/,
     /150&ndash;180 MB/, /150-180 MB/, /~165 MB/, /\b165 MB quantized/, /Nano 0\.8-1\.5B/,
     /Wave Micro planned/i, /Micro is on the plan/i, /Scratch pipeline standing up/i, /Scratch &middot; planned/,
-    /Wave Micro, 7 to 8 billion, an on-site server, planned/, /PLANNED TIERS/];
+    /Wave Micro, 7 to 8 billion, an on-site server, planned/, /PLANNED TIERS/,
+    // founder 2026-11-22: Nano is never ON AIR as a whole (chat is off); its short word is FIRE ON AIR
+    /NANO ON AIR/, NANO_BARE_ON_AIR];
   const pages = readdirSync(DIST).filter((f) => f.endsWith(".html"));
   for (const p of pages) {
     const html = readFileSync(path.join(DIST, p), "utf8").replace(/<!--[\s\S]*?-->/g, "");
