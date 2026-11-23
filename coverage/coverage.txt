@@ -976,7 +976,7 @@ rogerai.fm/roger/v7/internal/agent/agent.go:249:			Link					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:253:			setLink					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:280:			newReregistrar				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:289:			curToken				100.0%
-rogerai.fm/roger/v7/internal/agent/agent.go:303:			recover					100.0%
+rogerai.fm/roger/v7/internal/agent/agent.go:303:			recover					96.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:407:			reregReason				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:417:			backoffFor				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:429:			finishBusy				100.0%
@@ -3892,7 +3892,7 @@ rogerai.fm/roger/v7/internal/towercli/probe.go:30:			cmdProbe				92.7%
 rogerai.fm/roger/v7/internal/towercli/pull.go:31:			set					100.0%
 rogerai.fm/roger/v7/internal/towercli/pull.go:46:			get					100.0%
 rogerai.fm/roger/v7/internal/towercli/pull.go:56:			changedFrom				100.0%
-rogerai.fm/roger/v7/internal/towercli/pull.go:93:			runPulls				96.6%
+rogerai.fm/roger/v7/internal/towercli/pull.go:93:			runPulls				94.8%
 rogerai.fm/roger/v7/internal/towercli/pull.go:190:			servePulled				100.0%
 rogerai.fm/roger/v7/internal/towercli/requests.go:19:			pairingClient				100.0%
 rogerai.fm/roger/v7/internal/towercli/requests.go:29:			cmdRequests				89.5%
