@@ -447,7 +447,7 @@ func printCoreStatus(st *tower.State, out io.Writer) error {
 			fmt.Fprintf(out, "  hub serves:    %s\n", tw.HubReach)
 		}
 		if tr := tw.Trust; tr != nil && tr.Stage != "" {
-			fmt.Fprintf(out, "  trust stage:   %s (%s)\n", tr.Stage, stageAllows(tr.CommunityStations, tr.HouseStations))
+			fmt.Fprintf(out, "  trust stage:   %s (%s)\n", tr.Stage, stageAllows(tr.Stage, tr.CommunityStations, tr.HouseStations))
 			if tr.Next != "" {
 				fmt.Fprintf(out, "  next stage:    %s\n", tr.Next)
 			}
@@ -467,8 +467,12 @@ func printCoreStatus(st *tower.State, out io.Writer) error {
 }
 
 // stageAllows says, in plain words, what a trust stage lets a Tower hold. "RogerAI Stations"
-// are the platform's own, which reach a community Tower only as failover.
-func stageAllows(community, house int) string {
+// are the platform's own, which reach a community Tower only as failover. A house Tower has no
+// trust stage and no caps: Core reports it as "house" with no numbers, which are not zeros.
+func stageAllows(stage string, community, house int) string {
+	if stage == "house" {
+		return "community and RogerAI Stations without a trust cap"
+	}
 	c := fmt.Sprintf("up to %d community Stations", community)
 	if community < 0 {
 		c = "community Stations up to capacity"

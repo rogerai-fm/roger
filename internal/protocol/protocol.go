@@ -399,9 +399,15 @@ type NodeRegistration struct {
 	// NetContinent is BROKER-set at register: the continent the node's connecting address falls
 	// in under the operator's network table ("" = none). It is outside the node's signed bytes
 	// (regSigningBytes), rides the shared registry mirror, and is never emitted to consumers.
-	NetContinent string       `json:"net_continent,omitempty"`
-	HW           string       `json:"hw"`
-	Offers       []ModelOffer `json:"offers"`
+	NetContinent string `json:"net_continent,omitempty"`
+	// Cosigner is BROKER-set at register: the owner key whose login signature co-signed this
+	// registration, or "" when none did. Whatever a node sends here is overwritten. Like
+	// NetContinent it is outside the node's signed bytes and rides the shared registry mirror
+	// and the durable record. A self-attach signed by the node key resolves its owner only when
+	// this account and the node's owner binding agree (station_attach_signer.feature).
+	Cosigner string       `json:"cosigner,omitempty"`
+	HW       string       `json:"hw"`
+	Offers   []ModelOffer `json:"offers"`
 	// Confidential: node claims it runs inference in a TEE/confidential VM where
 	// the owner cannot read memory; Attestation is the (to-be-verified) hardware
 	// quote. The broker only surfaces `confidential ◆` after CRYPTOGRAPHICALLY
@@ -493,6 +499,7 @@ func (r NodeRegistration) regSigningBytes() []byte {
 	c := r
 	c.Sig = ""
 	c.NetContinent = "" // broker-set after the node signs
+	c.Cosigner = ""     // broker-set after the node signs
 	if len(c.Offers) > 0 {
 		offers := make([]ModelOffer, len(c.Offers))
 		copy(offers, c.Offers)
