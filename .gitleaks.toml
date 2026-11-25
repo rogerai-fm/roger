@@ -24,6 +24,11 @@ description = "Audited false positives (see header). Verified: no real secret co
 # generated coverage/ report or web/dist/ build output) could mask a real secret bundled
 # into generated output, so every suppression here is a precise, audited string.
 regexes = [
+  # --- Audited 2026-11-24 (branch wt/upstream-key, PR 32) ---
+  # The fake upstream key of internal/agent/tower_upstream_key_bdd_test.go (ukKey): an
+  # "sk-test-" placeholder the test's own stub upstream expects, used to prove the key is
+  # redacted. Not a credential of any service.
+  '''^sk\-test\-0123456789abcdefKEYZ$''',
   # --- Audited 2026-10-27 (on the unmerged Edge branches wt/simple-join, wt/jetson-local) ---
   # Edge bearer JOIN-PROOF golden vectors (internal/edgeauth/testdata/join_proof_vectors.json
   # and its generator gen_join_proof_vectors.py): fixed sequential test node keys and keys
