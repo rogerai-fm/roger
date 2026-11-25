@@ -1025,6 +1025,7 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 				Upstream: station.HTTPUpstream{URL: cfg.Upstream},
 				Outbox:   station.NewOutbox(256),
 				Seen:     station.NewAttemptCache(),
+				Log:      cfg.ModelLog,
 				// Transcripts make this node AUDITABLE: Core's sampled/adaptive audit asks for the
 				// exact bytes behind a settled receipt, and a node that retains nothing can only
 				// answer "not retained". Keep-all over the recent window (the store is bounded).

@@ -34,3 +34,30 @@ func TestOverflowRecognizedInEverySpelling(t *testing.T) {
 		}
 	}
 }
+
+// A context-window refusal is a 400 in the overflow vocabulary and nothing else: the same
+// words under any other status are that status alone.
+func TestRefusalIsOnlyA400InTheOverflowVocabulary(t *testing.T) {
+	for _, tc := range []struct {
+		status int
+		body   string
+		want   bool
+	}{
+		{400, "context length exceeded", true},
+		{400, "the request exceeds the available context size", true},
+		{400, "unknown parameter foo", false},
+		{400, "", false},
+		{413, "context length exceeded", false},
+		{422, "context length exceeded", false},
+		{429, "too many tokens per minute", false},
+		{500, "context length exceeded", false},
+		{200, "context length exceeded", false},
+	} {
+		if got := IsRefusal(tc.status, tc.body); got != tc.want {
+			t.Errorf("IsRefusal(%d, %q) = %v, want %v", tc.status, tc.body, got, tc.want)
+		}
+	}
+	if !IsOverflow(RefusalMessage) {
+		t.Error("the refusal message must read as an overflow to a client that compacts on it")
+	}
+}

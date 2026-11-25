@@ -98,12 +98,12 @@ func hexOf(b []byte) string { return hex.EncodeToString(b) }
 
 func TestRunLocalJobReturnsAReadableErrorWhenTheModelFails(t *testing.T) {
 	// A dead upstream: the node returns an OpenAI-shaped error, not an empty answer.
-	ans := runLocalJob(&http.Client{Timeout: time.Second}, Config{Upstream: "http://127.0.0.1:1"}, []byte(`{"model":"m"}`))
+	ans, _ := runLocalJob(&http.Client{Timeout: time.Second}, Config{Upstream: "http://127.0.0.1:1"}, []byte(`{"model":"m"}`))
 	require.Contains(t, string(ans), "local_station_error")
 	require.Contains(t, string(ans), "did not answer")
 
 	// An unbuildable upstream URL is also a readable error, not a panic.
-	ans2 := runLocalJob(&http.Client{Timeout: time.Second}, Config{Upstream: "://bad"}, []byte(`{"model":"m"}`))
+	ans2, _ := runLocalJob(&http.Client{Timeout: time.Second}, Config{Upstream: "://bad"}, []byte(`{"model":"m"}`))
 	require.Contains(t, string(ans2), "local_station_error")
 }
 
@@ -144,7 +144,7 @@ func TestCompleteLocalJobIsBestEffort(t *testing.T) {
 	_, priv, _ := ed25519.GenerateKey(rand.Reader)
 	// A dead broker must not panic - completion is best-effort.
 	require.NotPanics(t, func() {
-		completeLocalJob(&http.Client{Timeout: time.Second}, "http://127.0.0.1:1", priv, "job-1", []byte(`{}`))
+		completeLocalJob(&http.Client{Timeout: time.Second}, "http://127.0.0.1:1", priv, "job-1", []byte(`{}`), "")
 	})
 }
 
@@ -166,7 +166,7 @@ func TestRunLocalJobWrapsANonJSONUpstreamReply(t *testing.T) {
 		_, _ = io.WriteString(w, "502 Bad Gateway (not json)")
 	}))
 	defer bad.Close()
-	ans := runLocalJob(&http.Client{Timeout: time.Second}, Config{Upstream: bad.URL}, []byte(`{"model":"m"}`))
+	ans, _ := runLocalJob(&http.Client{Timeout: time.Second}, Config{Upstream: bad.URL}, []byte(`{"model":"m"}`))
 	require.True(t, json.Valid(ans), "the answer the node returns is always valid JSON")
 	require.Contains(t, string(ans), "unreadable")
 }

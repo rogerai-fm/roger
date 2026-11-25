@@ -32,6 +32,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"io"
 	"time"
 
 	"rogerai.fm/roger/v7/internal/towercore/dispatch"
@@ -89,7 +90,12 @@ type EdgeExecutor struct {
 	// Seen is the sealed path's one-serve-per-attempt guard (see AttemptCache). Nil disables
 	// replay suppression - acceptable only in tests; a wired node should always carry one.
 	Seen *AttemptCache
-	Now  func() time.Time
+	// Log is the operator's own output. One line goes here for each attempt the model answered
+	// with an error status, with the model's words (bounded, nothing unprintable), and nowhere
+	// else: the failure that crosses the Tower carries only a class (see ServeSealed). Nil
+	// keeps nothing.
+	Log io.Writer
+	Now func() time.Time
 }
 
 func (e EdgeExecutor) now() time.Time {

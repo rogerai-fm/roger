@@ -33,10 +33,10 @@ func TestStationJobGoesToTheServerOfItsModel(t *testing.T) {
 			return "", "", false
 		}}
 	c := &http.Client{Timeout: 5 * time.Second}
-	ans := runLocalJob(c, cfg.forJob([]byte(`{"model":"qwen3-8b"}`)), []byte(`{"model":"qwen3-8b"}`))
+	ans, _ := runLocalJob(c, cfg.forJob([]byte(`{"model":"qwen3-8b"}`)), []byte(`{"model":"qwen3-8b"}`))
 	require.Contains(t, string(ans), `"b"`)
 	require.Contains(t, seen["b"], "Bearer kb")
-	ans = runLocalJob(c, cfg.forJob([]byte(`{"model":"smollm2"}`)), []byte(`{"model":"smollm2"}`))
+	ans, _ = runLocalJob(c, cfg.forJob([]byte(`{"model":"smollm2"}`)), []byte(`{"model":"smollm2"}`))
 	require.Contains(t, string(ans), `"a"`)
 	require.Contains(t, seen["a"], "Bearer ka")
 }

@@ -61,6 +61,11 @@ type Config struct {
 	// 24h by default, and between probes the node reads as not currently verified.
 	ProbeMin time.Duration
 
+	// ModelLog is where a joined node writes one line for each attempt its model answered with
+	// an error status, with the model's own words (bounded, nothing unprintable). It is the
+	// operator's own output and is never sent to the broker or the Tower. nil keeps nothing.
+	ModelLog io.Writer
+
 	Broker, Upstream, UpstreamKey string
 	NodeID, Region, HW, Model     string
 	// StationModels says what this station serves right now, for a standalone Tower's poll (nil:

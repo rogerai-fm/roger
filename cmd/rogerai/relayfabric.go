@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"rogerai.fm/roger/v7/internal/agent"
 	"rogerai.fm/roger/v7/internal/client"
@@ -102,7 +103,8 @@ func joinRelayFabric(ctx context.Context, cfg agent.Config) {
 	// io.Discard for PROGRESS, not for everything: the ordinary share has already printed its
 	// on-air line, and a second stream of relay chatter underneath it would describe a plane the
 	// operator did not opt into and cannot act on. Notices are the other channel.
-	err = agent.ServeTower(ctx, cfg, agent.NodeKey(), filepath.Join(confDir, "rogerai"),
+	// An attempt's line is neither: it goes to the same terminal, once per attempt, bounded.
+	err = agent.ServeTower(ctx, relayConfig(cfg, notices), agent.NodeKey(), filepath.Join(confDir, "rogerai"),
 		discardWriter{}, notices.report)
 	// The RETURNED error is the startup one, and only one shape of it is worth a word. An attach
 	// that was refused means no relay would take this node right now, which is the ordinary case
@@ -132,6 +134,11 @@ type relayNotices struct {
 	// os.Stderr so a test can assert what an operator actually reads, which is the whole
 	// property this type exists for.
 	out io.Writer
+	// now is the clock the bound on refused-attempt lines reads; nil means time.Now.
+	now func() time.Time
+	// linesFrom and lines count the attempt lines of the current window (Write).
+	linesFrom time.Time
+	lines     int
 }
 
 func (n *relayNotices) report(err error) {
@@ -148,8 +155,53 @@ func (n *relayNotices) report(err error) {
 		return
 	}
 	n.said[msg] = true
-	w := n.out
+	n.sayLocked(msg)
 	n.mu.Unlock()
+}
+
+// relayConfig is the share's config as its relay join uses it: the same share, with the line
+// for each attempt the model answered with an error status pointed at the operator's terminal.
+func relayConfig(cfg agent.Config, n *relayNotices) agent.Config {
+	cfg.ModelLog = n
+	return cfg
+}
+
+// A consumer can provoke as many error replies as it likes, so the lines for them are bounded:
+// at most attemptLinesMax in attemptLinesEvery, then one line saying more were held back.
+const (
+	attemptLinesMax   = 5
+	attemptLinesEvery = 10 * time.Second
+)
+
+// Write puts the node's line for an attempt its model answered with an error status (the
+// model's own words, already bounded and made printable by the Station) on the operator's
+// terminal, where the notices go. Unlike a notice it is an event, not a standing condition:
+// nothing is remembered and nothing is said once only, but the lines are bounded in time. The
+// words stay on this machine; the relay and the broker are sent a class and no text
+// (features/tower/context_window_class.feature).
+func (n *relayNotices) Write(p []byte) (int, error) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	now := time.Now()
+	if n.now != nil {
+		now = n.now()
+	}
+	if now.Sub(n.linesFrom) >= attemptLinesEvery {
+		n.linesFrom, n.lines = now, 0
+	}
+	n.lines++
+	switch {
+	case n.lines <= attemptLinesMax:
+		n.sayLocked(strings.TrimRight(string(p), "\n"))
+	case n.lines == attemptLinesMax+1:
+		n.sayLocked("more lines like these were suppressed for a few seconds")
+	}
+	return len(p), nil
+}
+
+// sayLocked prints one line on the operator's terminal. The caller holds n.mu.
+func (n *relayNotices) sayLocked(msg string) {
+	w := n.out
 	if w == nil {
 		w = os.Stderr
 	}

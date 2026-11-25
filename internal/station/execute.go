@@ -39,6 +39,7 @@ import (
 	"strings"
 	"time"
 
+	"rogerai.fm/roger/v7/internal/ctxsig"
 	"rogerai.fm/roger/v7/internal/towercore/dispatch"
 )
 
@@ -133,7 +134,7 @@ func (u HTTPUpstream) Serve(ctx context.Context, request []byte) ([]byte, error)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, &UpstreamStatusError{Status: resp.StatusCode, RetryAfter: retryAfterSeconds(resp.Header.Get("Retry-After")),
-			Detail: truncate(string(body), 200)}
+			Detail: truncate(string(body), 200), ContextWindow: ctxsig.IsRefusal(resp.StatusCode, string(body))}
 	}
 	if len(body) == 0 {
 		return nil, errors.New("the model returned an empty body")
@@ -145,10 +146,13 @@ func (u HTTPUpstream) Serve(ctx context.Context, request []byte) ([]byte, error)
 // Retry-After (seconds, 0 when absent) are what a relay needs to answer a consumer honestly
 // (a 429 with its wait, not a generic failure); Detail is the model's own words, for the
 // operator's log only - it never crosses a blind Tower (see EdgeExecutor.ServeSealed).
+// ContextWindow is whether the model's whole reply was a context-window refusal
+// (ctxsig.IsRefusal): one bit, read here because only the Station sees the text.
 type UpstreamStatusError struct {
-	Status     int
-	RetryAfter int
-	Detail     string
+	Status        int
+	RetryAfter    int
+	Detail        string
+	ContextWindow bool
 }
 
 func (e *UpstreamStatusError) Error() string {
@@ -156,8 +160,12 @@ func (e *UpstreamStatusError) Error() string {
 }
 
 // Class is the failure as it may cross a blind Tower: the class, the status and the wait,
-// never the model's words.
+// never the model's words. A 400 that was a context-overflow complaint is its own class, so
+// the relay can tell the consumer the prompt is too long; no other status carries the word.
 func (e *UpstreamStatusError) Class() string {
+	if e.ContextWindow && e.Status == http.StatusBadRequest {
+		return ctxsig.TowerClass
+	}
 	if e.RetryAfter > 0 {
 		return fmt.Sprintf("the model did not answer (status %d, retry-after %d)", e.Status, e.RetryAfter)
 	}

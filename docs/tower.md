@@ -152,6 +152,46 @@ the receipt) rather than by a channel. There is no TLS-level channel binding and
 secrecy against a compromised Station session key on this path. A real inner TLS session is
 still the destination. This removes the plaintext without pretending to be full end-to-end.
 
+### Failure classes that cross a Tower
+
+When a Station cannot serve an attempt, the one thing it hands the Tower in the clear is a
+failure. It cannot be sealed, because the consumer has to read it to know why nothing opened.
+When the model behind the Station replied with an error, that failure is a class, one of four
+fixed shapes:
+
+| class | when the Station sends it |
+|---|---|
+| `the model did not answer` | the model could not be reached, or its reply could not be used |
+| `the model did not answer (status N)` | the model replied with HTTP status N |
+| `the model did not answer (status N, retry-after S)` | the same, and the reply carried a Retry-After of S seconds |
+| `the model did not answer (status 400, context-window)` | the model replied 400 and its reply said the prompt is too long for its context window |
+
+No text from the model crosses a Tower. A model's error body can quote the request it
+rejected, so the Station sends only the class: the status, the wait, and for a too-long prompt
+the one fixed word `context-window`. Only a 400 carries that word. The model's own words go to
+the Station operator's own terminal, one line for each attempt the model answered with an
+error status, and nowhere else. That line is bounded, carries nothing unprintable, and at most
+a few are shown in any ten seconds.
+
+What the relay does with a class:
+
+- a status and a wait are answered to the consumer as that status with that Retry-After, or
+  the request moves on to another station;
+- `context-window` is answered as a 400 with the error code `context_exceeded`, or the request
+  moves on to the next model in its list. The numbers in that answer are the relay's own count
+  of the prompt and the window the Station declared. None of them come from the Tower;
+- a class the relay cannot read is an ordinary failure.
+
+A Tower can send any class it likes, so a class is a claim. `context-window` gets the same
+plausibility check a direct station's own refusal gets. A claim that is believed is a fact
+about the prompt and leaves no mark. A claim that is not believed is recorded as a Station
+fault on the Tower's record. A Tower that sends it for everything fails its canaries. The
+answer never names the Tower.
+
+A self-hosted Tower that serves its own network answers its own consumers the same way: a
+too-long prompt is a 400 with the error code `context_exceeded`. It sends no numbers, because
+it counts no tokens and knows no window.
+
 ### Object signing
 
 Every authorization, offer, receipt, inventory and acknowledgement is an **Ed25519-signed

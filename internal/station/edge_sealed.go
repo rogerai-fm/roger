@@ -30,8 +30,11 @@ package station
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"rogerai.fm/roger/v7/internal/towercore/dispatch"
 	"rogerai.fm/roger/v7/internal/towercore/envelope"
@@ -128,12 +131,16 @@ func (e EdgeExecutor) ServeSealed(ctx context.Context, grantRaw, sealedReq []byt
 		// know why nothing opened). An upstream's own error body can echo fragments of the
 		// request (validation errors often quote what they rejected), and err.Error() embeds a
 		// slice of that body - so forwarding it would hand consumer plaintext to the exact
-		// party this design blinds. The operator still has the full error in their own logs;
-		// the wire gets only the class. A TYPED status reply adds its status and Retry-After
+		// party this design blinds. The operator has the model's words on their own output
+		// (Log, one line per attempt the model answered with an error status); the wire gets
+		// only the class. A TYPED status reply adds its status and Retry-After
 		// (two numbers, no echo), so the relay can answer a consumer's 429 as a 429 with its
 		// wait (features/routing/edge_bridge_parity.feature) instead of a generic failure.
 		var se *UpstreamStatusError
 		if errors.As(err, &se) {
+			if e.Log != nil {
+				fmt.Fprintln(e.Log, operatorLine(grant.AttemptID, se))
+			}
 			return nil, nil, se.Class()
 		}
 		return nil, nil, "the model did not answer"
@@ -173,4 +180,26 @@ func (e EdgeExecutor) ServeSealed(ctx context.Context, grantRaw, sealedReq []byt
 		e.Transcripts.Keep(Transcript{AttemptID: grant.AttemptID, Request: request, Response: body})
 	}
 	return raw, rec.Signed, ""
+}
+
+// operatorLineMax bounds the operator's line for an attempt, in characters.
+const operatorLineMax = 300
+
+// operatorLine is the one line the operator of a Station reads for an attempt its model
+// answered with an error status: the attempt, the status, and the model's own words. The
+// words come from a model and land on a terminal, so every character of the whole line that
+// is not printable becomes a space (control characters, and the format and separator
+// characters that can reorder or split a line), broken bytes are dropped, and the line is
+// bounded. It is for the operator's own output only (EdgeExecutor.Log).
+func operatorLine(attemptID string, se *UpstreamStatusError) string {
+	line := []rune(strings.Map(func(r rune) rune {
+		if !unicode.IsPrint(r) {
+			return ' '
+		}
+		return r
+	}, strings.ToValidUTF8(fmt.Sprintf("the model answered attempt %s with status %d: %s", attemptID, se.Status, se.Detail), "")))
+	if len(line) > operatorLineMax {
+		line = line[:operatorLineMax]
+	}
+	return string(line)
 }

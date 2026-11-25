@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"rogerai.fm/roger/v7/internal/ctxsig"
 	"rogerai.fm/roger/v7/internal/servedfile"
 	"rogerai.fm/roger/v7/internal/tower"
 )
@@ -198,7 +199,7 @@ func (s *Server) chatCompletions(w http.ResponseWriter, r *http.Request) {
 		// work; but if a station delivered in the same instant, still record the receipt (the
 		// work happened) - there is just no socket left to write the answer to.
 		s.q.abandon(jobID)
-		if res, ok := drain(j); ok {
+		if res, ok := drain(j); ok && !res.refused {
 			_, _ = s.st.RecordReceipt(clientKeyHash, res.stationID, model)
 		}
 	case <-time.After(s.completionTimeout):
@@ -229,6 +230,10 @@ func drain(j *job) (jobResult, bool) {
 // writeAnswer records the free local receipt for the serving station and relays the answer
 // verbatim with a free cost header - never a billing shape.
 func (s *Server) writeAnswer(w http.ResponseWriter, clientKeyHash, model string, res jobResult) {
+	if res.refused {
+		writeContextExceeded(w)
+		return
+	}
 	// The work happened; a receipt-write failure must not swallow the answer.
 	rec, recErr := s.st.RecordReceipt(clientKeyHash, res.stationID, model)
 	w.Header().Set("X-Roger-Cost", "0")
@@ -243,6 +248,22 @@ func (s *Server) writeAnswer(w http.ResponseWriter, clientKeyHash, model string,
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(res.answer)
+}
+
+// writeContextExceeded answers a prompt the station's model refused as too long, as the broker
+// answers the same refusal (features/tower/context_window_class.feature): a 400 with the code
+// context_exceeded and source "station". The words are the plane's own, never the model's. The
+// plane counts no tokens and knows no window, so it sends no numbers. Nothing was served, so
+// no receipt is written.
+func writeContextExceeded(w http.ResponseWriter) {
+	w.Header().Set("X-Roger-Cost", "0")
+	w.Header().Set("X-Roger-Local", "1")
+	writeJSON(w, http.StatusBadRequest, map[string]any{"error": map[string]any{
+		"code":     "context_exceeded",
+		"type":     "invalid_request_error",
+		"message":  ctxsig.RefusalMessage,
+		"metadata": map[string]any{"source": "station"},
+	}})
 }
 
 // writeRouteErr answers a routing refusal: the plane's plain {"error": "<text>"} shape, or the
@@ -334,6 +355,10 @@ func (s *Server) localPoll(w http.ResponseWriter, r *http.Request) {
 type completeRequest struct {
 	JobID  string          `json:"job_id"`
 	Answer json.RawMessage `json:"answer"`
+	// Failure is the station's failure class, when it has one to report. Only the
+	// context-window class is read (ctxsig.TowerClass, matched whole); anything else is
+	// ignored and the answer goes out as it is.
+	Failure string `json:"failure"`
 }
 
 // localComplete delivers a station's answer to the waiting consumer. Only the station that
@@ -356,7 +381,7 @@ func (s *Server) localComplete(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "a job_id and answer are required"})
 		return
 	}
-	switch s.q.complete(req.JobID, station.ID, req.Answer) {
+	switch s.q.complete(req.JobID, station.ID, req.Answer, req.Failure == ctxsig.TowerClass) {
 	case completeStreamed:
 		writeJSON(w, http.StatusConflict, map[string]any{"error": "this job is streamed: send it as chunks to /local/chunk"})
 	case completeDelivered:

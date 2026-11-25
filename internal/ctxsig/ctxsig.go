@@ -10,6 +10,23 @@ package ctxsig
 
 import "strings"
 
+// TowerClass is the failure class a Station sends across a blind Tower when the model behind
+// it replied 400 and IsOverflow matched the reply (features/tower/context_window_class.feature).
+// It is the whole failure: one fixed sentence, none of the model's words. A reader compares it
+// for equality, so anything shaped nearly like it is an ordinary failure.
+const TowerClass = "the model did not answer (status 400, context-window)"
+
+// RefusalMessage is what a consumer is told when a station's own server refused the prompt as
+// too long, under the error code context_exceeded. One wording for the broker and for a
+// self-hosted Tower.
+const RefusalMessage = "request exceeds the context window: the station's server refused the prompt as too long - reduce the prompt and retry"
+
+// IsRefusal reports whether a model server's HTTP reply is a context-window refusal: status
+// 400 with a body IsOverflow matches. No other status counts, whatever it says.
+func IsRefusal(status int, body string) bool {
+	return status == 400 && IsOverflow(body)
+}
+
 // IsOverflow reports whether raw is a server's context-overflow complaint, in any
 // spelling seen in the wild. Apple's on-device foundation model says "Exceeded model
 // context window size"; llama.cpp / vLLM / OpenAI-compatible servers phrase it as

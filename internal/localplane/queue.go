@@ -22,6 +22,9 @@ import (
 type jobResult struct {
 	answer    []byte
 	stationID string
+	// refused is the station reporting that its model refused the prompt as too long (the
+	// context-window class): nothing was served, and the consumer is answered context_exceeded.
+	refused bool
 }
 
 type job struct {
@@ -155,7 +158,7 @@ func (q *queue) poll(ctx context.Context, stationID string, models []string, str
 // actually in flight (a late or forged completion for an unknown id changes nothing). Delivery
 // never blocks: the result channel is buffered, and a consumer that already gave up leaves the
 // buffered value to be garbage-collected with the job.
-func (q *queue) complete(id, stationID string, answer []byte) completeStatus {
+func (q *queue) complete(id, stationID string, answer []byte, refused bool) completeStatus {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	j, ok := q.inflight[id]
@@ -176,7 +179,7 @@ func (q *queue) complete(id, stationID string, answer []byte) completeStatus {
 	// then-drain be correct: after abandon returns, either the answer was already delivered
 	// (drain finds it) or a later complete finds the job gone and reports delivered=false -
 	// there is no gap in which an answer is both reported delivered and lost.
-	j.result <- jobResult{answer: answer, stationID: stationID}
+	j.result <- jobResult{answer: answer, stationID: stationID, refused: refused}
 	return completeDelivered
 }
 

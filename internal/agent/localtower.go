@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"time"
 
+	"rogerai.fm/roger/v7/internal/ctxsig"
 	"rogerai.fm/roger/v7/internal/lanmode"
 	"rogerai.fm/roger/v7/internal/protocol"
 	"rogerai.fm/roger/v7/internal/servedfile"
@@ -108,8 +109,8 @@ func ServeLocalTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, o
 			runLocalStream(ctx, execClient, towerClient, jcfg, priv, job)
 			continue
 		}
-		answer := runLocalJob(execClient, jcfg, job.Request)
-		completeLocalJob(towerClient, cfg.Broker, priv, job.ID, answer)
+		answer, failure := runLocalJob(execClient, jcfg, job.Request)
+		completeLocalJob(towerClient, cfg.Broker, priv, job.ID, answer, failure)
 	}
 }
 
@@ -222,14 +223,19 @@ func pollLocalJob(ctx context.Context, c *http.Client, broker string, priv ed255
 // runLocalJob executes one job against the node's own upstream model and returns the answer
 // bytes. The request is forced NON-streaming (the plane's completion is one answer, not a
 // stream), and pinned to the offer's model on Osaurus, exactly as the joined serve path does.
-func runLocalJob(c *http.Client, cfg Config, request []byte) []byte {
+//
+// failure is the context-window class (ctxsig.TowerClass) when the model replied 400 in the
+// overflow vocabulary, and empty otherwise: the Tower answers its consumer context_exceeded
+// for it (features/tower/context_window_class.feature). The answer is still returned as
+// before, so a Tower that predates the class relays what it always did.
+func runLocalJob(c *http.Client, cfg Config, request []byte) (answer []byte, failure string) {
 	body := unstreamLocal(request)
 	if cfg.Osaurus {
 		body = pinModel(body, cfg.Model)
 	}
 	upReq, err := http.NewRequest(http.MethodPost, cfg.Upstream, bytes.NewReader(body))
 	if err != nil {
-		return localError("could not build the upstream request")
+		return localError("could not build the upstream request"), ""
 	}
 	upReq.Header.Set("Content-Type", "application/json")
 	if cfg.UpstreamKey != "" {
@@ -240,25 +246,33 @@ func runLocalJob(c *http.Client, cfg Config, request []byte) []byte {
 	}
 	resp, err := c.Do(upReq)
 	if err != nil {
-		return localError("the local model did not answer")
+		return localError("the local model did not answer"), ""
 	}
 	defer resp.Body.Close()
 	ans, _ := io.ReadAll(io.LimitReader(resp.Body, 16<<20))
+	if ctxsig.IsRefusal(resp.StatusCode, string(ans)) {
+		failure = ctxsig.TowerClass
+	}
 	// Never let the node's own upstream key leak back to the consumer if the upstream echoed it.
 	ans = redactUpstreamKey(ans, cfg.UpstreamKey)
 	// The answer must be valid JSON: it is completed back as a json.RawMessage, and a non-JSON
 	// upstream reply (a plain-text error page) would fail to marshal and silently strand the
 	// consumer until its 120s timeout. Wrap anything unparseable as a readable local error.
 	if !json.Valid(ans) {
-		return localError("the local model returned an unreadable response")
+		return localError("the local model returned an unreadable response"), failure
 	}
-	return ans
+	return ans, failure
 }
 
 // completeLocalJob returns the answer to the Tower for a job the node polled. Best-effort: if
-// the completion fails, the consumer times out and retries; the node just moves on.
-func completeLocalJob(c *http.Client, broker string, priv ed25519.PrivateKey, jobID string, answer []byte) {
-	body, err := json.Marshal(map[string]any{"job_id": jobID, "answer": json.RawMessage(answer)})
+// the completion fails, the consumer times out and retries; the node just moves on. failure,
+// when set, rides beside the answer (see runLocalJob).
+func completeLocalJob(c *http.Client, broker string, priv ed25519.PrivateKey, jobID string, answer []byte, failure string) {
+	msg := map[string]any{"job_id": jobID, "answer": json.RawMessage(answer)}
+	if failure != "" {
+		msg["failure"] = failure
+	}
+	body, err := json.Marshal(msg)
 	if err != nil {
 		return
 	}

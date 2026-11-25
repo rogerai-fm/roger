@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"rogerai.fm/roger/v7/internal/ctxsig"
 	"rogerai.fm/roger/v7/internal/protocol"
 )
 
@@ -64,6 +65,14 @@ func runLocalStream(ctx context.Context, c, tower *http.Client, cfg Config, priv
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= 400 {
+		// A 400 in the overflow vocabulary is the context-window class, as on the one-shot
+		// path (runLocalJob): the Tower answers its consumer context_exceeded for it.
+		if resp.StatusCode == http.StatusBadRequest {
+			if b, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20)); ctxsig.IsRefusal(resp.StatusCode, string(b)) {
+				post.fail(ctxsig.TowerClass)
+				return
+			}
+		}
 		post.fail("the local model answered " + resp.Status)
 		return
 	}

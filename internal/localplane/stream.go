@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"time"
 
+	"rogerai.fm/roger/v7/internal/ctxsig"
 	"rogerai.fm/roger/v7/internal/protocol"
 )
 
@@ -212,9 +213,14 @@ func (s *Server) localChunk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// A station's own upstream error text is never echoed: it can carry the upstream's key.
+	// The one exception is the context-window class as a stream's first word: a fixed sentence
+	// that can carry nothing, which streamAnswer answers as a refusal instead of a stream.
 	errMsg := ""
 	if req.Error != "" {
 		errMsg = "a local upstream failure ended the reply"
+		if req.Error == ctxsig.TowerClass && *req.Seq == 0 && req.Data == "" {
+			errMsg = ctxsig.TowerClass
+		}
 	}
 	status, expected, reason := s.q.chunk(req.JobID, station.ID, *req.Seq, []byte(req.Data), req.Final, errMsg,
 		chunkLimits{chunkMax: s.chunkMax, totalMax: s.streamTotal})
@@ -254,7 +260,7 @@ func (s *Server) streamAnswer(w http.ResponseWriter, r *http.Request, clientKeyH
 		return
 	case <-r.Context().Done():
 		s.q.abandonFor(j.id, goneConsumerLeft)
-		if res, ok := drain(j); ok {
+		if res, ok := drain(j); ok && !res.refused {
 			_, _ = s.st.RecordReceipt(clientKeyHash, res.stationID, model)
 		}
 		return
@@ -272,6 +278,10 @@ func (s *Server) streamAnswer(w http.ResponseWriter, r *http.Request, clientKeyH
 		}
 	}
 
+	if first.errMsg == ctxsig.TowerClass {
+		writeContextExceeded(w) // refused before any frame: the same JSON as the one-shot path
+		return
+	}
 	s.sseHeaders(w, first.stationID)
 	flush := func() {
 		if f, ok := w.(http.Flusher); ok {
@@ -339,6 +349,10 @@ func (s *Server) streamAnswer(w http.ResponseWriter, r *http.Request, clientKeyH
 // writeWrapped answers a streamed request whose station returned the whole answer (a station
 // without chunk support): the answer goes out as a single-chunk SSE stream.
 func (s *Server) writeWrapped(w http.ResponseWriter, clientKeyHash, model string, res jobResult) {
+	if res.refused {
+		writeContextExceeded(w)
+		return
+	}
 	s.sseHeaders(w, res.stationID)
 	_, _ = s.st.RecordReceipt(clientKeyHash, res.stationID, model)
 	if ev, ok := protocol.CompletionAsSSE(res.answer, model); ok {

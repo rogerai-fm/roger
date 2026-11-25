@@ -20,7 +20,7 @@ func TestQueueDeliversAJobToAPollingStation(t *testing.T) {
 	require.Equal(t, []byte(`{"prompt":"hi"}`), got.body)
 
 	// It completes back to the waiting consumer.
-	require.Equal(t, completeDelivered, q.complete("req-1", "st-1", []byte(`{"answer":"hello"}`)))
+	require.Equal(t, completeDelivered, q.complete("req-1", "st-1", []byte(`{"answer":"hello"}`), false))
 	select {
 	case res := <-j.result:
 		require.Equal(t, "st-1", res.stationID)
@@ -92,7 +92,7 @@ func TestExactlyOneStationTakesAJob(t *testing.T) {
 
 func TestCompleteForUnknownJobIsANoOp(t *testing.T) {
 	q := newQueue()
-	require.Equal(t, completeDropped, q.complete("never-existed", "st", []byte("x")), "a completion for an unknown id changes nothing")
+	require.Equal(t, completeDropped, q.complete("never-existed", "st", []byte("x"), false), "a completion for an unknown id changes nothing")
 }
 
 func TestAbandonedJobCannotBeCompleted(t *testing.T) {
@@ -101,7 +101,7 @@ func TestAbandonedJobCannotBeCompleted(t *testing.T) {
 	_, ok := q.poll(context.Background(), "st", []string{"m"}, false)
 	require.True(t, ok)
 	q.abandon("gone")
-	require.Equal(t, completeDropped, q.complete("gone", "st", []byte("x")), "an abandoned job's late completion is dropped")
+	require.Equal(t, completeDropped, q.complete("gone", "st", []byte("x"), false), "an abandoned job's late completion is dropped")
 }
 
 func TestOnlyTheTakingStationMayComplete(t *testing.T) {
@@ -110,9 +110,9 @@ func TestOnlyTheTakingStationMayComplete(t *testing.T) {
 	_, ok := q.poll(context.Background(), "st-owner", []string{"m"}, false)
 	require.True(t, ok)
 	// A different station guessing the id cannot complete it.
-	require.Equal(t, completeDropped, q.complete("j1", "st-impostor", []byte("x")), "only the station that took the job may complete it")
+	require.Equal(t, completeDropped, q.complete("j1", "st-impostor", []byte("x"), false), "only the station that took the job may complete it")
 	// The real owner can.
-	require.Equal(t, completeDelivered, q.complete("j1", "st-owner", []byte("ok")))
+	require.Equal(t, completeDelivered, q.complete("j1", "st-owner", []byte("ok"), false))
 }
 
 // A job abandoned before any station took it must leave the PENDING set, or it leaks there
