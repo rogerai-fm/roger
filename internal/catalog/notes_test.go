@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -109,4 +110,54 @@ func TestFireNotesStateSpecializedInputAndDecisionSupport(t *testing.T) {
 		require.Regexp(t, number, n.BestAt, id)
 		require.Regexp(t, date, n.BestAt, id)
 	}
+}
+
+// features/details/interaction.feature: a note's interaction and example.
+func TestNoteInteraction(t *testing.T) {
+	ns, err := ParseNotes([]byte(`[{"id":"one-job","summary":"S","interaction":"single_turn","example":"Ping."},
+		{"id":"no-example","summary":"S","interaction":"single_turn"},
+		{"id":"words-only","summary":"S"}]`))
+	require.NoError(t, err)
+
+	// the note wins over what a station declared
+	got := ns.Apply("one-job", protocol.Taxonomy{Interaction: protocol.InteractionChat, Example: "Tell me a story."})
+	require.Equal(t, protocol.InteractionSingleTurn, got.Interaction)
+	require.Equal(t, "Ping.", got.Example)
+	// and replaces the pair: a station's example never rides on RogerAI's interaction
+	got = ns.Apply("no-example", protocol.Taxonomy{Interaction: protocol.InteractionChat, Example: "Tell me a story."})
+	require.Equal(t, protocol.InteractionSingleTurn, got.Interaction)
+	require.Empty(t, got.Example)
+	// a note that says neither keeps the station's own
+	got = ns.Apply("words-only", protocol.Taxonomy{Interaction: protocol.InteractionChat, Example: "Hello."})
+	require.Equal(t, protocol.InteractionChat, got.Interaction)
+	require.Equal(t, "Hello.", got.Example)
+	// no note: untouched
+	got = ns.Apply("other", protocol.Taxonomy{Interaction: protocol.InteractionSingleTurn, Example: "Ping."})
+	require.Equal(t, protocol.InteractionSingleTurn, got.Interaction)
+	require.Equal(t, "Ping.", got.Example)
+
+	for doc, want := range map[string]string{
+		`[{"id":"bad","summary":"S","interaction":"oneshot"}]`:                           `notes: "bad" interaction must be "chat" or "single_turn", got "oneshot"`,
+		`[{"id":"bad","summary":"S","interaction":"single-turn"}]`:                       `notes: "bad" interaction must be "chat" or "single_turn", got "single-turn"`,
+		`[{"id":"bad","summary":"S","interaction":"chat","example":" Ping."}]`:           `notes: "bad" has a control character or stray whitespace in " Ping."`,
+		`[{"id":"bad","summary":"S","example":"` + strings.Repeat("a", 401) + `"}]`:      `notes: "bad" example: at most 400 characters (got 401)`,
+		`[{"id":"bad","summary":"S","interaction":"chat","example":"Triage this one."}]`: `notes: "bad" example: reserved use "triage"`,
+	} {
+		_, err := ParseNotes([]byte(doc))
+		require.EqualError(t, err, want)
+	}
+}
+
+func TestBuiltinNotesInteraction(t *testing.T) {
+	ns, err := Builtin()
+	require.NoError(t, err)
+	for id, example := range map[string]string{
+		"wave-pico-293m":            `channel=s00808c02 tag=AI_12506 stated_unit=? period_s=9.0 n=96 range=[1.32,4.902] mean=2.671 sd=1.3488 first=2.336 last=1.329 slope_per_min=0.0605 sign_changes=56 hf_energy=0.0449 repeat_frac=0.0 longest_run=1 zero_frac=0.0 at_max_frac=0.01 sd_head=0.0963 sd_tail=1.7299 monotonic_frac=0.358 n_resets=61 max_drop=3.406 gap_frac=0.0`,
+		"wave-nano-fire-controller": `{"time_local":"14:05","wind_kmh":30,"wind_from":"NE","wind_toward_structures":true,"rh_pct":34,"temp_c":27,"camera_margin_prev":0.82,"camera_margin_now":0.9,"pm25":95,"co_ppm":11,"voc_idx":40,"thermal_delta_c":3,"sensor_fault":false,"escalation_tried_all":false,"acknowledged":false,"minutes_unacked":0}`,
+		"wave-nano-fire-vision":     "Is there smoke in this picture? Answer yes or no.",
+	} {
+		require.Equal(t, protocol.InteractionSingleTurn, ns[id].Interaction, id)
+		require.Equal(t, example, ns[id].Example, id)
+	}
+	require.Empty(t, ns["wave-nano-chat"].Interaction) // unknown reads as chat; nothing is claimed
 }

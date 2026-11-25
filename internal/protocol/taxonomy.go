@@ -35,6 +35,13 @@ type Taxonomy struct {
 	NotFor        string `json:"not_for,omitempty"`
 	DetailsSource string `json:"details_source,omitempty"`
 	Page          string `json:"page,omitempty"`
+
+	// How the model expects to be talked to (features/details/interaction.feature):
+	// Interaction is "chat" or "single_turn" (absent = unknown), Example is one example prompt.
+	// Operator-authored or from a curated note, bounded and cleaned like the details, and
+	// display only: nothing routes, filters or enforces on either.
+	Interaction string `json:"interaction,omitempty"`
+	Example     string `json:"example,omitempty"`
 }
 
 // Claim sources. Only these two can arrive from a node.
@@ -308,7 +315,8 @@ func (t Taxonomy) Declare(modality string) (Taxonomy, error) {
 // The details ride along either way: inference never writes text, so a declaration that is
 // only details keeps the inferred category and still carries its words; a declaration with no
 // details keeps whatever words the other side carries (an owner's category-only override never
-// blanks the node's own summary).
+// blanks the node's own summary). The interaction and its example ride the same way, as a
+// pair of their own: declaring either replaces both, declaring neither keeps the other side's.
 func (t Taxonomy) OnAir(modality string, inferred Taxonomy) Taxonomy {
 	t.TaxonomySource, t.DetailsSource, t.Page = "", "", ""
 	c := t.Canonical(modality)
@@ -317,10 +325,16 @@ func (t Taxonomy) OnAir(modality string, inferred Taxonomy) Taxonomy {
 		c.TaxonomySource = SourceDeclared
 		out = c
 	}
-	if !c.DetailsDeclared() {
-		return out.WithDetailsOf(inferred)
+	words, talk := inferred, inferred
+	if c.DetailsDeclared() {
+		words = c
 	}
-	return out.WithDetailsOf(c)
+	if c.InteractionDeclared() {
+		talk = c
+	}
+	out = out.WithDetailsOf(words)
+	out.Interaction, out.Example = talk.Interaction, talk.Example
+	return out
 }
 
 // SplitCategory splits "cat/sub" (the form operators type) into its parts.

@@ -60,10 +60,14 @@ Feature: /market carries each model's details block
     When a consumer GETs /market
     Then the response is byte-identical to the response before this change
 
+  # Fixture corrections (2026-11-23): three stations declare text for "someone-7b", and with
+  # all of them gone the model has no row at all. The offline and banned cases use "mystery-m",
+  # which keeps its one station with no text.
   Scenario: An offline station's text does not reach the row
-    Given the only station that declares text for "someone-7b" stops heartbeating
+    Given a station that declares the summary "Stale words." for "mystery-m" stopped heartbeating
     When a consumer GETs /market
-    Then the "someone-7b" row has no "details" key
+    Then the "mystery-m" row has no "details" key
+    And the response does not contain "Stale words."
 
   Scenario: A private station's text does not reach the row
     Given a private station declares the summary "Private words." for "someone-7b"
@@ -72,37 +76,43 @@ Feature: /market carries each model's details block
     And the response does not contain "Private words."
 
   Scenario: A banned station's text does not reach the row
-    Given the stations that declare text for "someone-7b" are banned
+    Given a banned station declares the summary "Banned words." for "mystery-m"
     When a consumer GETs /market
-    Then the "someone-7b" row has no "details" key
+    Then the "mystery-m" row has no "details" key
+    And the response does not contain "Banned words."
 
   Scenario: A node cannot claim the curated source
-    Given a station registers "someone-7b" with details source "rogerai"
+    Given a station declares the summary "Trust me." for "mystery-m" with details source "rogerai"
     When a consumer GETs /market
-    Then the "someone-7b" row's details.source is "declared"
+    Then the "mystery-m" row's details.source is "declared"
+    And the "mystery-m" row's details has no "page"
 
   Scenario: The text arrives escaped, never as raw markup
     Given a station declares the summary "<b>Fast</b> & small" for "markup-m"
     When a consumer GETs /market
-    Then the "markup-m" row's details.summary is the sanitized text of text_sanitization.feature
-    And the raw response body contains no "<b>"
+    Then the "markup-m" row's details.summary is "<b>Fast</b> & small"
+    And the response does not contain "<b>"
 
   Scenario: The model filter keeps the block
     When a consumer GETs /market?model=demo-1b-fire-decision
     Then the "demo-1b-fire-decision" row's details.source is "rogerai"
 
   Scenario: The category filter keeps the block
+    Given a station declares the summary "Sorts tickets." for "sorter-m" in category "language/classification"
     When a consumer GETs /market?category=language
-    Then every row that has text carries its details block
+    Then the "sorter-m" row's details.summary is "Sorts tickets."
+    And every row that has text carries its details block
 
   Scenario: The text does not change the signal or the order
-    Given the same offers with every details field removed
-    When a consumer GETs /market
-    Then every row's signal and the row order equal the response with details
+    Given a consumer GETs /market
+    And the same offers with every details field removed
+    When a consumer GETs /market again
+    Then every row's signal equals its signal with details
+    And the rows are in the same signal order
 
   Scenario: The cached feed is not recomputed per request for details
-    When a consumer GETs /market twice within the cache window
-    Then computeMarket ran once
+    When /market is read 3 times within the cache window
+    Then the details were computed once per cache fill
 
   Scenario: A voice model's row can carry text too
     Given a tts station declares the summary "A calm voice." for "calm-voice"
@@ -111,3 +121,21 @@ Feature: /market carries each model's details block
 
   Scenario: The API reference documents the block
     Then the public API reference describes details on /market as the same block as rogerai.details on /v1/models
+
+# --- regression (review 2026-11-23) ---
+
+  # B. The background station declares Apache-2.0, so four licenses tie one each. The
+  # lexically smallest wins, on every cache fill and on both feeds.
+  Scenario: Facts a curated note leaves out do not depend on station order
+    Given RogerAI's curated note for "demo-1b-fire-decision" has no license
+    And stations declare the licenses "MIT", "GPL-3.0" and "BSD-3-Clause" for "demo-1b-fire-decision"
+    When /market and /v1/models are each read 20 times, each past the cache
+    Then on every read the "demo-1b-fire-decision" row's details.license is "Apache-2.0"
+    And on every read the row's details equals the entry's rogerai.details
+
+  # C. /v1/models leaves out a station that fails its liveness probes. So does the row.
+  Scenario: The text of a station that fails its liveness probes does not reach the row
+    Given a station that declares the summary "Dead words." for "mystery-m" has failed its liveness probes
+    When a consumer GETs /market
+    Then the "mystery-m" row has no "details" key
+    And the response does not contain "Dead words."

@@ -45,7 +45,8 @@ func cmdModelsInfo(cfg config, args []string) error {
 		offers = lanOffersFor(cfg)
 		for i := range offers {
 			offers[i].DetailsSource, offers[i].Page = "", ""
-			offers[i].Taxonomy = notes.Apply(offers[i].Model, offers[i].Taxonomy.Canonical(offers[i].Modality))
+			offers[i].Taxonomy = notes.Apply(offers[i].Model, offers[i].Described().Canonical(offers[i].Modality))
+			offers[i].Input = nil // folded in above, so a note's example is the one that stands
 		}
 	} else {
 		var err error
@@ -54,7 +55,7 @@ func cmdModelsInfo(cfg config, args []string) error {
 		}
 	}
 	for i := range offers { // read again whatever answered: this text is printed into a terminal
-		offers[i].Taxonomy = offers[i].Taxonomy.Canonical(offers[i].Modality)
+		offers[i].Taxonomy = offers[i].Described().Canonical(offers[i].Modality)
 	}
 	var mine []client.Offer
 	for _, o := range offers {
@@ -73,6 +74,7 @@ func cmdModelsInfo(cfg config, args []string) error {
 			online++
 		}
 	}
+	ballots = chatVoters(mine, ballots)
 	d := protocol.FoldDetails(ballots)
 	if asJSON {
 		blk := about.Block(d, ballots, catalog.SiteOrigin)
@@ -85,6 +87,7 @@ func cmdModelsInfo(cfg config, args []string) error {
 		return nil
 	}
 	tuning, base, license := about.Facts(ballots, d)
+	interaction, example := protocol.FoldInteraction(ballots)
 	vision := false
 	for _, o := range mine {
 		for _, c := range o.Capabilities {
@@ -98,7 +101,8 @@ func cmdModelsInfo(cfg config, args []string) error {
 		fmt.Println("  no description yet - the station has not said what this model is for")
 	}
 	for _, l := range about.Lines(about.Model{ID: id, Modality: mine[0].Modality, Vision: vision, Tuning: tuning,
-		BaseModel: base, License: license, Details: d, Siblings: siblingsOf(id, base, offers)},
+		BaseModel: base, License: license, Details: d, Interaction: interaction, Example: example,
+		Siblings: siblingsOf(id, base, offers)},
 		func(p string) string { return catalog.PageURL(catalog.SiteOrigin, p) }) {
 		fmt.Println("  " + about.Pad(l.Label) + l.Value)
 	}
@@ -108,6 +112,23 @@ func cmdModelsInfo(cfg config, args []string) error {
 	}
 	fmt.Printf("  %s%d %s   ·   roger use %s\n", about.Pad("on air"), online, n, id)
 	return nil
+}
+
+// chatVoters applies the broker's rule for one id: when any of its offers is a chat offer,
+// only chat offers vote on the description, the facts, the interaction and the example, as
+// on /market and /v1/models. Otherwise every offer votes.
+func chatVoters(mine []client.Offer, ballots []protocol.Ballot) []protocol.Ballot {
+	chat := func(m string) bool { return m == "" || m == protocol.ModalityChat }
+	var voters []protocol.Ballot
+	for i, o := range mine {
+		if chat(o.Modality) {
+			voters = append(voters, ballots[i])
+		}
+	}
+	if len(voters) == 0 {
+		return ballots
+	}
+	return voters
 }
 
 // siblingsOf is every other on-air model on the same base.

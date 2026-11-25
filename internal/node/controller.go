@@ -1165,7 +1165,9 @@ func (c *Controller) rowLocked(model string) (ShareRow, bool) {
 }
 
 // SetMeta validates and records a model's declared taxonomy (stored canonical, without a
-// source), and persists it through the host. A declaration with no claim in it clears.
+// source), and persists it through the host. A declaration with no claim in it clears,
+// except the interaction and example pair: a save that carries neither keeps the pair
+// already declared (see below), and ClearMeta removes everything.
 // Like a price, it applies the next time the model goes on air; a live session is untouched.
 func (c *Controller) SetMeta(model string, t protocol.Taxonomy) error {
 	c.mu.Lock()
@@ -1175,6 +1177,12 @@ func (c *Controller) SetMeta(model string, t protocol.Taxonomy) error {
 		return ErrNotServed
 	}
 	t, err := t.Declare(row.Modality)
+	// The share editors do not carry the interaction or the example prompt. A save without
+	// them keeps the pair already declared (roger share --interaction); a save with either
+	// replaces both.
+	if prev := c.meta[model]; err == nil && !t.InteractionDeclared() {
+		t.Interaction, t.Example = prev.Interaction, prev.Example
+	}
 	c.mu.Unlock()
 	if err != nil {
 		return err
@@ -1193,7 +1201,7 @@ func (c *Controller) ClearMeta(model string) error {
 // storeMeta records t (an empty one removes) and persists it through the host.
 func (c *Controller) storeMeta(model string, t protocol.Taxonomy) {
 	c.mu.Lock()
-	if t.Declared() || t.DetailsDeclared() {
+	if t.Declared() || t.DetailsDeclared() || t.InteractionDeclared() {
 		c.meta[model] = t
 	} else {
 		delete(c.meta, model)

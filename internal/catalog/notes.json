@@ -13,7 +13,9 @@
     "best_at": "Specialized: only ticks in the controller's prompt format. On 1,200 recorded ticks from one site, read 2026-11-20: no missed alarms, persistent smoke 100%, 97.1% across tick types.",
     "not_for": "Chat or free text, which get a usage note. Decision support only: not a listed fire alarm, not a substitute for emergency services. In a fire, call your local emergency number.",
     "base_model": "Wave Nano 1.45B",
-    "page": "/research-wave-nano.html"
+    "page": "/research-wave-nano.html",
+    "interaction": "single_turn",
+    "example": "{\"time_local\":\"14:05\",\"wind_kmh\":30,\"wind_from\":\"NE\",\"wind_toward_structures\":true,\"rh_pct\":34,\"temp_c\":27,\"camera_margin_prev\":0.82,\"camera_margin_now\":0.9,\"pm25\":95,\"co_ppm\":11,\"voc_idx\":40,\"thermal_delta_c\":3,\"sensor_fault\":false,\"escalation_tried_all\":false,\"acknowledged\":false,\"minutes_unacked\":0}"
   },
   {
     "id": "wave-nano-fire-vision",
@@ -21,13 +23,17 @@
     "best_at": "Confirming or ruling out smoke in one frame or a detector's crop. On 1,129 held-out frames from the camera network it learned on, read 2026-11-20: AUC 0.969, finds 93.7% of smoke frames.",
     "not_for": "Chat, video, acting alone, or cameras unlike the ones it learned on. Decision support only: not a listed fire alarm or emergency services. See the license note before commercial use.",
     "base_model": "Wave Nano 1.45B",
-    "page": "/research-wave-nano.html"
+    "page": "/research-wave-nano.html",
+    "interaction": "single_turn",
+    "example": "Is there smoke in this picture? Answer yes or no."
   },
   {
     "id": "wave-pico-293m",
     "summary": "Wave Pico 293M. Reads one industrial telemetry channel and names the instrument fault or the process state.",
     "best_at": "One channel at a time from Modbus, Sparkplug B, Prometheus, InfluxDB, Datadog or syslog. Answers only above a measured confidence gate and escalates below it.",
     "not_for": "Root-cause chains, which it reads at chance. Process state is its weakest family.",
-    "page": "/research-wave-pico.html"
+    "page": "/research-wave-pico.html",
+    "interaction": "single_turn",
+    "example": "channel=s00808c02 tag=AI_12506 stated_unit=? period_s=9.0 n=96 range=[1.32,4.902] mean=2.671 sd=1.3488 first=2.336 last=1.329 slope_per_min=0.0605 sign_changes=56 hf_energy=0.0449 repeat_frac=0.0 longest_run=1 zero_frac=0.0 at_max_frac=0.01 sd_head=0.0963 sd_tail=1.7299 monotonic_frac=0.358 n_resets=61 max_drop=3.406 gap_frac=0.0"
   }
 ]

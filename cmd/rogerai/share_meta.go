@@ -12,6 +12,7 @@ import (
 type shareMetaFlags struct {
 	category, tuning, policy, license, baseModel *string
 	summary, bestAt, notFor                      *string // the details (features/details)
+	interaction, example                         *string // features/details/interaction.feature
 	tags                                         tagList
 }
 
@@ -23,14 +24,16 @@ func (t *tagList) Set(v string) error { *t = append(*t, v); return nil }
 
 func addShareMetaFlags(fs *flag.FlagSet) *shareMetaFlags {
 	m := &shareMetaFlags{
-		category:  fs.String("category", "", "declare what the model is for: <category>[/<subcategory>], e.g. vision/ocr (saved per model)"),
-		tuning:    fs.String("tuning", "", "declare how the weights were made: base|instruct|finetune|merge|quantized|adapter"),
-		policy:    fs.String("policy", "", "declare the content-policy grade of the weights: aligned|reduced-refusal|uncensored (broker screening applies regardless)"),
-		license:   fs.String("license", "", "declare the model license (SPDX id, e.g. Apache-2.0)"),
-		baseModel: fs.String("base-model", "", "declare the model this one derives from (e.g. Qwen/Qwen3-VL-8B-Instruct)"),
-		summary:   fs.String("summary", "", "one line: what the model is (at most 140 characters, shown to people browsing the market)"),
-		bestAt:    fs.String("best-at", "", "what the model does well (at most 200 characters, shown to people browsing the market)"),
-		notFor:    fs.String("not-for", "", "what the model should not be used for (at most 200 characters, shown to people browsing the market)"),
+		category:    fs.String("category", "", "declare what the model is for: <category>[/<subcategory>], e.g. vision/ocr (saved per model)"),
+		tuning:      fs.String("tuning", "", "declare how the weights were made: base|instruct|finetune|merge|quantized|adapter"),
+		policy:      fs.String("policy", "", "declare the content-policy grade of the weights: aligned|reduced-refusal|uncensored (broker screening applies regardless)"),
+		license:     fs.String("license", "", "declare the model license (SPDX id, e.g. Apache-2.0)"),
+		baseModel:   fs.String("base-model", "", "declare the model this one derives from (e.g. Qwen/Qwen3-VL-8B-Instruct)"),
+		summary:     fs.String("summary", "", "one line: what the model is (at most 140 characters, shown to people browsing the market)"),
+		bestAt:      fs.String("best-at", "", "what the model does well (at most 200 characters, shown to people browsing the market)"),
+		notFor:      fs.String("not-for", "", "what the model should not be used for (at most 200 characters, shown to people browsing the market)"),
+		interaction: fs.String("interaction", "", "declare how the model expects to be talked to: chat|single_turn (single_turn = one job per message; shown to clients, not enforced)"),
+		example:     fs.String("example", "", "one example prompt for the model (at most 400 characters, shown to people browsing the market)"),
 	}
 	fs.Var(&m.tags, "tag", "declare a domain tag (repeatable, e.g. --tag manufacturing --tag ppe)")
 	return m
@@ -38,7 +41,7 @@ func addShareMetaFlags(fs *flag.FlagSet) *shareMetaFlags {
 
 var shareMetaFlagNames = map[string]bool{
 	"category": true, "tag": true, "tuning": true, "policy": true, "license": true, "base-model": true,
-	"summary": true, "best-at": true, "not-for": true,
+	"summary": true, "best-at": true, "not-for": true, "interaction": true, "example": true,
 }
 
 // resolveShareMeta returns the taxonomy a headless share goes on air with. Any taxonomy flag
@@ -54,7 +57,8 @@ func resolveShareMeta(fs *flag.FlagSet, m *shareMetaFlags, model, modality strin
 		var err error
 		declared, err = protocol.Taxonomy{Category: cat, Subcategory: sub, Tags: m.tags, Tuning: *m.tuning,
 			ContentPolicy: *m.policy, License: *m.license, BaseModel: *m.baseModel,
-			Summary: *m.summary, BestAt: *m.bestAt, NotFor: *m.notFor}.Declare(modality)
+			Summary: *m.summary, BestAt: *m.bestAt, NotFor: *m.notFor,
+			Interaction: *m.interaction, Example: *m.example}.Declare(modality)
 		if err != nil {
 			return protocol.Taxonomy{}, err
 		}
@@ -69,7 +73,7 @@ func resolveShareMeta(fs *flag.FlagSet, m *shareMetaFlags, model, modality strin
 
 // setShareMeta records (or, for an empty taxonomy, removes) a model's declaration in c.
 func setShareMeta(c *config, model string, t protocol.Taxonomy) {
-	if !t.Declared() && !t.DetailsDeclared() {
+	if !t.Declared() && !t.DetailsDeclared() && !t.InteractionDeclared() {
 		delete(c.Meta, model)
 		return
 	}

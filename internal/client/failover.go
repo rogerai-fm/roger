@@ -91,6 +91,24 @@ type Offer struct {
 	// Taxonomy is what the station (or RogerAI's notes) says the model is for, flat on the
 	// wire like /discover: read by `roger models <id>` and the console's about row.
 	protocol.Taxonomy
+	// Input mirrors the broker's "input" object. Only its example prompt is read: the broker
+	// publishes the example there, not as a taxonomy key (features/details/interaction.feature).
+	Input *OfferInput `json:"input,omitempty"`
+}
+
+// OfferInput is the part of an offer's "input" object a client reads.
+type OfferInput struct {
+	Example string `json:"example,omitempty"`
+}
+
+// Described is the offer's taxonomy with the example prompt wherever it was published: under
+// input (the broker) or as a taxonomy key (a LAN Tower passing a station's offer through).
+func (o Offer) Described() protocol.Taxonomy {
+	t := o.Taxonomy
+	if o.Input != nil && o.Input.Example != "" {
+		t.Example = o.Input.Example
+	}
+	return t
 }
 
 // failoverPolicy bounds the auto-recovery loop. Defaults are conservative so a

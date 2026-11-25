@@ -85,7 +85,7 @@ func TestFactsAndBlock(t *testing.T) {
 	tu, base, lic := Facts(ballots, d)
 	require.Equal(t, []string{"adapter", "demo", "MIT"}, []string{tu, base, lic})
 
-	// no text anywhere: the first station that states each fact
+	// no text anywhere: the value most stations state for each fact
 	tu, base, lic = Facts([]protocol.Ballot{{T: protocol.Taxonomy{License: "L"}}, {T: protocol.Taxonomy{Tuning: "Merge", BaseModel: "B"}}}, protocol.Details{})
 	require.Equal(t, []string{"merge", "B", "L"}, []string{tu, base, lic})
 
@@ -106,4 +106,90 @@ func TestFactsAndBlock(t *testing.T) {
 func TestSameBase(t *testing.T) {
 	require.Equal(t, "demo-1b", SameBase(" DEMO-1B "))
 	require.Equal(t, "", SameBase("\u200b"))
+}
+
+// features/details/interaction.feature: the interaction and example lines.
+func TestLinesInteraction(t *testing.T) {
+	find := func(m Model, label string) string {
+		for _, l := range Lines(m, nil) {
+			if l.Label == label {
+				return l.Value
+			}
+		}
+		return ""
+	}
+	one := Model{ID: "m", Interaction: protocol.InteractionSingleTurn, Example: "Ping."}
+	require.Equal(t, "single turn, one job per message", find(one, "turns"))
+	require.Equal(t, "Ping.", find(one, "example"))
+	require.Equal(t, "chat, a conversation", find(Model{ID: "m", Interaction: protocol.InteractionChat}, "turns"))
+
+	// unknown says nothing, and an unknown word is never printed
+	for _, m := range []Model{{ID: "m"}, {ID: "m", Interaction: "oneshot\x1b[31m"}} {
+		require.Empty(t, find(m, "turns"))
+		require.Empty(t, find(m, "example"))
+	}
+	// the two lines sit under the kind line
+	var labels []string
+	for _, l := range Lines(one, nil) {
+		labels = append(labels, l.Label)
+	}
+	require.Equal(t, []string{"kind", "turns", "example"}, labels)
+}
+
+// Review 2026-11-23: the facts never depend on the order the stations are read in. Each fact
+// is the value most stations state, ties to the lexically smallest.
+func TestFactsOrderIndependent(t *testing.T) {
+	st := func(tuning, base, lic string) protocol.Ballot {
+		return protocol.Ballot{T: protocol.Taxonomy{Summary: "S", DetailsSource: protocol.SourceRogerAI,
+			Tuning: tuning, BaseModel: base, License: lic}, Online: true}
+	}
+	perms := func(b []protocol.Ballot) [][]protocol.Ballot {
+		var out [][]protocol.Ballot
+		var walk func(k int)
+		walk = func(k int) {
+			if k == len(b) {
+				out = append(out, append([]protocol.Ballot(nil), b...))
+				return
+			}
+			for i := k; i < len(b); i++ {
+				b[k], b[i] = b[i], b[k]
+				walk(k + 1)
+				b[k], b[i] = b[i], b[k]
+			}
+		}
+		walk(0)
+		return out
+	}
+	for _, tc := range []struct {
+		name    string
+		ballots []protocol.Ballot
+		want    []string
+	}{
+		{"a three-way tie goes to the lexically smallest", []protocol.Ballot{st("", "", "MIT"), st("", "", "Apache-2.0"), st("", "", "GPL-3.0")},
+			[]string{"", "", "Apache-2.0"}},
+		{"the value most stations state wins", []protocol.Ballot{st("instruct", "b", "MIT"), st("base", "a", "Apache-2.0"), st("instruct", "b", "MIT")},
+			[]string{"instruct", "b", "MIT"}},
+		{"a station that states nothing does not vote", []protocol.Ballot{st("", "", ""), st("", "", ""), st("adapter", "demo", "MIT")},
+			[]string{"adapter", "demo", "MIT"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, p := range perms(tc.ballots) {
+				d := protocol.FoldDetails(p)
+				tu, base, lic := Facts(p, d)
+				require.Equal(t, tc.want, []string{tu, base, lic})
+				require.Equal(t, tc.want[2], Block(d, p, "https://site")["license"])
+			}
+		})
+	}
+	// the stations whose words won are the only ones asked, in any order
+	mixed := []protocol.Ballot{
+		{T: protocol.Taxonomy{Summary: "Other.", License: "AAA"}, Online: true},
+		{T: protocol.Taxonomy{Summary: "Win.", License: "MIT"}, Online: true},
+		{T: protocol.Taxonomy{Summary: "Win.", License: "BSD"}, Online: true},
+		{T: protocol.Taxonomy{Summary: "Win."}, Online: true},
+	}
+	for _, p := range perms(mixed) {
+		_, _, lic := Facts(p, protocol.FoldDetails(p))
+		require.Equal(t, "BSD", lic)
+	}
 }

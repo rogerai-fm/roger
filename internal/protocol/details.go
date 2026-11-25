@@ -19,8 +19,26 @@ const SourceRogerAI = "rogerai"
 const (
 	SummaryMax = 140
 	DetailMax  = 200
+	ExampleMax = 400
 	pageMax    = 200
 )
+
+// The interactions a model can declare (features/details/interaction.feature). Absent means
+// unknown, which a client reads as chat.
+const (
+	InteractionChat       = "chat"
+	InteractionSingleTurn = "single_turn"
+)
+
+// CanonicalInteraction returns the interaction for a spelling ("Single-Turn" reads as
+// "single_turn"), "" when it is not one of the two.
+func CanonicalInteraction(s string) string {
+	switch v := strings.NewReplacer("-", "_", " ", "_").Replace(normWord(s)); v {
+	case InteractionChat, InteractionSingleTurn:
+		return v
+	}
+	return ""
+}
 
 // detailsClean drops every control (C0, DEL, C1, so ESC and with it any ANSI sequence),
 // bidi and zero-width character, turns tab, CR, LF and the line/paragraph separators into
@@ -108,6 +126,7 @@ func (t *Taxonomy) detailsFields() []detailsField {
 		{"summary", &t.Summary, SummaryMax, true},
 		{"best at", &t.BestAt, DetailMax, true},
 		{"not for", &t.NotFor, DetailMax, false}, // "not for diagnosis" is the warning we want
+		{"example", &t.Example, ExampleMax, true},
 	}
 }
 
@@ -119,6 +138,7 @@ func (t *Taxonomy) normalizeDetails() {
 			*f.v = ""
 		}
 	}
+	t.Interaction = CanonicalInteraction(t.Interaction)
 	switch {
 	case !t.DetailsDeclared():
 		t.DetailsSource = ""
@@ -143,6 +163,9 @@ func (t Taxonomy) validateDetails() error {
 			return fmt.Errorf("%s: reserved use %q", f.name, w)
 		}
 	}
+	if normWord(t.Interaction) != "" && CanonicalInteraction(t.Interaction) == "" {
+		return fmt.Errorf("unknown interaction %q (valid: %s, %s)", t.Interaction, InteractionChat, InteractionSingleTurn)
+	}
 	return nil
 }
 
@@ -151,9 +174,14 @@ func (t Taxonomy) DetailsDeclared() bool {
 	return t.Summary != "" || t.BestAt != "" || t.NotFor != ""
 }
 
-// WithDetailsOf returns t carrying d's details (text, source, page) in place of its own.
+// InteractionDeclared reports whether an interaction or an example is set.
+func (t Taxonomy) InteractionDeclared() bool { return t.Interaction != "" || t.Example != "" }
+
+// WithDetailsOf returns t carrying d's details (text, source, page) and d's interaction and
+// example in place of its own.
 func (t Taxonomy) WithDetailsOf(d Taxonomy) Taxonomy {
 	t.Summary, t.BestAt, t.NotFor, t.DetailsSource, t.Page = d.Summary, d.BestAt, d.NotFor, d.DetailsSource, d.Page
+	t.Interaction, t.Example = d.Interaction, d.Example
 	return t
 }
 
@@ -242,4 +270,41 @@ func anyDetails(ts []Taxonomy) bool {
 		}
 	}
 	return false
+}
+
+// FoldInteraction picks a band's interaction and example prompt (interaction.feature, D6).
+// Only online stations that declare an interaction vote; the value most of them declare
+// wins and a tie is "chat", the safe reading. The example is the one most stations on the
+// winning side sent, ties to the alphabetically first. A curated note needs no rule here: it
+// is stamped on every station's ballot before the fold. Every value is re-canonicalized.
+func FoldInteraction(ballots []Ballot) (interaction, example string) {
+	votes := map[string]int{}
+	examples := map[string]map[string]int{}
+	for _, b := range ballots {
+		if !b.Online {
+			continue
+		}
+		t := Taxonomy{Interaction: b.T.Interaction, Example: b.T.Example}
+		t.normalizeDetails()
+		votes[t.Interaction]++
+		if t.Example != "" {
+			if examples[t.Interaction] == nil {
+				examples[t.Interaction] = map[string]int{}
+			}
+			examples[t.Interaction][t.Example]++
+		}
+	}
+	switch chat, single := votes[InteractionChat], votes[InteractionSingleTurn]; {
+	case single > chat:
+		interaction = InteractionSingleTurn
+	case chat > 0:
+		interaction = InteractionChat
+	}
+	best := 0
+	for ex, n := range examples[interaction] {
+		if n > best || (n == best && ex < example) {
+			example, best = ex, n
+		}
+	}
+	return interaction, example
 }

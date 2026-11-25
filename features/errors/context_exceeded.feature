@@ -196,6 +196,22 @@ Feature: A request that is too long gets the context_exceeded code with numbers
     And error.metadata.station is "s1"
     And error.metadata.window is 8192
 
+  # Regressions (pre-push audit, 2026-11-23).
+  Scenario: With a model list the station refusal names the model that refused
+    Given station "b1" is on air for "b" with a declared window of 8192
+    And "b1"'s server answers 400 "the request exceeds the available context size"
+    When "u-1" relays for models ["nobody-serves-this", "b"] with a prompt of about 6000 tokens
+    Then the response is 400 with error code "context_exceeded"
+    And error.metadata.model is "b"
+    And error.metadata.window is 8192
+
+  Scenario: A voice station sharing the model's id does not set the window quoted
+    Given station "s1" is on air for "m" with a declared window of 4096
+    And station "v1" is on air for "m" with modality "tts"
+    When "u-1" relays for "m" with a prompt of about 5000 tokens
+    Then the response is 400 with error code "context_exceeded"
+    And error.metadata.window is 4096
+
   Scenario: A station 400 that is not an overflow keeps its own code
     Given station "s1" is on air for "m" with a declared window of 8192
     And "s1"'s server answers 400 "unknown parameter foo"

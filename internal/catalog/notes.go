@@ -32,6 +32,10 @@ type Note struct {
 	BaseModel string `json:"base_model,omitempty"`
 	License   string `json:"license,omitempty"`
 	Page      string `json:"page,omitempty"` // a site path, e.g. /research-wave-nano.html
+	// How the model expects to be talked to (features/details/interaction.feature):
+	// "chat" or "single_turn", and one example prompt. Both optional.
+	Interaction string `json:"interaction,omitempty"`
+	Example     string `json:"example,omitempty"`
 }
 
 // Notes is a validated set, keyed by canonical model id.
@@ -72,10 +76,14 @@ func (n Note) validate() error {
 		return fail("has no summary")
 	}
 	// The operator's strict rules (lengths, reserved uses) hold for our own words too.
-	if err := (protocol.Taxonomy{Summary: n.Summary, BestAt: n.BestAt, NotFor: n.NotFor}).Validate(""); err != nil {
+	if err := (protocol.Taxonomy{Summary: n.Summary, BestAt: n.BestAt, NotFor: n.NotFor, Example: n.Example}).Validate(""); err != nil {
 		return fail("%v", err)
 	}
-	for _, v := range []string{n.Summary, n.BestAt, n.NotFor, n.BaseModel, n.License} {
+	// Published as written, so only the two exact values pass.
+	if n.Interaction != "" && n.Interaction != protocol.InteractionChat && n.Interaction != protocol.InteractionSingleTurn {
+		return fail("interaction must be %q or %q, got %q", protocol.InteractionChat, protocol.InteractionSingleTurn, n.Interaction)
+	}
+	for _, v := range []string{n.Summary, n.BestAt, n.NotFor, n.BaseModel, n.License, n.Example} {
 		if protocol.DetailsText(v, 1<<16) != v {
 			return fail("has a control character or stray whitespace in %q", v)
 		}
@@ -90,8 +98,9 @@ func (n Note) validate() error {
 func Builtin() (Notes, error) { return ParseNotes(notesJSON) }
 
 // Apply returns t as published for model: RogerAI's note in place of any station text, with
-// its base model and license when it has them; or, for a model with no note, t with any
-// "rogerai" label it should not carry demoted to "declared" and no page.
+// its base model and license when it has them, and its interaction and example (as a pair)
+// when it has either; or, for a model with no note, t with any "rogerai" label it should not
+// carry demoted to "declared" and no page.
 func (ns Notes) Apply(model string, t protocol.Taxonomy) protocol.Taxonomy {
 	n, ok := ns[NoteID(model)]
 	if !ok {
@@ -108,6 +117,9 @@ func (ns Notes) Apply(model string, t protocol.Taxonomy) protocol.Taxonomy {
 	}
 	if n.License != "" {
 		t.License = n.License
+	}
+	if n.Interaction != "" || n.Example != "" {
+		t.Interaction, t.Example = n.Interaction, n.Example
 	}
 	return t
 }

@@ -18,6 +18,7 @@ type Model struct {
 	Vision                     bool   // a station declared the vision capability
 	Tuning, BaseModel, License string
 	Details                    protocol.Details
+	Interaction, Example       string   // protocol.FoldInteraction: how to talk to it, one example prompt
 	Siblings                   []string // other on-air models on the same base, sorted
 }
 
@@ -65,8 +66,19 @@ func Kind(modality string, vision bool, tuning, base string) string {
 	return k
 }
 
-// Lines is the ABOUT block below its heading: summary, best at, not for, kind, base, same
-// base, license, page. A line with nothing to say is left out. page turns a note's site path
+// turns says how the model expects to be talked to, "" when that is unknown.
+func turns(interaction string) string {
+	switch interaction {
+	case protocol.InteractionSingleTurn:
+		return "single turn, one job per message"
+	case protocol.InteractionChat:
+		return "chat, a conversation"
+	}
+	return ""
+}
+
+// Lines is the ABOUT block below its heading: summary, best at, not for, kind, turns,
+// example, base, same base, license, page. A line with nothing to say is left out. page turns a note's site path
 // into what this surface shows ("" leaves the page line out).
 func Lines(m Model, page func(string) string) []Line {
 	d := m.Details
@@ -80,6 +92,8 @@ func Lines(m Model, page func(string) string) []Line {
 	add("best at", d.BestAt)
 	add("not for", d.NotFor)
 	add("kind", Kind(m.Modality, m.Vision, m.Tuning, m.BaseModel))
+	add("turns", turns(m.Interaction))
+	add("example", m.Example)
 	if !(m.Tuning == "adapter" && m.BaseModel != "") {
 		add("base", m.BaseModel) // an adapter's base is already on the kind line
 	}
@@ -112,28 +126,41 @@ func Pad(label string) string {
 	return label + strings.Repeat(" ", LabelWidth-len(label))
 }
 
-// Facts picks a band's tuning, base model and license: those of the first station whose text
-// is the folded text (so the facts and the words come from one author), else of the first
-// station that states each.
+// Facts picks a band's tuning, base model and license from the stations whose text is the
+// folded text (so the facts and the words come from the same authors), else from every
+// station. Each fact is the value most of them state, ties to the lexically smallest, so the
+// order the stations are read in never changes the answer.
 func Facts(ballots []protocol.Ballot, d protocol.Details) (tuning, base, license string) {
+	var authors []protocol.Ballot
 	for _, b := range ballots {
 		f := protocol.FoldDetails([]protocol.Ballot{{T: b.T, Online: true}})
 		if !d.Empty() && f.Summary == d.Summary && f.BestAt == d.BestAt && f.NotFor == d.NotFor && f.Source == d.Source {
-			return tuningOf(b.T), protocol.DetailsText(b.T.BaseModel, 128), protocol.DetailsText(b.T.License, 64)
+			authors = append(authors, b)
 		}
 	}
+	if len(authors) > 0 {
+		ballots = authors
+	}
+	var votes [3]map[string]int
 	for _, b := range ballots {
-		if tuning == "" {
-			tuning = tuningOf(b.T)
-		}
-		if base == "" {
-			base = protocol.DetailsText(b.T.BaseModel, 128)
-		}
-		if license == "" {
-			license = protocol.DetailsText(b.T.License, 64)
+		for i, v := range []string{tuningOf(b.T), protocol.DetailsText(b.T.BaseModel, 128), protocol.DetailsText(b.T.License, 64)} {
+			if votes[i] == nil {
+				votes[i] = map[string]int{}
+			}
+			if v != "" {
+				votes[i][v]++
+			}
 		}
 	}
-	return tuning, base, license
+	var out [3]string
+	for i, m := range votes {
+		for v, n := range m {
+			if best := m[out[i]]; n > best || (n == best && v < out[i]) {
+				out[i] = v
+			}
+		}
+	}
+	return out[0], out[1], out[2]
 }
 
 // tuningOf is a station's tuning if it is a known one, else "": it is printed into a terminal.

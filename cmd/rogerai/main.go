@@ -1574,6 +1574,7 @@ func cmdShare(cfg config, args []string) error {
 	if *advanced {
 		fmt.Println("advanced flags: --node --region --parallel --upstream --upstream-key --modality --ctx --confidential --free-window --schedule --curated --upstream-price-in --upstream-price-out --probe-min --category --tag --tuning --policy --license --base-model")
 		fmt.Println("model details, shown to people browsing the market: --summary (140 characters) --best-at (200) --not-for (200); any taxonomy or details flag replaces the model's saved declaration")
+		fmt.Println("how to talk to the model, shown to clients and not enforced: --interaction chat|single_turn --example (400 characters); these replace the saved declaration too")
 	}
 	// EARN login-gate, UP FRONT (mirrors the --private pre-check below): a priced share
 	// 401s at the broker if the owner is not GitHub-linked. Fail FAST here - before any

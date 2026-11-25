@@ -18,7 +18,8 @@
 # DECISIONS:
 #   D1. Two new optional fields beside summary/best_at/not_for, with the same rules:
 #         interaction   "chat" or "single_turn"
-#         example       one example prompt, at most 200 characters
+#         example       one example prompt, at most 400 characters (raised from 200 by the founder
+#                       on 2026-11-23: a real Wave input needs about 330)
 #       Set by the operator (roger share --interaction, --example) or by a curated note.
 #   D2. They are published where a client branches, at the top of the model's row or entry,
 #       in the shape the app asked for:
@@ -35,6 +36,9 @@
 #       change.
 #   D6. A curated note wins over declarations. Among declarations the value most online
 #       stations declare wins; a tie is "chat" (the safe reading).
+#   D7. (2026-11-23) The example is published once, under input.example. The broker's public
+#       views (/discover, /market, /v1/models) carry no top-level "example" key. On the wire
+#       from a node to the broker, interaction and example stay plain taxonomy fields.
 
 Feature: A model declares how it expects to be talked to
 
@@ -55,6 +59,15 @@ Feature: A model declares how it expects to be talked to
     Then the "plain-m" offer has no "interaction" key
     And the "plain-m" offer's input has no "example" key
 
+  # Spec correction (2026-11-23): added with decision D7. The example appears once.
+  Scenario: The example is published only under input
+    Given station "s1" shares "smoke-check" with interaction "single_turn" and example "Ping."
+    When a consumer GETs /discover
+    Then the "smoke-check" offer's input.example is "Ping."
+    And the "smoke-check" offer has no "example" key
+
+  # Spec correction (2026-11-23): an empty "sent" cell means the field is absent from the
+  # registration, not sent as an empty string.
   Scenario Outline: Only the two known values are accepted
     Given station "s1" registers "m" with interaction "<sent>"
     When a consumer GETs /discover
@@ -70,9 +83,9 @@ Feature: A model declares how it expects to be talked to
       |              | absent        |
 
   Scenario: The example is bounded
-    Given station "s1" registers "m" with an example of 201 characters
+    Given station "s1" registers "m" with an example of 401 characters
     When a consumer GETs /discover
-    Then the "m" offer's input.example is at most 200 characters
+    Then the "m" offer's input.example is at most 400 characters
 
   Scenario: The example is sanitized like the rest of the text
     Given station "s1" registers "m" with example "<script>x</script> Say hi\u0007"
@@ -179,11 +192,14 @@ Feature: A model declares how it expects to be talked to
     When the notes are parsed
     Then parsing fails naming the note and the field
 
+  # Restored to the approved text on the founder's ruling of 2026-11-23: every one-job Wave
+  # model ships an example.
   Scenario: The shipped notes mark every one-job Wave model single_turn with an example
     Then the built-in notes for "wave-pico-293m", "wave-nano-fire-controller" and "wave-nano-fire-vision" each have interaction "single_turn" and a non-empty example
 
   # --- display only ----------------------------------------------------------------------
 
+  @relay
   Scenario: The broker does not change a request to a single-turn model
     Given station "s1" shares "smoke-check" with interaction "single_turn" and example "Ping."
     And "u-1" is a funded consumer
@@ -220,3 +236,53 @@ Feature: A model declares how it expects to be talked to
   Scenario: The API reference documents the fields
     Then the public API reference describes interaction and input on /discover, /market and /v1/models
     And it says absent means unknown and that the broker does not enforce it
+
+# --- regression (review 2026-11-23) ---
+
+  # A. accepts follows the declared vision capability on every feed, never the model's name.
+  Scenario: A vision-sounding model id does not add image to input.accepts
+    Given station "s1" shares "llava-7b" with no interaction and no example
+    When a consumer GETs /discover
+    Then the "llava-7b" offer's input.accepts is ["text"]
+    When a consumer GETs /market and GETs /v1/models
+    Then the "llava-7b" row's input is {"accepts": ["text"]}
+    And the "llava-7b" entry's rogerai.input is {"accepts": ["text"]}
+
+  # C. One id shared by a chat station and a voice station: the chat offers decide the row.
+  Scenario: A chat station and a voice station on one id give the row a chat input
+    Given station "s1" is on air for "m" with modality "chat" and capabilities []
+    And station "s2" is on air for "m" with modality "stt" and capabilities []
+    When a consumer GETs /market 20 times, each past the cache
+    Then on every read the "m" row's input is {"accepts": ["text"]}
+
+  Scenario: A voice station does not vote on a chat model's interaction
+    Given station "s1" shares "m" with no interaction and no example
+    And voice station "s2" is on air for "m" with modality "stt", interaction "single_turn" and example "Voice words."
+    When a consumer GETs /market and GETs /v1/models
+    Then the "m" row has no "interaction" key
+    And the "m" row's input is {"accepts": ["text"]}
+    And the "m" entry's rogerai block has no "interaction" key
+
+  Scenario: A station that fails its liveness probes does not vote
+    Given station "s1" shares "m" with no interaction and no example
+    And station "s2" shares "m" with interaction "single_turn" and example "Dead words."
+    And station "s2" has failed its liveness probes
+    When a consumer GETs /market and GETs /v1/models
+    Then the "m" row has no "interaction" key
+    And the "m" row's input is {"accepts": ["text"]}
+    And the "m" entry's rogerai block has no "interaction" key
+
+  # D. Each excluded kind alone, against no chat voter: a leaking filter cannot hide in a tie.
+  Scenario Outline: A lone <kind> single_turn declarer leaves the row with no interaction
+    Given station "s1" shares "m" with no interaction and no example
+    And <kind> station "x1" shares "m" with interaction "single_turn" and example "Outsider words."
+    When a consumer GETs /market and GETs /v1/models
+    Then the "m" row has no "interaction" key
+    And the "m" row's input is {"accepts": ["text"]}
+    And the "m" entry's rogerai block has no "interaction" key
+
+    Examples:
+      | kind       |
+      | an offline |
+      | a private  |
+      | a banned   |
