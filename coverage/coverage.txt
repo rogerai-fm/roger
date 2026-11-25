@@ -347,7 +347,7 @@ rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:204:			edgeBandsOnAir				100.0%
 rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:224:			lanShareUpstream			100.0%
 rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:236:			edgeReadResources			100.0%
 rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:243:			edgeReadResourcesFrom			86.5%
-rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:393:			edgeRealFS				100.0%
+rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:393:			edgeRealFS				66.7%
 rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:407:			edgeSelfDeclares			90.0%
 rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:433:			edgeAttachUpstream			100.0%
 rogerai.fm/roger/v7/cmd/rogerai/edgeinstance.go:439:			peerServing				93.6%
@@ -1049,7 +1049,7 @@ rogerai.fm/roger/v7/internal/agent/corerecord.go:129:			SetCoreForTest				100.0%
 rogerai.fm/roger/v7/internal/agent/corerecord.go:139:			CoreAnswered				40.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:23:			idFromPriv				100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:31:			NodeID					100.0%
-rogerai.fm/roger/v7/internal/agent/localtower.go:47:			ServeLocalTower				86.1%
+rogerai.fm/roger/v7/internal/agent/localtower.go:47:			ServeLocalTower				83.3%
 rogerai.fm/roger/v7/internal/agent/localtower.go:118:			forJob					87.5%
 rogerai.fm/roger/v7/internal/agent/localtower.go:146:			localPollBackoff			100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:167:			pollLocalJob				93.5%
