@@ -301,7 +301,8 @@ Feature: A request that is too long gets the context_exceeded code with numbers
   Scenario: The API reference documents the code and how the broker counts
     Then the public API reference lists "context_exceeded" with its metadata keys
     And it says prompt_tokens is an estimate of the text content at about four characters per token
-    And it says images and the tools array are not counted
+    And it says images are not counted
+    # Amended 2026-11-24 with prompt_count.feature: tool definitions and earlier tool calls are counted now.
     And it says a station's own server may count more and refuse a request the broker accepted
 
   # --- NOT in this change (needs its own ruling) -------------------------------------
