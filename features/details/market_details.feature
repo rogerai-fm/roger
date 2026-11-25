@@ -3,7 +3,7 @@
 # GET /market carries each model's card text, one block per model, so a model picker can show
 # it from the feed it already reads without joining station rows from /discover.
 #
-# Source of the ask: the iOS handoff BROKER-MODEL-INFO-FOR-CLIENTS-HANDOFF-2026-11-23 (item 7).
+# Source of the ask: the iOS app's request for model information (2026-11-23).
 #
 # GROUND TRUTH (origin/main df8bda4b):
 #   - /v1/models already publishes the block as rogerai.details (models.go:230): FoldDetails

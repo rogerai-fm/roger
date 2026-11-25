@@ -3,7 +3,7 @@
 # GET /market carries each model's parameter count, so a model picker can order by size
 # ("Smartest") from the feed it already reads instead of using price as a stand-in.
 #
-# Source of the ask: the iOS handoff BROKER-MODEL-INFO-FOR-CLIENTS-HANDOFF-2026-11-23 (item 8).
+# Source of the ask: the iOS app's request for model information (2026-11-23).
 # The founder chose the parameter count over a hand-set tier on 2026-11-23.
 #
 # GROUND TRUTH (origin/main 8c788286):
@@ -15,8 +15,8 @@
 #     declares one, else the estimates; the largest value wins; when the values differ the
 #     block also carries params_b_min and params_b_max.
 #   - /market rows carry none of this today.
-#   - On 2026-11-23 the live band had a count for 6 of 19 chat models, all estimated from
-#     the id. The hosted commercial models publish no count and have none.
+#   - Most counts on the band are estimated from the id. The hosted commercial models
+#     publish no count and have none.
 #
 # DECISIONS IN THIS DRAFT (each is a ruling to confirm):
 #   D1. The /market row gains the SAME keys with the SAME values as the rogerai block on

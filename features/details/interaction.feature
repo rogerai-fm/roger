@@ -5,7 +5,7 @@
 # category except language/chat, language, vision/vlm and language/code as one-job, and
 # wave-pico-293m (no declared category, guessed as language/chat) slips through.
 #
-# Source of the ask: the iOS handoff BROKER-MODEL-INFO-FOR-CLIENTS-HANDOFF-2026-11-23 (item 6).
+# Source of the ask: the iOS app's request for model information (2026-11-23).
 #
 # GROUND TRUTH (origin/main df8bda4b):
 #   - protocol.Taxonomy carries the operator text summary, best_at, not_for (bounded,

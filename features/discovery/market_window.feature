@@ -4,7 +4,7 @@
 # from the one feed it already reads. Today the window is only on /discover (per station) and
 # on /v1/models (context_length, rogerai.ctx_max).
 #
-# Source of the ask: the iOS handoff BROKER-MODEL-INFO-FOR-CLIENTS-HANDOFF-2026-11-23 (item 3).
+# Source of the ask: the iOS app's request for model information (2026-11-23).
 #
 # GROUND TRUTH (origin/main 37369958):
 #   - marketView (market.go:385) has no window field.

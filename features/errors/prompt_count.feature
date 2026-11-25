@@ -8,7 +8,7 @@
 # to what the model really reads, so a request that cannot fit is refused at the broker with
 # context_exceeded instead of failing at the station.
 #
-# Source of the ask: the iOS handoff on model information for clients, item 1 ("say how the
+# Source of the ask: the iOS app's request for model information ("say how the
 # broker counts a request against ctx, and whether tools are counted; decide which count is
 # the truth").
 #
@@ -26,7 +26,7 @@
 #     It does NOT collect: an assistant message's tool_calls (function name and arguments),
 #     the legacy function_call, the property NAMES of a tool schema (they are object keys),
 #     JSON punctuation, image parts, or the chat template the station's server adds.
-#   - Correction to the record: context_exceeded.feature (D5) and the handoff both say tools
+#   - Correction to the record: context_exceeded.feature (D5) and the iOS request both said tools
 #     are not counted. The tools' string values ARE counted, since the tools-array screening
 #     change. Their property names and all earlier tool calls are not.
 #   - metadata.counted is "text" today (context_exceeded.feature, approved and shipped).
@@ -56,7 +56,7 @@
 #   D2. Still not counted: image parts (their cost differs by model), the template's fixed
 #       preamble (differs by model), JSON punctuation and whitespace, tool_call ids. The
 #       station's own server stays the final judge; its refusal already comes back as
-#       context_exceeded with source "station" (PR 21, PR 28).
+#       context_exceeded with source "station" (context_exceeded.feature).
 #   D3. The rate stays bytes / 4. The count is a gate and an estimate, never a billing number.
 #       The rule must not count ABOVE what a model reads: an over-count refuses requests that
 #       fit. Under-counting by about a third is accepted.

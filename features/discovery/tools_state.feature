@@ -6,11 +6,11 @@
 # The tools mark a client reads is the one routing obeys, and a tools request that no station
 # can take says so in a field, not only in a sentence.
 #
-# Source of the ask: the iOS handoff on model information for clients, item 5 ("publish one
+# Source of the ask: the iOS app's request for model information ("publish one
 # tools state per model that matches what routing will do: verified, passthrough or none; run
 # the tools check on gpt-oss-120b, qwen-3.8-27b, mistral-large-2512, gemini-3.7-flash").
 #
-# GROUND TRUTH (origin/main 7cf851ce, and the live /market read on 2026-11-24):
+# GROUND TRUTH (origin/main 7cf851ce, and a /market read on 2026-11-24):
 #   - There is ONE tools bit per (station, model): toolsVerifiedForLocked (toolcall.go:494).
 #     The tool-call test sets it; a station cannot declare it (a declared "tools" is stripped
 #     at register). It lapses after toolsVerifiedTTL (90 minutes) without a fresh pass.
@@ -22,10 +22,8 @@
 #                parameters (models.go:223, :235).
 #   - Hosted (curated) stations earn the bit by the same test as everyone else. There is no
 #     "passthrough" case: no station carries tools without passing the test.
-#   - Live 2026-11-24: all 17 general chat models carry "tools", including the four the
-#     handoff named. The three one-job Wave models carry none. The handoff's reading of three
-#     models (2026-11-22) was taken during the tool-test budget starvation, fixed by PR 19
-#     and PR 22.
+#   - On 2026-11-24 every general chat model carried "tools", including the four the
+#     request named. The one-job Wave models carry none.
 #   - A tools request that no station can take gets 503 no_match, and the sentence ends
 #     "with the tools capability". metadata carries only "filters" (when a filter emptied the
 #     pool). A client must read the sentence to learn tools were the reason. The iOS app

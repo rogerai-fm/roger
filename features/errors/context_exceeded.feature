@@ -3,8 +3,8 @@
 # A request that is too long for the model gets ONE stable code with numbers, so a client can
 # cut the request and retry without reading a number out of an English sentence.
 #
-# Source of the ask: the iOS handoff BROKER-MODEL-INFO-FOR-CLIENTS-HANDOFF-2026-11-23 (items 1
-# and 2). The app matches the words "context window" and parses N from "right now is N".
+# Source of the ask: the iOS app's request for model information (2026-11-23). The app
+# matches the words "context window" and parses N from "right now is N".
 #
 # GROUND TRUTH (origin/main 37369958):
 #   - tunnel.go:3108 answers 400 via jsonErr (no explicit code) with the message
@@ -307,5 +307,5 @@ Feature: A request that is too long gets the context_exceeded code with numbers
 
   # --- NOT in this change (needs its own ruling) -------------------------------------
   # Counting the tools array toward the window at the broker. Today a request with 35 tool
-  # specs passed a 4,140 window at the broker (handoff item 1). Counting tools changes which
+  # specs passed a 4,140 window at the broker (reported by the iOS app). Counting tools changes which
   # requests are refused at the pick, so it changes routing and the strike guard's inputs.
