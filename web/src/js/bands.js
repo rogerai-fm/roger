@@ -260,8 +260,12 @@
     return out;
   }
 
+  // A search station rides the same feeds tagged modality "search". It is priced per query
+  // and answers on /v1/search, so it is never a model on this page.
+  function isSearch(o) { return !!o && o.modality === "search"; }
+
   function fromMarket(rows) {
-    return rows.map(function (m) {
+    return rows.filter(function (m) { return !isSearch(m); }).map(function (m) {
       var providers = +m.providers || 0;
       // counted APART but ON AIR: a curated-only band answers requests (same rule
       // as the /discover path below, which already got this right).
@@ -304,7 +308,7 @@
   function fromDiscover(offers) {
     var by = {};
     offers.forEach(function (o) {
-      if (!o || !o.model) return;
+      if (!o || !o.model || isSearch(o)) return;
       var b = by[o.model] || (by[o.model] = {
         model: o.model, live: 0, total: 0, minIn: Infinity, minOut: Infinity, priceTier: 0,
         tps: 0, ttft: Infinity, conf: false, free: false, ctx: 0, ctxEst: true,

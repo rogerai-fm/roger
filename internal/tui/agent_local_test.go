@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"rogerai.fm/roger/v7/internal/detect"
+	"rogerai.fm/roger/v7/internal/protocol"
 )
 
 // LOCAL MODELS IN /model. Founder ask 2026-08-07: run the TUI agent on your own models
@@ -296,5 +297,20 @@ func TestAPublicBandKeepsItsBandRow(t *testing.T) {
 	m.bindAgentEndpoint("grok-4.6")
 	if m.agent.localChat != "" {
 		t.Error("a public band bound the local endpoint")
+	}
+}
+
+// A search share is not a chat model: it answers on /v1/search and is priced per query, so
+// offering it as an agent brain could only fail. Same rule as a voice share.
+func TestAgentSkipsASearchShare(t *testing.T) {
+	m := agentWithPrivateLocal(t)
+	m.setShareRows([]shareRow{
+		{model: "grok-4.6", ctx: 32768, upstream: "http://127.0.0.1:11434/v1/chat/completions"},
+		{model: "web-search", modality: protocol.ModalitySearch, upstream: "http://127.0.0.1:8888"},
+	})
+	for _, r := range m.localAgentRows() {
+		if r.model == "web-search" {
+			t.Fatal("a search share was offered to the agent as a chat model")
+		}
 	}
 }

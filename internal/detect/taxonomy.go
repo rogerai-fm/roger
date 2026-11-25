@@ -52,6 +52,9 @@ func inferCategory(id, modality string, caps []string) (string, string) {
 	if modality == protocol.ModalityTTS || modality == protocol.ModalitySTT {
 		return "audio", modality
 	}
+	if modality == protocol.ModalitySearch {
+		return "retrieval", protocol.ModalitySearch
+	}
 	for _, r := range inferRules {
 		if r.re.MatchString(id) {
 			return r.category, r.sub

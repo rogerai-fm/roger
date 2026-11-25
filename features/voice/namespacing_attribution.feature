@@ -11,8 +11,9 @@
 # cross-owner station uniqueness, namespaced ROUTING) lives in features/voice/namespaced_routing.feature.
 # FOUNDER-APPROVED with 4 binding decisions baked in:
 #   Q1  the voice-name slug comes from the offer's display NAME → @<station>/<slug(Name)>.
-#   Q2  PUBLIC voices are SIGNED-IN operators only: an UNBOUND (anonymous) TTS offer is NOT
-#       listed on public /voices. Every public voice is attributable.
+#   Q2  A NAMESPACED public voice is a SIGNED-IN operator's only. AMENDED 2026-11-15 by
+#       features/stations/anonymous_supply.feature (AS2): an UNBOUND (anonymous) FREE TTS offer
+#       is listed by its raw id, labeled unverified, with no namespaced_id and no operator.
 #   Q3  the chat-model impersonation denylist is PREFIX-match, ENV-overridable.
 #   Q5  /voices DUAL-EMITS: the raw id (id, back-compat; the app treats it as opaque) AND
 #       the namespaced id (namespaced_id), for a migration window.
@@ -68,11 +69,13 @@ Feature: Public voices are namespaced per operator, attributed, and cannot imper
       Then "llama3.2" never appears in /voices as a raw id or a namespaced id
 
   # --- BOUNDARIES: unbound/anonymous excluded, self-dup, "/" in name, very long ---
-    Scenario: An anonymous (unbound) free voice is NOT listed on public /voices (Q2)
+    # AMENDED 2026-11-15 by features/stations/anonymous_supply.feature (AS2): an anonymous free
+    # voice IS listed, by its raw id, labeled unverified, and never under a callsign.
+    Scenario: An anonymous (unbound) free voice is listed by its raw id, with no namespace (Q2 as amended)
       Given an anonymous free tts node offering model "kokoro" named "Kiosk"
       When an anonymous GET /voices arrives
-      Then no voice with raw id "kokoro" is listed
-      And the voices list is empty
+      Then a voice with raw id "kokoro" is listed
+      And no voice with a namespaced_id containing "kiosk" is listed
 
     Scenario: The same operator cannot register two voices with the same normalized name
       Given "@bownux" registers an on-air tts offer with model "op-a" named "Operator"

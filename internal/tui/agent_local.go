@@ -77,8 +77,8 @@ func (m model) localAgentRows() []agentPickerRow {
 		if r.model == "" || seen[r.model] || r.upstream == "" {
 			continue
 		}
-		if r.modality == protocol.ModalityTTS || r.modality == protocol.ModalitySTT {
-			continue // a voice model cannot run a tool-use loop
+		if r.modality == protocol.ModalityTTS || r.modality == protocol.ModalitySTT || r.modality == protocol.ModalitySearch {
+			continue // a voice model or a search share cannot run a tool-use loop
 		}
 		seen[r.model] = true
 		out = append(out, agentPickerRow{

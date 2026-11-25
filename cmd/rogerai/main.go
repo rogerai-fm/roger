@@ -107,21 +107,23 @@ type config struct {
 	Broker          string                       `json:"broker"`
 	User            string                       `json:"user"`
 	Limits          Limits                       `json:"limits"`
-	Onboarded       bool                         `json:"onboarded,omitempty"`         // share setup completed (`roger onboard`)
-	WelcomeSeen     bool                         `json:"welcome_seen,omitempty"`      // the one-time welcome card was shown and closed
-	WelcomeAgain    bool                         `json:"welcome_again,omitempty"`     // show the card once more (`roger onboard --welcome` / --reset)
-	Share           *Share                       `json:"share,omitempty"`             // saved provider config (the wizard's earn/free choice)
-	Prices          map[string]SharePrice        `json:"share_prices,omitempty"`      // per-model price + schedule from the in-TUI editor
-	Voices          map[string]ShareVoice        `json:"share_voices,omitempty"`      // per-model voice identity (dj name / voice / speed / language / sample_url)
-	Meta            map[string]protocol.Taxonomy `json:"share_meta,omitempty"`        // per-model DECLARED taxonomy (category, tags, tuning, policy, license, base model)
-	Compact         bool                         `json:"compact,omitempty"`           // windowshade compact-mode toggle (the in-TUI [m] choice, persisted)
-	Webui           *bool                        `json:"webui,omitempty"`             // browser node console: nil/true = on (default), false = off; --no-webui overrides off for a run
-	WebuiOpen       *bool                        `json:"webui_open,omitempty"`        // auto-open the console in a browser at launch: nil/false = no (default; founder respec 2026-07-14 - it hijacked terminal-embedded browsers), true = yes
-	Palette         string                       `json:"palette,omitempty"`           // TUI color layer: ""/"full" = the lamp board (default), "mono" = the mono+red escape hatch. ROGER_PALETTE overrides per-run. (design overhaul increment 0)
-	Deck            string                       `json:"deck,omitempty"`              // the painted deck ground behind the whole TUI: ""/"on" = the RogerAI faceplate (default), "off" = inherit the terminal's own background. ROGER_DECK overrides per-run.
-	Theme           string                       `json:"theme,omitempty"`             // TUI theme: ""/"auto" = follow the terminal background, "light" = light page + dark text, "dark" = dark page. ROGER_THEME overrides per-run.
-	Colorblind      string                       `json:"colorblind,omitempty"`        // TUI color-vision board: ""/"off", "protan", "deutan" (red-green), "tritan" (blue-yellow). ROGER_COLORBLIND overrides per-run.
-	LastSeenVersion string                       `json:"last_seen_version,omitempty"` // the Version last launched; the tube warm-up boot plays only when this differs (first run + after an upgrade). (design overhaul increment 10)
+	Onboarded       bool                         `json:"onboarded,omitempty"`             // share setup completed (`roger onboard`)
+	WelcomeSeen     bool                         `json:"welcome_seen,omitempty"`          // the one-time welcome card was shown and closed
+	WelcomeAgain    bool                         `json:"welcome_again,omitempty"`         // show the card once more (`roger onboard --welcome` / --reset)
+	Share           *Share                       `json:"share,omitempty"`                 // saved provider config (the wizard's earn/free choice)
+	Prices          map[string]SharePrice        `json:"share_prices,omitempty"`          // per-model price + schedule from the in-TUI editor
+	Voices          map[string]ShareVoice        `json:"share_voices,omitempty"`          // per-model voice identity (dj name / voice / speed / language / sample_url)
+	Meta            map[string]protocol.Taxonomy `json:"share_meta,omitempty"`            // per-model DECLARED taxonomy (category, tags, tuning, policy, license, base model)
+	SearchKeys      map[string]string            `json:"search_keys,omitempty"`           // a search share's engine key by engine (brave); never printed back
+	SearchTerms     []string                     `json:"search_terms_accepted,omitempty"` // engines whose terms the provider accepted to answer for (share --search)
+	Compact         bool                         `json:"compact,omitempty"`               // windowshade compact-mode toggle (the in-TUI [m] choice, persisted)
+	Webui           *bool                        `json:"webui,omitempty"`                 // browser node console: nil/true = on (default), false = off; --no-webui overrides off for a run
+	WebuiOpen       *bool                        `json:"webui_open,omitempty"`            // auto-open the console in a browser at launch: nil/false = no (default; founder respec 2026-07-14 - it hijacked terminal-embedded browsers), true = yes
+	Palette         string                       `json:"palette,omitempty"`               // TUI color layer: ""/"full" = the lamp board (default), "mono" = the mono+red escape hatch. ROGER_PALETTE overrides per-run. (design overhaul increment 0)
+	Deck            string                       `json:"deck,omitempty"`                  // the painted deck ground behind the whole TUI: ""/"on" = the RogerAI faceplate (default), "off" = inherit the terminal's own background. ROGER_DECK overrides per-run.
+	Theme           string                       `json:"theme,omitempty"`                 // TUI theme: ""/"auto" = follow the terminal background, "light" = light page + dark text, "dark" = dark page. ROGER_THEME overrides per-run.
+	Colorblind      string                       `json:"colorblind,omitempty"`            // TUI color-vision board: ""/"off", "protan", "deutan" (red-green), "tritan" (blue-yellow). ROGER_COLORBLIND overrides per-run.
+	LastSeenVersion string                       `json:"last_seen_version,omitempty"`     // the Version last launched; the tube warm-up boot plays only when this differs (first run + after an upgrade). (design overhaul increment 10)
 	// EdgeInstance is the name THIS roger goes by on its node's Edge (features/edge/
 	// instances.feature). Empty = a default derived from the node's name. Set by
 	// `roger edge name . <name>`; a running roger picks a change up on its next pass.
@@ -1267,6 +1269,11 @@ func dispatch(cfg config, args []string) error {
 		if args[0] == "models" && len(args) > 1 && !strings.HasPrefix(args[1], "-") {
 			return cmdModelsInfo(cfg, args[1:])
 		}
+		// `roger search check` runs the search/1 contract checks for a native search provider
+		// (share_search.go); a bare `roger search` still lists the market.
+		if args[0] == "search" && len(args) > 1 && args[1] == "check" {
+			return cmdSearch(cfg, args[1:], os.Stdout)
+		}
 		if cfg.lan.LAN {
 			return cmdLANSearch(cfg, args[1:])
 		}
@@ -1471,6 +1478,11 @@ needs no login. When you earn, payouts are a 30-day hold (10% reserved to day 90
 `
 
 func cmdShare(cfg config, args []string) error {
+	// `roger share --search <engine>` puts a search engine on the market: its own small path
+	// (no model detection, no context window), the same command (share_search.go).
+	if wantsSearchShare(args) {
+		return shareSearch(cfg, args, defaultSearchShareIO())
+	}
 	// Defaults inherit the saved onboarding share config (model + price) when set,
 	// so `roger share` after the wizard Just Works with the choices already made.
 	defModel, defIn, defOut := "", 0.0, 0.0

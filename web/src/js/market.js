@@ -169,11 +169,15 @@
     return pickSix(channels, mulberry32(hash32(key) ^ (seed | 0)));
   }
 
+  // A search station rides the same feeds tagged modality "search". It is priced per query
+  // and answers on /v1/search, so it is never a model on this page.
+  function isSearch(o) { return !!o && o.modality === "search"; }
+
   // Node test seam (mirrors dashboard.js): in a non-DOM runtime, export the pure
   // bits and skip all DOM/fetch below. The browser path runs exactly as before.
   if (typeof document === "undefined") {
     if (typeof module !== "undefined" && module.exports) {
-      module.exports = { meterReadout: meterReadout, fmtPrice: fmtPrice, decideRender: decideRender, parseRetryAfter: parseRetryAfter, HOLD_MAX: HOLD_MAX, pickSix: pickSix, pickSixStable: pickSixStable };
+      module.exports = { meterReadout: meterReadout, fmtPrice: fmtPrice, decideRender: decideRender, parseRetryAfter: parseRetryAfter, HOLD_MAX: HOLD_MAX, pickSix: pickSix, pickSixStable: pickSixStable, fromMarket: fromMarket, aggregate: aggregate };
     }
     return;
   }
@@ -279,7 +283,7 @@
   function aggregate(offers) {
     var byModel = {};
     offers.forEach(function (o) {
-      if (!o || !o.model) return;
+      if (!o || !o.model || isSearch(o)) return;
       var k = o.model;
       var m = byModel[k] || (byModel[k] = {
         model: k, providers: 0, online: 0, tpsSum: 0, tpsN: 0,
@@ -340,7 +344,7 @@
   // equals the broker/CLI/TUI value, and surface ttft + success next to it so the
   // number is explainable.
   function fromMarket(rows) {
-    return rows.map(function (m) {
+    return rows.filter(function (m) { return !isSearch(m); }).map(function (m) {
       var providers = +m.providers || 0;
       // curated proxies count toward "on air" (a request would succeed) but stay
       // COUNTED APART in the row - the 2026-09-02 regression: /market rows carry

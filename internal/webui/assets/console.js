@@ -857,12 +857,14 @@
      OPEN MARKET is the broker's discover feed, filtered to bands that are actually on
      air right now.
 
-     Both groups drop VOICE models (tts/stt): they cannot hold a conversation, and
+     Both groups drop VOICE models (tts/stt) and SEARCH stations: they cannot hold a conversation, and
      listing one is an invitation to a turn that can only fail. The TUI's picker draws
      exactly these two groups under exactly these two rules. */
   var CHAT_LOCAL = "local:", CHAT_MARKET = "market:";
 
   function chatIsVoice(modality) { return modality === "tts" || modality === "stt"; }
+  // A search station answers on /v1/search and is priced per query, so it cannot chat either.
+  function chatCannotTalk(modality) { return chatIsVoice(modality) || modality === "search"; }
 
   // chatLocalRows are this node's own models that a turn can actually be sent to. A row
   // with no upstream has nothing behind it - offering it would trade a broker 504 for a
@@ -870,7 +872,7 @@
   function chatLocalRows() {
     var rows = (lastSnapshot && lastSnapshot.rows) || [];
     return rows.filter(function (r) {
-      return r.model && r.upstream && !chatIsVoice(r.modality);
+      return r.model && r.upstream && !chatCannotTalk(r.modality);
     });
   }
 
@@ -878,7 +880,7 @@
   // it was there all along - nothing else in the feed answers "will this answer me?".
   function chatMarketOffers() {
     return (lastOffers || []).filter(function (o) {
-      return o.model && o.online === true && !chatIsVoice(o.modality);
+      return o.model && o.online === true && !chatCannotTalk(o.modality);
     });
   }
 

@@ -15,6 +15,8 @@ package tui
 import (
 	"net/http"
 	"net/http/httptest"
+	"reflect"
+	"sort"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -78,6 +80,25 @@ func TestGroupBandsTagsModality(t *testing.T) {
 		if got[model] != want {
 			t.Errorf("band %q modality = %q, want %q", model, got[model], want)
 		}
+	}
+}
+
+// A search station on the feed is not a band: it is not on the dial, so nothing can tune it,
+// chat to it or pick it as an agent brain, and its per-query price is never shown as a token
+// price. Stations next to it are untouched.
+func TestGroupBandsLeavesSearchStationsOffTheDial(t *testing.T) {
+	bands := groupBands([]offer{
+		{Model: "gpt-oss-20b", Modality: "chat", Online: true},
+		{Model: "web-search", Modality: "search", Online: true},
+		{Model: "a-voice", Modality: "tts", Online: true},
+	}, nil)
+	got := []string{}
+	for _, b := range bands {
+		got = append(got, b.model)
+	}
+	sort.Strings(got)
+	if want := []string{"a-voice", "gpt-oss-20b"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("bands = %v, want %v (no band for the search station)", got, want)
 	}
 }
 

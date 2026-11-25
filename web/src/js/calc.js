@@ -24,6 +24,9 @@
   var BROKER = "https://broker.rogerai.fm";
 
   function $(id) { return document.getElementById(id); }
+  // A search station rides /market tagged modality "search". It is priced per query
+  // and answers on /v1/search, so it is never a model on this page.
+  function isSearch(o) { return !!o && o.modality === "search"; }
   // Clamped to the input's OWN min/max. Without this the markup declared a 24-hour day
   // and a 100% ceiling that the arithmetic then ignored, so a typed 500% utilisation
   // computed happily and printed a number nobody could earn.
@@ -145,6 +148,7 @@
         var rows = (d && d.market) || [];
         var best = null, free = 0, sawOut = false;
         for (var i = 0; i < rows.length; i++) {
+          if (isSearch(rows[i])) continue; // a search station has no out-price; it is not a free model
           var p = rows[i].min_out;
           if (typeof p !== "number") continue;
           sawOut = true;

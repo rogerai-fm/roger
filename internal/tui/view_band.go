@@ -532,6 +532,9 @@ func groupBands(offers []offer, limits *LimitStore) []band {
 	byKey := map[string]*band{}
 	order := []string{}
 	for _, o := range offers {
+		if isSearchOffer(o) {
+			continue // a search station is not a band: nothing on the dial can tune or chat to it
+		}
 		key := o.Model + "\x00" + o.Quant
 		b, ok := byKey[key]
 		if !ok {

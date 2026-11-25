@@ -61,11 +61,20 @@ Feature: Voice/audio offers carry a modality and a truthful billing unit
       | modality | result   |
       |          | accepted |
       | chat     | accepted |
+      | text     | accepted |
       | tts      | accepted |
       | stt      | accepted |
       | video    | rejected |
       | speech   | rejected |
       | TTS      | rejected |
+
+  # Founder ruling 2026-11-24: "text" is another name for chat. The Tower code already reads it
+  # that way (cmd/rogerai-broker/tower.go), so a node that sends it is filed as chat, never refused.
+  Scenario: An offer labeled "text" is filed as chat billed per token
+    Given an offer for model "m" with modality "text"
+    When the broker normalizes the offer
+    Then the offer modality is "chat"
+    And the offer unit is "token"
 
   # --- a single node may advertise a mixed fleet across modalities ---
   Scenario: One node registers chat, TTS, and STT offers together

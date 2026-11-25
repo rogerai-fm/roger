@@ -33,6 +33,7 @@ import (
 	"rogerai.fm/roger/v7/internal/client"
 	"rogerai.fm/roger/v7/internal/keyfile"
 	"rogerai.fm/roger/v7/internal/protocol"
+	"rogerai.fm/roger/v7/internal/searchengine"
 	"rogerai.fm/roger/v7/internal/servedfile"
 	"rogerai.fm/roger/v7/internal/station"
 )
@@ -104,7 +105,12 @@ type Config struct {
 	Schedule []protocol.PriceWindow
 	// Voice: the offer's modality + display metadata (set only when sharing a voice/audio model,
 	// from the detected server; empty modality = chat, so a normal LLM share is unchanged).
-	Modality string // "" / "chat" | "tts" | "stt"
+	Modality string // "" / "chat" | "tts" | "stt" | "search"
+	// SearchEngine (brave | searxng | native) and Scope describe a SEARCH share
+	// (features/search/node_bridge.feature): Upstream and UpstreamKey are then the engine's
+	// address and key.
+	SearchEngine string
+	Scope        string
 	// Capabilities are the offer's chat sub-capabilities (e.g. ["vision"]) from the detected
 	// server; empty/nil for a plain text model. See docs/BROKER-VISION-CAPABILITY.md.
 	Capabilities []string
@@ -530,13 +536,7 @@ func Start(cfg Config) (*Session, error) {
 		cfg.Parallel = 4
 	}
 
-	offer := protocol.ModelOffer{Model: cfg.Model, Modality: cfg.Modality, Capabilities: cfg.Capabilities,
-		Quant: cfg.Quant, Weights: cfg.Weights, Variant: cfg.Variant, Taxonomy: cfg.Taxonomy,
-		PriceIn: cfg.PriceIn, PriceOut: cfg.PriceOut,
-		Ctx: cfg.Ctx, CtxEstimated: cfg.CtxEstimated, Schedule: cfg.Schedule,
-		UpstreamIn: cfg.UpstreamPriceIn, UpstreamOut: cfg.UpstreamPriceOut,
-		Name: cfg.Name, Language: cfg.Language, SampleURL: cfg.SampleURL, LatencyMS: cfg.LatencyMS,
-		Voice: cfg.Voice, Speed: cfg.Speed}
+	offer := offerOf(cfg)
 	reg := protocol.NodeRegistration{
 		NodeID: cfg.NodeID, PubKey: pubHex, BridgeToken: token,
 		Region: cfg.Region, HW: cfg.HW, Offers: []protocol.ModelOffer{offer},
@@ -648,14 +648,7 @@ func pollLoop(cfg Config, offer protocol.ModelOffer, priv ed25519.PrivateKey, se
 			}
 		}
 		ctx, done := sess.inflight.start(job.ID)
-		if isStream(job.Body) {
-			rec := serveStreamCtx(ctx, cfg, offer, priv, token, job)
-			recordIf(sess, job, rec)
-		} else {
-			res := serveCtx(ctx, cfg, offer, priv, up, job)
-			postResult(poll, cfg, token, res)
-			recordIf(sess, job, res.Receipt)
-		}
+		recordIf(sess, job, serveJob(ctx, cfg, offer, priv, up, poll, token, job))
 		done()
 	}
 }
@@ -699,7 +692,7 @@ func heartbeatUntil(broker, nodeID string, rereg *reregistrar, sess *Session) {
 	stop := sess.stop
 	beat := func() {
 		token, gen := rereg.curToken()
-		b, _ := json.Marshal(map[string]string{"node_id": nodeID})
+		b := heartbeatBody(nodeID)
 		req, err := http.NewRequest(http.MethodPost, broker+"/nodes/heartbeat", bytes.NewReader(b))
 		if err != nil {
 			return
@@ -777,6 +770,19 @@ func checkUpstreamKey(key string) error {
 // One implementation for every path: station.RedactKey, which also catches the key's JSON escape
 // forms (features/tower/tower_upstream_key.feature).
 func redactUpstreamKey(b []byte, key string) []byte { return station.RedactKey(b, key) }
+
+// serveJob serves one accepted job and returns its receipt: a streaming job is piped to the
+// broker as it flows, any other is answered in one result. A search share never streams: the
+// stream path posts the raw job to the upstream with its key, so on a search share every job
+// takes serveCtx, whose path guard and engine adapter apply (node_bridge.feature N1).
+func serveJob(ctx context.Context, cfg Config, offer protocol.ModelOffer, priv ed25519.PrivateKey, up, poll *http.Client, token string, job protocol.Job) protocol.UsageReceipt {
+	if isStream(job.Body) && cfg.Modality != protocol.ModalitySearch {
+		return serveStreamCtx(ctx, cfg, offer, priv, token, job)
+	}
+	res := serveCtx(ctx, cfg, offer, priv, up, job)
+	postResult(poll, cfg, token, res)
+	return res.Receipt
+}
 
 func isStream(body []byte) bool {
 	var p struct {
@@ -924,6 +930,23 @@ func parseUsage(line []byte) (prompt, completion int, ok bool) {
 	return 0, 0, false
 }
 
+// offerOf is the one offer a share registers, built from its config.
+func offerOf(cfg Config) protocol.ModelOffer {
+	return protocol.ModelOffer{Model: cfg.Model, Modality: cfg.Modality, Capabilities: cfg.Capabilities,
+		Quant: cfg.Quant, Weights: cfg.Weights, Variant: cfg.Variant, Taxonomy: cfg.Taxonomy,
+		PriceIn: cfg.PriceIn, PriceOut: cfg.PriceOut,
+		Ctx: cfg.Ctx, CtxEstimated: cfg.CtxEstimated, Schedule: cfg.Schedule,
+		UpstreamIn: cfg.UpstreamPriceIn, UpstreamOut: cfg.UpstreamPriceOut,
+		Name: cfg.Name, Language: cfg.Language, SampleURL: cfg.SampleURL, LatencyMS: cfg.LatencyMS,
+		Voice: cfg.Voice, Speed: cfg.Speed, Engine: cfg.SearchEngine, Scope: cfg.Scope}
+}
+
+// heartbeatBody is what a heartbeat sends: the node id and nothing else.
+func heartbeatBody(nodeID string) []byte {
+	b, _ := json.Marshal(map[string]string{"node_id": nodeID})
+	return b
+}
+
 func serve(cfg Config, offer protocol.ModelOffer, priv ed25519.PrivateKey, up *http.Client, job protocol.Job) protocol.JobResult {
 	return serveCtx(context.Background(), cfg, offer, priv, up, job)
 }
@@ -940,6 +963,15 @@ func serveCtx(ctx context.Context, cfg Config, offer protocol.ModelOffer, priv e
 	p := cleanUpstreamPath(job.Path)
 	if !isAllowedUpstreamPath(p) {
 		return protocol.JobResult{ID: job.ID, Status: http.StatusNotFound, Body: []byte(`{"error":"unsupported path"}`)}
+	}
+	// A SEARCH share answers search jobs only, through its engine adapter; any other share
+	// refuses one. A chat or voice job never reaches a search engine's address, and a search
+	// job never reaches a model server (features/search/node_bridge.feature N1).
+	if (cfg.Modality == protocol.ModalitySearch) != (p == pathSearch) {
+		return protocol.JobResult{ID: job.ID, Status: http.StatusNotFound, Body: []byte(`{"error":"unsupported path"}`)}
+	}
+	if p == pathSearch {
+		return serveSearch(ctx, cfg, priv, up, job)
 	}
 	// The broker tags a voice job with the upstream Path to hit (e.g. /v1/audio/speech); serve it
 	// against the SAME local server at that path, derived from the chat upstream's base. An empty
@@ -1017,6 +1049,7 @@ const (
 	pathChatAlias  = "/chat/completions"        // chat completions (back-compat alias)
 	pathSpeech     = "/v1/audio/speech"         // TTS
 	pathTranscribe = "/v1/audio/transcriptions" // STT
+	pathSearch     = "/v1/search"               // search (answered by the engine adapter, not forwarded)
 )
 
 // cleanUpstreamPath does the minimal, safe normalization the allowlist matches against: trim
@@ -1040,7 +1073,22 @@ func cleanUpstreamPath(p string) string {
 // back-compat. Case-sensitive (the relay treats paths case-sensitively). Extend it by adding one
 // term for a new canonical modality.
 func isAllowedUpstreamPath(p string) bool {
-	return p == "" || p == pathChat || p == pathChatAlias || isSpeechPath(p) || p == pathTranscribe
+	return p == "" || p == pathChat || p == pathChatAlias || isSpeechPath(p) || p == pathTranscribe || p == pathSearch
+}
+
+// serveSearch answers a search job through the share's engine (internal/searchengine) and signs
+// the receipt. The engine sees only the search parameters: never the job id or the caller's
+// pseudonym (features/search/privacy.feature P3).
+func serveSearch(ctx context.Context, cfg Config, priv ed25519.PrivateKey, up *http.Client, job protocol.Job) protocol.JobResult {
+	engines := map[string]searchengine.Engine{cfg.Model: {Kind: cfg.SearchEngine, Upstream: cfg.Upstream, Key: cfg.UpstreamKey, Client: up}}
+	status, body := searchengine.ServeJob(ctx, engines, job)
+	if ctx.Err() != nil {
+		return cancelledResult(job.ID)
+	}
+	rec := protocol.UsageReceipt{RequestID: job.ID, NodeID: cfg.NodeID, User: job.User, Model: cfg.Model,
+		PriceIn: cfg.PriceIn, TS: time.Now().Unix(), LineageMethod: "p0-search"}
+	chainSign(cfg.NodeID, &rec, priv)
+	return protocol.JobResult{ID: job.ID, Status: status, Body: redactUpstreamKey(body, cfg.UpstreamKey), Receipt: rec}
 }
 
 // isSpeechPath reports whether a (cleaned) job path targets the local text-to-speech endpoint -

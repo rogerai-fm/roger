@@ -41,6 +41,11 @@ type ModelOffer struct {
 	// Unit is the billing unit, CANONICAL for the modality (token|char|byte) — set by
 	// Normalize, never trusted from the wire, so a node cannot mis-state how it is metered.
 	Unit string `json:"unit,omitempty"`
+	// Engine is what answers a SEARCH offer: brave | searxng | native (closed set, search
+	// offers only). It is the honesty label shown wherever the station is listed.
+	Engine string `json:"engine,omitempty"`
+	// Scope is a search offer's optional one-line statement of what its index covers.
+	Scope string `json:"scope,omitempty"`
 	// Capabilities are OPTIONAL chat sub-capabilities beyond plain text - canonical + normalized
 	// (lowercased, deduped, unknown values dropped by Normalize; never trusted raw from the wire).
 	// "vision" = the model accepts image_url content; empty/absent = text-only or undetermined.
@@ -138,10 +143,21 @@ const (
 	ModalityChat = "chat" // /v1/chat/completions,      billed per token
 	ModalityTTS  = "tts"  // /v1/audio/speech,          billed per input char
 	ModalitySTT  = "stt"  // /v1/audio/transcriptions,  billed per audio-byte
+	// ModalitySearch is /v1/search, billed per query.
+	ModalitySearch = "search"
+
+	// modalityTextAlias is an older name for chat. Normalize files it as ModalityChat.
+	modalityTextAlias = "text"
 
 	UnitToken = "token"
 	UnitChar  = "char"
 	UnitByte  = "byte"
+	UnitQuery = "query"
+
+	// Search engines (ModelOffer.Engine), a closed set.
+	EngineBrave   = "brave"
+	EngineSearXNG = "searxng"
+	EngineNative  = "native"
 )
 
 // canonicalUnit is the ONE billing unit for a modality. A tts offer always bills chars and an
@@ -152,6 +168,8 @@ func canonicalUnit(modality string) string {
 		return UnitChar
 	case ModalitySTT:
 		return UnitByte
+	case ModalitySearch:
+		return UnitQuery
 	default: // chat + the empty back-compat default
 		return UnitToken
 	}
@@ -161,16 +179,28 @@ func canonicalUnit(modality string) string {
 // for that modality. The broker calls it on every registered offer, so a node can never
 // mis-state its billing unit (protecting the customer who pays it).
 func (o *ModelOffer) Normalize() {
-	if o.Modality == "" {
+	// "text" is another name for chat (the Tower code reads it that way): filed as chat, never refused.
+	if o.Modality == "" || o.Modality == modalityTextAlias {
 		o.Modality = ModalityChat
 	}
 	o.Unit = canonicalUnit(o.Modality)
+	if o.Modality == ModalitySearch {
+		o.PriceOut = 0 // a query has no output side to price
+		for i := range o.Schedule {
+			o.Schedule[i].Out = 0
+		}
+	}
 	o.Capabilities = CanonicalCapabilities(o.Capabilities)
 	o.Quant = CanonicalQuant(o.Quant)
 	o.Weights = CanonicalVariantText(o.Weights)
 	o.Variant = CanonicalVariantText(o.Variant)
 	// A node never authors the curated label or a page link: only the broker stamps those.
 	o.DetailsSource, o.Page = "", ""
+	if o.Modality == ModalitySearch {
+		o.Scope = CanonicalScope(o.Scope)
+	} else {
+		o.Scope = "" // a scope describes a search index; on any other offer it is a stray label
+	}
 	o.Taxonomy.normalize(o.Modality)
 }
 
@@ -311,7 +341,7 @@ func CanonicalCapabilities(in []string) []string {
 // CLOSED — an unknown modality is rejected, not silently trusted. Empty is valid (-> chat).
 func (o ModelOffer) ValidModality() bool {
 	switch o.Modality {
-	case "", ModalityChat, ModalityTTS, ModalitySTT:
+	case "", ModalityChat, modalityTextAlias, ModalityTTS, ModalitySTT, ModalitySearch:
 		return true
 	default:
 		return false
@@ -584,7 +614,12 @@ type UsageReceipt struct {
 	// tokenizer key, the lineage row and X-RogerAI-Model follow the dispatch, while Model
 	// keeps what the node signed so VerifyNode and the chain hash still hold. Zeroed in the
 	// node form like Curated; covered by the broker signature.
-	DispatchedModel  string  `json:"dispatched_model,omitempty"`
+	DispatchedModel string `json:"dispatched_model,omitempty"`
+	// Unit / Units are BROKER-set: the billing unit and the broker's own count of it for a
+	// non-token modality (a search is unit "query", Units 1). Zeroed in the node form like
+	// DispatchedModel; covered by the broker signature.
+	Unit             string  `json:"unit,omitempty"`
+	Units            int     `json:"units,omitempty"`
 	PromptTokens     int     `json:"prompt_tokens"`
 	CompletionTokens int     `json:"completion_tokens"`
 	PriceIn          float64 `json:"price_in"`
@@ -707,7 +742,8 @@ func (r UsageReceipt) nodeSigningBytes() []byte {
 	// keeps it, so the co-signed receipt still proves the designation.
 	c.Curated = false
 	c.CuratedAtCost = false
-	c.DispatchedModel = "" // broker-set, like Curated
+	c.DispatchedModel = ""  // broker-set, like Curated
+	c.Unit, c.Units = "", 0 // broker-set: the unit and the broker's own count of it
 	// The void audit fields are broker-set on the $0 path after the node signed, so they
 	// are zeroed here like GrantID; brokerSigningBytes keeps them, so a co-signed void
 	// receipt proves WHY nothing was billed and tampering with the reason is detectable.

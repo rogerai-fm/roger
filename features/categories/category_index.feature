@@ -23,7 +23,8 @@ Feature: GET /categories lists every category with its live supply
     Then the response status is 200
     And the taxonomy version is 1
     And the categories are "language,vision,audio,retrieval,generation,signals"
-    And category "retrieval" lists subcategories "embeddings,rerank"
+    # Amended 2026-11-15 (founder ruling): search stations sit under retrieval/search.
+    And category "retrieval" lists subcategories "embeddings,rerank,search"
     And category "retrieval" has 0 providers and 0 models
 
   Scenario: A category counts its online stations and distinct models

@@ -58,6 +58,9 @@ func canonModality(m string) string {
 	return m
 }
 
+// isSearchOffer reports a search station's offer (priced per query, answered on /v1/search).
+func isSearchOffer(o offer) bool { return o.Modality == protocol.ModalitySearch }
+
 // isVoice reports whether the band is a VOICE band (tts or stt) — the ONE predicate that both
 // groups it into the Voices section and diverts its selection to the preview instead of chat.
 func (b band) isVoice() bool {

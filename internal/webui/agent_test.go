@@ -441,11 +441,12 @@ func TestLocalRowSkipsWhatCannotChat(t *testing.T) {
 	ctrl.SetRows([]node.ShareRow{
 		{Model: "voice", Modality: protocol.ModalityTTS, Upstream: "http://127.0.0.1:8095/v1/chat/completions"},
 		{Model: "whisper-1", Modality: protocol.ModalitySTT, Upstream: "http://127.0.0.1:8896/v1/chat/completions"},
+		{Model: "web-search", Modality: protocol.ModalitySearch, Upstream: "http://127.0.0.1:8888"},
 		{Model: "orphan"}, // detected, but no server carries it
 		{Model: "grok-4.3", Upstream: "http://127.0.0.1:8645/v1/chat/completions"},
 	})
 	s := New(ctrl, Options{})
-	for _, bad := range []string{"voice", "whisper-1", "orphan"} {
+	for _, bad := range []string{"voice", "whisper-1", "web-search", "orphan"} {
 		if _, ok := s.localRow(bad); ok {
 			t.Errorf("%q must not be routable as a chat model", bad)
 		}

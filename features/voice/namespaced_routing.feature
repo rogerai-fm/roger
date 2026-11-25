@@ -97,11 +97,13 @@ Feature: Public voices are namespaced by STATION, attributed, unique per station
       Then a voice with raw id "af_heart" is listed
       And that voice's namespaced_id is "@brave-otter/operator"
 
-    Scenario: An anonymous (unbound, station-less earning) node is still excluded from public /voices
+    # AMENDED 2026-11-15 by features/stations/anonymous_supply.feature (AS2): an anonymous free
+    # voice is listed by its raw id and never under a callsign.
+    Scenario: An anonymous (unbound) free voice is listed by its raw id only, never under a station
       Given an anonymous free tts node "nfree" offering raw model "kokoro" named "Kiosk"
       When an anonymous GET /voices arrives
-      Then no voice with raw id "kokoro" is listed
-      And the voices list is empty
+      Then a voice with raw id "kokoro" is listed
+      And the voice with raw id "kokoro" has no namespaced_id and no operator
 
     Scenario: The full /voices body leaks no node address with station attribution added
       Given station "brave-otter" has an on-air tts node "nb" offering raw model "af_heart" named "Operator" at 15 credits per 1M chars

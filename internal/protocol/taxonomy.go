@@ -67,7 +67,7 @@ var categories = []CategoryDef{
 	{"language", []string{"chat", "code", "reasoning", "summarize", "translate", "extraction", "classification", "creative"}},
 	{"vision", []string{"vlm", "ocr", "document", "detection", "segmentation", "classification"}},
 	{"audio", []string{"tts", "stt", "audio-classification"}},
-	{"retrieval", []string{"embeddings", "rerank"}},
+	{"retrieval", []string{"embeddings", "rerank", "search"}},
 	{"generation", []string{"image", "video", "music"}},
 	{"signals", []string{"time-series", "anomaly", "tabular"}},
 }
@@ -179,7 +179,8 @@ func (t *Taxonomy) normalize(modality string) {
 	// always the broker's own derivation from its modality (below), never anyone's claim - also
 	// on a re-normalize, where the derived category is already set.
 	voice := modality == ModalityTTS || modality == ModalitySTT
-	if (t.Category == "" || voice) && len(t.Tags) == 0 && t.Tuning == "" && t.BaseModel == "" &&
+	search := modality == ModalitySearch
+	if (t.Category == "" || voice || search) && len(t.Tags) == 0 && t.Tuning == "" && t.BaseModel == "" &&
 		t.ContentPolicy == "" && t.License == "" {
 		t.TaxonomySource = ""
 	} else if src := normWord(t.TaxonomySource); src == SourceInferred {
@@ -190,7 +191,9 @@ func (t *Taxonomy) normalize(modality string) {
 
 	if voice {
 		t.Category, t.Subcategory = "audio", modality
-	} else if t.Subcategory == ModalityTTS || t.Subcategory == ModalitySTT {
+	} else if search {
+		t.Category, t.Subcategory = "retrieval", ModalitySearch
+	} else if t.Subcategory == ModalityTTS || t.Subcategory == ModalitySTT || t.Subcategory == ModalitySearch {
 		t.Subcategory = ""
 	}
 }
@@ -249,6 +252,13 @@ func (t Taxonomy) Validate(modality string) error {
 		}
 	} else if sub == ModalityTTS || sub == ModalitySTT {
 		return fmt.Errorf("audio/%s is only for a %s model", sub, sub)
+	}
+	if modality == ModalitySearch {
+		if (cat != "" && cat != "retrieval") || (sub != "" && sub != ModalitySearch) {
+			return fmt.Errorf("a search station is always retrieval/search")
+		}
+	} else if sub == ModalitySearch {
+		return fmt.Errorf("retrieval/search is only for a search station")
 	}
 	switch subs, ok := subcategoriesOf(cat); {
 	case cat == "" && sub != "":

@@ -13,7 +13,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"html"
 	"io"
 	"net/http"
 	"net/url"
@@ -22,6 +21,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"rogerai.fm/roger/v7/internal/protocol"
 )
 
 const (
@@ -209,45 +210,11 @@ func renderResults(rs []searchResult) string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
-// flatten cleans one field of provider text: markup out, entities decoded, all whitespace
-// (including newlines) collapsed to single spaces.
-//
-// Brave wraps query-term matches in <strong>; a live run showed that reaching the model
-// verbatim. Markup spends context on nothing, and tag-shaped text handed to an agent is
-// worse than noise. The newline collapse is load-bearing separately: a newline inside a
-// title or snippet would forge an extra "[n] Title / URL" pair that the citation reader
-// would then bind to somebody else's URL.
-func flatten(s string) string {
-	// Strip, then decode, then NEUTRALIZE what decoding may have re-formed: a snippet
-	// carrying &lt;strong&gt; would otherwise decode into literal tag-shaped text after the
-	// stripper had already run. Decoding first instead would eat legitimate prose ("a < b"),
-	// so the angle brackets are blanked rather than the order reversed.
-	return strings.Join(strings.Fields(angleBrackets.Replace(html.UnescapeString(stripTags(s)))), " ")
-}
-
-// angleBrackets blanks any angle bracket surviving the strip+decode pass.
-var angleBrackets = strings.NewReplacer("<", " ", ">", " ")
-
-// stripTags removes anything between angle brackets. Provider snippets are HTML fragments,
-// not documents, so this is deliberately blunt: no parser, no partial-tag ambiguity, and an
-// unclosed "<" simply truncates there rather than leaking the rest as markup.
-func stripTags(s string) string {
-	var b strings.Builder
-	b.Grow(len(s))
-	for {
-		i := strings.IndexByte(s, '<')
-		if i < 0 {
-			b.WriteString(s)
-			return b.String()
-		}
-		b.WriteString(s[:i])
-		j := strings.IndexByte(s[i:], '>')
-		if j < 0 {
-			return b.String()
-		}
-		s = s[i+j+1:]
-	}
-}
+// flatten cleans one field of provider text (protocol.FlattenText: markup out, entities
+// decoded, whitespace including newlines collapsed). The newline collapse is load-bearing:
+// a newline inside a title or snippet would forge an extra "[n] Title / URL" pair that the
+// citation reader would then bind to somebody else's URL.
+func flatten(s string) string { return protocol.FlattenText(s) }
 
 // braveSearch calls the Brave Search API once. NO retry: a 429 must not be answered by
 // hammering a rate-limited provider (the /discover incident's lesson).

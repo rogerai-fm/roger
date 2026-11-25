@@ -163,8 +163,8 @@ func readOnlyTools(all []harness.Tool) []harness.Tool {
 //
 //	an EMPTY UPSTREAM has nothing to send to, so the row is not offerable - taking it
 //	would trade a broker timeout for a local one;
-//	a VOICE model (tts/stt) cannot run a tool-use loop at all, so it is not a chat
-//	band no matter where it is served from.
+//	a VOICE model (tts/stt) or a SEARCH share cannot run a tool-use loop at all, so it
+//	is not a chat band no matter where it is served from.
 //
 // Same two rules the TUI's localAgentRows applies, for the same reason.
 func (s *Server) localRow(model string) (node.ShareRow, bool) {
@@ -172,7 +172,7 @@ func (s *Server) localRow(model string) (node.ShareRow, bool) {
 		if r.Model != model || r.Upstream == "" {
 			continue
 		}
-		if r.Modality == protocol.ModalityTTS || r.Modality == protocol.ModalitySTT {
+		if r.Modality == protocol.ModalityTTS || r.Modality == protocol.ModalitySTT || r.Modality == protocol.ModalitySearch {
 			continue
 		}
 		return r, true
