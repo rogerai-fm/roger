@@ -1,0 +1,167 @@
+/* =====================================================================
+   company-crew.css - the company page's FIG. 1, the lab and the network as one crew of Pings
+   (CompanyFigure.svelte, app/pages/company.js; drawing and click places by
+   computer-scientist/article/fig_company_gen.py). A page sheet, listed only by company.html, so the
+   pages that share company.css (careers, faq, the legal pages) carry none of its bytes.
+   ===================================================================== */
+/* ---------- FIG. 1  .pg : the lab and the network, one crew (CompanyFigure.svelte, fig_company_gen.py) ----------
+   2026-11-24, founder ask; reviewed by a UX pass the same day. The scene is the isometric hand (components.css
+   .iso__*); Ping is drawn from the iOS rig in its own 32-unit space and stands facing the reader on a 2:1 ground
+   shadow, so its strokes are in that space (vector-effect none). Ink is --ink-900 (Ping turns light on the dark
+   ground, as the app icon does); worn things are ink with a lighter trim, and red is kept for the signal: the
+   eyes, the curve, the model's top face, the beacon and its rings. The tower's beacon is Ping too: two brackets
+   around the lamp, its eye asleep until the model arrives.
+   One loop of 8 s (x --motion): the curve trains down (0-18%), the model appears in the carrier's hands (20%),
+   it walks to the tower (22-44%), hands it over (45%: the beacon's eye opens, two rings leave the tower), each
+   agent hops and pings back as the ring reaches it (delays from the generator's REACH), the carrier walks back.
+   Still (reduced motion, print): the crew at rest, the model in hand, the curve drawn, the beacon awake. */
+.pg { color: var(--ink-700); }
+.pg .pg__stage { max-width: 900px; }
+.pg .pg__ping :is(path, rect, circle, ellipse), .pg .pg__beacon :is(path, circle) { vector-effect: none; }
+.pg__zone { opacity: .035; }
+.pg__path { stroke-dasharray: 2 3; }
+.pg__ink { fill: var(--ink-900); stroke: none; }
+.pg__side, .pg__trim { fill: color-mix(in srgb, var(--ink-900) 45%, var(--paper)); stroke: none; }
+.pg__br { fill: none; stroke: var(--ink-900); stroke-linejoin: miter; stroke-miterlimit: 6; }
+.pg__br.pg__side { stroke: color-mix(in srgb, var(--ink-900) 45%, var(--paper)); }
+.pg__shadow { fill: currentColor; opacity: .12; }
+.pg__ping { --eye: var(--live); }
+.pg__eye--orange { --eye: var(--ping-orange); } .pg__eye--amber { --eye: var(--ping-amber); } .pg__eye--green { --eye: var(--ping-green); }
+.pg__eye--teal { --eye: var(--ping-teal); } .pg__eye--blue { --eye: var(--ping-blue); } .pg__eye--violet { --eye: var(--ping-violet); }
+.pg__eye--pink { --eye: var(--ping-pink); }
+.pg__eye { fill: var(--eye); }
+.pg__beye { fill: var(--live); }
+.pg__trimln, .pg__band, .pg__stem, .pg__rim { fill: none; stroke-linecap: round; }
+.pg__trimln { stroke: color-mix(in srgb, var(--ink-900) 45%, var(--paper)); stroke-width: .85; }
+.pg__band { stroke: var(--ink-900); stroke-width: 1.1; }
+.pg__stem, .pg__rim { stroke: var(--ink-900); stroke-width: .75; }
+.pg__halo { fill: none; stroke: var(--ink-900); stroke-width: .75; }
+.pg__spec { fill: var(--live-tint); opacity: .8; }
+.pg__ring { fill: none; stroke: var(--eye, var(--live)); stroke-width: .6; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.pg__cube { stroke: var(--ink-900); stroke-width: .35; stroke-linejoin: round; }
+.pg__cube--top { fill: var(--live); }
+.pg__cube--l { fill: color-mix(in srgb, var(--ink-900) 10%, var(--paper)); }
+.pg__cube--r { fill: color-mix(in srgb, var(--ink-900) 22%, var(--paper)); }
+/* the board: a training dashboard, four panels; loss in red, everything else ink */
+.pg__panel { fill: var(--paper); stroke: currentColor; stroke-opacity: .25; stroke-width: .8; }
+.pg .pg__line, .pg .pg__gauge { fill: none; stroke-linecap: round; vector-effect: none; stroke-dasharray: 100; stroke-dashoffset: 0; }
+.pg .pg__line { stroke-width: .7; }
+.pg .pg__line--loss { stroke: var(--live); }
+.pg .pg__line--eval { stroke: var(--ink-900); }
+.pg__target { stroke: currentColor; stroke-opacity: .4; stroke-dasharray: 2 2; }
+.pg__bar { fill: color-mix(in srgb, var(--ink-900) 55%, var(--paper)); stroke: none; transform-box: fill-box; transform-origin: bottom; }
+.pg__gtrack { fill: none; stroke: currentColor; stroke-opacity: .18; stroke-width: 2.4; }
+.pg .pg__gauge { stroke: var(--ink-900); stroke-width: .9; }
+.pg__wave { fill: none; stroke: var(--live); stroke-width: 1.2; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.pg__m { --edge: 1; }
+.pg .pg__screen { fill: color-mix(in srgb, currentColor 14%, var(--paper)); }
+.pg__beye { transform-box: fill-box; transform-origin: center; }
+.pg__name--lab { left: 30%; top: 0; }
+.pg__name--net { left: 64%; top: 2%; }
+@container (max-width: 560px) {
+  .pg .iso__name { font-size: var(--t-micro); }
+  .pg__name--lab { left: 2%; }
+  .pg__name--net { left: auto; right: 2%; text-align: right; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pg { --loop: calc(var(--motion) * 8s); }
+  /* the carrier: waits for the model, walks it to the tower, hands it over, walks back */
+  .pg__at--carry > .pg__move { animation: pg-walk var(--loop) ease-in-out infinite; }
+  .pg__ping--carry { animation: pg-step calc(var(--motion) * .5s) ease-in-out infinite alternate; }
+  .pg__ping--carry .pg__model { animation: pg-cube var(--loop) linear infinite; }
+  .pg__ping--carry .pg__look { animation: pg-face var(--loop) step-end infinite; }
+  /* the beacon wakes at the hand-over; two rings leave the tower */
+  .pg__beye { animation: pg-wake var(--loop) ease-out infinite; }
+  .pg__ring--beacon { animation: pg-answer-b var(--loop) ease-out infinite; }
+  .pg__wave { animation: pg-wave var(--loop) linear infinite; }
+  .pg__wave--2 { animation-delay: calc(var(--motion) * .45s); }
+  /* the agents: a hop and a ping as the ring reaches each (fig_company_gen.py REACH, from each one's distance) */
+  :is(.pg__ping--laptop, .pg__ping--rig, .pg__ping--edge), :is(.pg__ping--laptop, .pg__ping--rig, .pg__ping--edge, .pg__ping--phone) .pg__ring {
+    animation: pg-hop var(--loop) ease-out infinite;
+  }
+  :is(.pg__ping--laptop, .pg__ping--rig, .pg__ping--edge, .pg__ping--phone) .pg__ring { animation-name: pg-answer; }
+  .pg__ping--rig, .pg__ping--rig .pg__ring { animation-delay: calc(var(--motion) * -.17s); }
+  .pg__ping--edge, .pg__ping--edge .pg__ring { animation-delay: calc(var(--motion) * -.02s); }
+  .pg__ping--phone .pg__ring { animation-delay: calc(var(--motion) * .29s); }
+  .pg__ping--laptop, .pg__ping--laptop .pg__ring { animation-delay: calc(var(--motion) * .39s); }
+  .pg__ping--phone { animation: pg-hover calc(var(--motion) * 2.4s) ease-in-out infinite alternate; }
+  /* the lab: the curve trains down first; the three at work breathe and blink on their own beats */
+  .pg .pg__line, .pg .pg__gauge { animation: pg-curve var(--loop) ease-out infinite; }
+  .pg__bar { animation: pg-bar var(--loop) ease-out infinite; }
+  .pg__bar--1 { animation-delay: calc(var(--motion) * .12s); } .pg__bar--2 { animation-delay: calc(var(--motion) * .24s); }
+  .pg__bar--3 { animation-delay: calc(var(--motion) * .36s); } .pg__bar--4 { animation-delay: calc(var(--motion) * .48s); }
+  .pg__ping--research { animation: pg-breathe calc(var(--motion) * 3.2s) ease-in-out infinite alternate; }
+  .pg__ping--probe { animation: pg-breathe calc(var(--motion) * 2.6s) ease-in-out infinite alternate; }
+  .pg__m--mast .iso__lamp { animation: pg-blinklamp calc(var(--motion) * 2.6s) steps(1) infinite; }
+  .pg__ping--board .pg__look { animation: pg-read calc(var(--motion) * 5s) ease-in-out infinite alternate; }
+  .pg__ping .pg__iris { transform-box: view-box; transform-origin: 16px 12px; animation: pg-blink calc(var(--motion) * 3.7s) linear infinite; }
+  .pg__ping--board .pg__iris { animation-duration: calc(var(--motion) * 4.3s); }
+  .pg__ping--rig .pg__iris { animation-duration: calc(var(--motion) * 5.1s); }
+  .pg__ping--edge .pg__iris { animation-duration: calc(var(--motion) * 3.3s); }
+}
+@keyframes pg-walk { 0%, 22% { transform: translate(0, 0); } 44%, 50% { transform: translate(67.5px, 19.5px); } 92%, 100% { transform: translate(0, 0); } }
+@keyframes pg-step { from { transform: translateY(0); } to { transform: translateY(-1.4px); } }
+@keyframes pg-cube { 0%, 19% { opacity: 0; } 21%, 44% { opacity: 1; } 46%, 100% { opacity: 0; } }
+@keyframes pg-face { 0% { transform: translate(1.5px, 0); } 46% { transform: translate(-1.5px, 0); } 93% { transform: translate(1.5px, 0); } }
+@keyframes pg-wake { 0%, 43% { transform: scaleY(.12); } 46% { transform: scaleY(1.15); } 48%, 84% { transform: scaleY(1); } 90%, 100% { transform: scaleY(.12); } }
+@keyframes pg-answer-b { 0%, 45% { transform: scale(1); opacity: 0; } 46% { opacity: .9; } 58%, 100% { transform: scale(3); opacity: 0; } }
+@keyframes pg-wave { 0%, 45% { transform: scale(.25); opacity: 0; } 47% { opacity: .55; } 66% { opacity: .35; } 75% { transform: scale(3.9); opacity: 0; } 100% { transform: scale(3.9); opacity: 0; } }
+@keyframes pg-hop { 0%, 66% { transform: translateY(0); } 69% { transform: translateY(-5px); } 72% { transform: translateY(0); } 74% { transform: translateY(-1.6px); } 76%, 100% { transform: translateY(0); } }
+@keyframes pg-answer { 0%, 67% { transform: scale(1); opacity: 0; } 69% { opacity: .9; } 83%, 100% { transform: scale(2.6); opacity: 0; } }
+@keyframes pg-hover { from { transform: translateY(0); } to { transform: translateY(-1.6px); } }
+@keyframes pg-curve { 0% { stroke-dashoffset: 100; } 18%, 100% { stroke-dashoffset: 0; } }
+@keyframes pg-bar { 0% { transform: scaleY(.05); } 14%, 100% { transform: scaleY(1); } }
+@keyframes pg-blinklamp { 0%, 60% { fill: var(--live); stroke: var(--live); } 61%, 100% { fill: var(--paper); } }
+@keyframes pg-breathe { from { transform: translateY(0); } to { transform: translateY(-.6px); } }
+@keyframes pg-read { 0%, 30% { transform: translate(-1.2px, -.4px); } 70%, 100% { transform: translate(.6px, -.8px); } }
+@keyframes pg-blink { 0%, 95% { transform: scaleY(1); } 97% { transform: scaleY(.12); } 100% { transform: scaleY(1); } }
+
+/* ---------- FIG. 1, the crew talks: tap a Ping and it says one thing about RogerAI (app/pages/company.js) ----------
+   Each Ping has a button over it (hidden until the script runs, so a page without JS shows no dead control);
+   the said one hops, its eye rings, and the bubble sits above its head. The places are generated
+   (fig_company_gen.py --svelte CompanyFigure.svelte company.css) between the markers below. */
+.pg__hit {
+  position: absolute; padding: 0; border: 0; border-radius: var(--r-md, 6px); background: transparent; cursor: pointer;
+  min-width: 24px; min-height: 28px;
+}
+.pg__hit:focus-visible { outline: 2px solid var(--live); outline-offset: 2px; }
+.pg__hit:hover { background: color-mix(in srgb, currentColor 5%, transparent); }
+.pg__say {
+  position: absolute; z-index: 2; max-width: min(240px, 60%); width: max-content;
+  transform: translate(var(--say-x, -50%), calc(-100% - 6px));
+  padding: var(--s-2) var(--s-3); border: 1px solid var(--hairline-2); border-radius: var(--r-md, 6px);
+  background: var(--paper); color: var(--ink-900); font-size: var(--t-sm); line-height: 1.35; text-align: left;
+  box-shadow: 0 1px 0 var(--hairline);
+}
+.pg__say[hidden] { display: none; }
+.pg__say b { display: block; font-size: var(--t-xs); color: var(--ink-500); font-weight: var(--weight-semi); margin-bottom: 2px; }
+/* the tail: a small square turned 45 degrees under the bubble, over the speaker */
+.pg__say::after {
+  content: ""; position: absolute; top: 100%; left: calc(var(--say-x, -50%) * -1); width: 9px; height: 9px;
+  background: var(--paper); border-right: 1px solid var(--hairline-2); border-bottom: 1px solid var(--hairline-2);
+  transform: translate(-50%, -4px) rotate(45deg);
+}
+@container (max-width: 560px) { .pg__say { font-size: var(--t-xs); max-width: 70%; } }
+@media (prefers-reduced-motion: no-preference) {
+  .pg__say:not([hidden]) { animation: pg-pop var(--d-3) var(--ease-out-quint); }
+  .pg[data-said="research"] .pg__ping--research, .pg[data-said="board"] .pg__ping--board, .pg[data-said="probe"] .pg__ping--probe,
+  .pg[data-said="carry"] .pg__ping--carry, .pg[data-said="laptop"] .pg__ping--laptop, .pg[data-said="rig"] .pg__ping--rig,
+  .pg[data-said="edge"] .pg__ping--edge, .pg[data-said="phone"] .pg__ping--phone { animation: pg-hello calc(var(--motion) * .7s) ease-out; }
+}
+.pg[data-said="research"] .pg__ping--research .pg__ring, .pg[data-said="board"] .pg__ping--board .pg__ring, .pg[data-said="probe"] .pg__ping--probe .pg__ring,
+.pg[data-said="carry"] .pg__ping--carry .pg__ring, .pg[data-said="laptop"] .pg__ping--laptop .pg__ring, .pg[data-said="rig"] .pg__ping--rig .pg__ring,
+.pg[data-said="edge"] .pg__ping--edge .pg__ring, .pg[data-said="phone"] .pg__ping--phone .pg__ring { opacity: .9; animation: none; }
+@keyframes pg-pop { from { opacity: 0; transform: translate(var(--say-x, -50%), calc(-100% + 2px)); } }
+@keyframes pg-hello { 0% { transform: translateY(0); } 35% { transform: translateY(-6px); } 60% { transform: translateY(0); } 78% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
+/* pg:hits:begin (generated) */
+.pg__hit { width: 5.0%; height: 12.3%; }
+.pg__hit--research { left: 20.4%; top: 21.6%; }  .pg[data-said="research"] .pg__say { left: 22.9%; top: 21.6%; --say-x: -12%; }
+.pg__hit--board { left: 31.9%; top: 26.7%; }  .pg[data-said="board"] .pg__say { left: 34.4%; top: 26.7%; --say-x: -50%; }
+.pg__hit--probe { left: 18.9%; top: 37.0%; }  .pg[data-said="probe"] .pg__say { left: 21.4%; top: 37.0%; --say-x: -12%; }
+.pg__hit--carry { left: 39.9%; top: 30.0%; width: 25.9%; height: 25.3%; }  .pg[data-said="carry"] .pg__say { left: 42.7%; top: 30.0%; --say-x: -50%; }
+.pg__hit--laptop { left: 39.5%; top: 56.0%; }  .pg[data-said="laptop"] .pg__say { left: 42.0%; top: 56.0%; --say-x: -50%; }
+.pg__hit--rig { left: 61.5%; top: 65.6%; }  .pg[data-said="rig"] .pg__say { left: 64.0%; top: 65.6%; --say-x: -50%; }
+.pg__hit--edge { left: 81.3%; top: 62.6%; }  .pg[data-said="edge"] .pg__say { left: 83.8%; top: 62.6%; --say-x: -88%; }
+.pg__hit--phone { left: 47.6%; top: 64.6%; }  .pg[data-said="phone"] .pg__say { left: 50.0%; top: 64.6%; --say-x: -50%; }
+/* pg:hits:end */

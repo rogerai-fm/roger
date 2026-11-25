@@ -47,7 +47,7 @@ test("the headline ships the canonical word in HTML, with the cycle list in foun
   assert.equal(attr(attrs, "data-cycle-store"), "hero-word", "load rotation is opted in");
   assert.equal(attr(attrs, "data-cycle-fit"), ".hero__line", "the tail closes up by transform");
   const text1 = h1().replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
-  assert.match(text1, /world’s decentralized Models \. In under 30 seconds\./);
+  assert.match(text1, /world’s decentralized Models \. Sovereign inference that runs on your hardware or someone else’s through a privatized network\./);   // copy change 2026-11-21 (founder line)
 });
 
 test("the word list lives in one place: no script and no other page carries it", () => {

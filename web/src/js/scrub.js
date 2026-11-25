@@ -15,6 +15,10 @@
    width, e.g. the homepage spectrum on phones), the two stay in step:
    scrubbing brings the tuned item to the middle, and swiping the gallery
    tunes the item that comes to rest in the middle.
+   data-scrub-auto (2026-11-14): the list plays itself while it is in view, one
+   item every 2.8 s, so a figure tells its story without a drag; the first
+   pointer, key or swipe from the reader stops it for good. Off under
+   prefers-reduced-motion and without IntersectionObserver.
    Markup contract: web/DESIGN-SYSTEM.md.
    ===================================================================== */
 (function () {
@@ -35,9 +39,14 @@
     range.style.setProperty("--scrub-n", String(items.length));
     range.setAttribute("aria-label", list.getAttribute("aria-label") || "");
 
+    // the figure the list plays (if any) carries the tuned step as data-step="1".."n", so its sheet can read
+    // the state as [data-step="3"] rather than a :has(li:nth-child(3).is-tuned) chain (2026-11-24). Without
+    // JS the attribute is absent: a sheet's still picture is :not([data-step]).
+    var host = typeof list.closest === "function" ? list.closest("figure") : null;
     function tune(k) {
       range.value = String(k);
       for (var i = 0; i < items.length; i++) items[i].classList.toggle("is-tuned", i === k);
+      if (host) host.setAttribute("data-step", String(k + 1));
       var name = items[k].querySelector("b");
       range.setAttribute("aria-valuetext", name ? name.textContent : String(k));
     }
@@ -81,5 +90,24 @@
     // it, so the needle starts on that first item too (the needle and the view agree)
     var start = parseInt(list.getAttribute("data-scrub-start"), 10);
     tune(start >= 0 && start < items.length && !overflows() ? start : 0);
+    if (list.getAttribute("data-scrub-auto") != null) autoplay();
+
+    // the self-playing figure: advances while in view, stops at the reader's first touch
+    function autoplay() {
+      var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (still || typeof IntersectionObserver !== "function") return;
+      var timer = null, stopped = false;
+      function stop() { stopped = true; clearInterval(timer); timer = null; }
+      function step() { tune((Number(range.value) + 1) % items.length); center(Number(range.value)); }
+      function play() { if (!stopped && !timer) timer = setInterval(step, 2800); }
+      function pause() { clearInterval(timer); timer = null; }
+      ["pointerdown", "keydown", "touchstart"].forEach(function (ev) {
+        range.addEventListener(ev, stop, { passive: true });
+        list.addEventListener(ev, stop, { passive: true });
+      });
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) play(); else pause(); });
+      }, { threshold: 0.4 }).observe(list);
+    }
   }
 })();

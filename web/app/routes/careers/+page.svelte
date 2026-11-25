@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Careers - RogerAI
   // Ported from web/src/careers.html (2026-10-29); the copy is the legacy copy.
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -58,19 +59,13 @@
       </div>
     </aside>
 
-    <nav class="toc-tuner" data-tuner aria-label="Sections">
-      <div class="wrap toc-tuner__band">
-      <div class="toc-tuner__readout" aria-hidden="true"></div>
-      <ol class="toc-tuner__scale">
-        <li><a class="toc-tuner__st" href="#roles"><b>&sect;1</b><span class="toc-tuner__name">RESEARCH</span></a></li>
-        <li><a class="toc-tuner__st" href="#engineering"><b>&sect;2</b><span class="toc-tuner__name">ENGINEERING</span></a></li>
-        <li><a class="toc-tuner__st" href="#industrial"><b>&sect;3</b><span class="toc-tuner__name">INDUSTRIAL DEPLOYMENT</span></a></li>
-        <li><a class="toc-tuner__st" href="#apply"><b>&sect;4</b><span class="toc-tuner__name">HOW TO APPLY</span></a></li>
-        <li><a class="toc-tuner__st" href="#why"><b>&sect;5</b><span class="toc-tuner__name">WHY HERE</span></a></li>
-      </ol>
-      <span class="toc-tuner__needle" aria-hidden="true"></span>
-      </div>
-    </nav>
+    <TocTuner sections={[
+      { id: "roles", no: "§1", name: "RESEARCH" },
+      { id: "engineering", no: "§2", name: "ENGINEERING" },
+      { id: "industrial", no: "§3", name: "INDUSTRIAL DEPLOYMENT" },
+      { id: "apply", no: "§4", name: "HOW TO APPLY" },
+      { id: "why", no: "§5", name: "WHY HERE" },
+    ]} />
 
     <section class="section" id="roles">
       <div class="wrap">

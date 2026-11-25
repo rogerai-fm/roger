@@ -1,4 +1,5 @@
 <script>
+  import LoadState from "#lib/ui/LoadState.svelte";
   // Billing, /billing.html (legacy: web/src/js/billing.js + billing-help.js): the value-first
   // wallet view and the Stripe Checkout top-up. Thin, credentialed reads over the broker
   // behind the session cookie (no token ever touches JS); logged-out visitors go to /login.
@@ -62,7 +63,7 @@
 
   onMount(async () => {
     const res = await bootGet("/billing");
-    if (res.status === 401) { location.replace("/login.html"); return; }
+    if (res.status === 401) { location.replace("/login.html?next=" + encodeURIComponent("/billing.html")); return; }
     if (!res.data) { status = "fault"; return; }
     d = res.data;
     status = "ready";
@@ -72,8 +73,9 @@
   });
 </script>
 <div class="authwrap tint-panel">
+<LoadState status={status} what="your billing" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. Try again shortly.</p>
+  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. <button type="button" class="ghost" onclick={() => location.reload()}>Try again</button></p>
   <h1>Billing</h1>
   <p class="sub">Add money, watch it go further. Your wallet, your spend, and what RogerAI saves you against the name-brand labs.</p>
 

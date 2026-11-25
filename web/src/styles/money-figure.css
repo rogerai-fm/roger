@@ -1,0 +1,116 @@
+/* =====================================================================
+   money-figure.css : the money, drawn once (app/lib/ui/MoneyFigure.svelte)
+   A sheet of its own rather than pricing.css because a second page (the homepage,
+   size="small") will list it; it stays out of components.css until that second page
+   lands (DESIGN-SYSTEM.md, "Before you add a component", step 3). Lead class .mf on
+   every rule, so no shared component is restyled; the tinted ground comes from
+   .figure--plate; every colour a token. The figure is still by design: nothing moves,
+   so reduced motion and print get the same picture.
+
+   <figure class="figure figure--plate mf mf--full|mf--small" role="group" aria-labelledby>
+     .mf__path          one paid path: a tag, then its stage
+       .mf__stage--2|3  grid: the wallet (col 1, every row) | the fork (col 2, every row) |
+                        one .mf__to per row (glyph, share, who, note)
+       .mf__fork        the wires, drawn to the cell (preserveAspectRatio="none"), and the
+                        "per token" label above the trunk
+     .mf__cases         the cases the drawings do not cover (free, curated, custom tuning;
+                        the Tower split too in the small size)
+     figcaption.fig     the claim, in words
+   Since 2026-11-22 the party glyphs are in the isometric hand: their tones and lines are the
+   .iso__* rules of components.css, so this sheet styles only the tip, the mark and the lamp.
+   ===================================================================== */
+.mf { color: var(--ink-700); container-type: inline-size; }
+.mf .mf__path { max-width: 760px; margin: 0 auto; }
+.mf .mf__path + .mf__path { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--hairline-2); }
+.mf .mf__tag {
+  display: block; margin: 0 0 var(--s-2) var(--s-2);
+  font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: var(--tracking-label);
+  text-transform: uppercase; color: var(--ink-500);
+}
+
+/* the stage: three columns, one row per recipient. Rows share one height
+   (minmax(0, 1fr)) so the fork's branches, drawn at the row centres, land on the boxes. */
+.mf .mf__stage {
+  display: grid; grid-template-columns: minmax(0, 132px) minmax(72px, 128px) minmax(0, 1fr);
+  align-items: center; column-gap: 0; padding-inline: var(--s-2);
+}
+.mf .mf__stage--2 { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+.mf .mf__stage--3 { grid-template-rows: repeat(3, minmax(0, 1fr)); }
+.mf .mf__from { grid-column: 1; grid-row: 1 / -1; display: grid; justify-items: center; align-content: center; min-width: 0; text-align: center; }
+.mf .mf__from .mf__glyph { width: 100%; max-width: 112px; }
+.mf .mf__fork { grid-column: 2; grid-row: 1 / -1; position: relative; align-self: stretch; min-width: 0; min-height: 72px; }
+.mf .mf__forksvg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; }
+.mf .mf__wire { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+/* the trunk's label sits above the wire, centred on its left 85% (the branches leave at x=85) */
+.mf .mf__onwire {
+  position: absolute; left: 42.5%; top: 50%; transform: translate(-50%, calc(-100% - 3px));
+  white-space: nowrap; font-family: var(--font-mono); font-size: var(--t-micro);
+  letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-500);
+}
+.mf .mf__to {
+  grid-column: 3; display: grid; grid-template-columns: minmax(48px, 84px) auto minmax(0, 1fr);
+  grid-template-rows: auto auto; align-items: center; column-gap: var(--s-3); row-gap: 2px;
+  padding-block: var(--s-2); min-width: 0;
+}
+.mf .mf__to .mf__glyph { grid-column: 1; grid-row: 1 / -1; width: 100%; }
+.mf .mf__share {
+  grid-column: 2; grid-row: 1; font-family: var(--font-mono); font-size: var(--t-h3);
+  font-weight: var(--weight-semi); font-variant-numeric: tabular-nums; letter-spacing: var(--tracking-tight);
+  color: var(--ink-900); line-height: 1;
+}
+.mf .mf__who {
+  font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi);
+  letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-900);
+}
+.mf .mf__to .mf__who { grid-column: 3; grid-row: 1; }
+.mf .mf__note { color: var(--ink-400); font-size: var(--t-xs); line-height: 1.35; }
+.mf .mf__to .mf__note { grid-column: 2 / -1; grid-row: 2; }
+.mf .mf__from .mf__who { margin-top: var(--s-2); }
+.mf .mf__from .mf__note { margin-top: 2px; max-width: 18ch; }
+
+/* the drawings: the wallet, the station and the tower in the isometric hand (components.css .iso__*,
+   the SVG from fig_money_glyphs_gen.py); the mark flat in ink with its red centre; the tip where
+   the fork's branch lands in currentColor */
+.mf .mf__glyph { display: block; height: auto; overflow: visible; }
+.mf .mf__glyph path, .mf .mf__glyph rect, .mf .mf__glyph circle, .mf .mf__glyph line { vector-effect: non-scaling-stroke; }
+.mf .mf__tip { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.mf .mf__brand { fill: currentColor; color: var(--ink-900); }
+.mf .mf__lamp { fill: var(--live); stroke: none; }
+
+/* the cases: short rows under the drawings, hairlines on top */
+.mf .mf__cases {
+  list-style: none; margin: var(--s-5) auto 0; padding: 0; max-width: 760px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 var(--s-5);
+}
+.mf .mf__cases li { padding: var(--s-3) var(--s-2) 0; border-top: 1px solid var(--hairline-2); font-size: var(--t-xs); line-height: 1.4; color: var(--ink-500); }
+.mf .mf__cases b {
+  display: block; margin-bottom: 2px; font-family: var(--font-mono); font-size: var(--t-micro);
+  font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-900);
+}
+.mf .mf__ask { font-style: normal; color: var(--live-text); white-space: nowrap; }
+
+/* the small size (the homepage): one path, no notes, the cases in two columns */
+.mf--small .mf__note { display: none; }
+.mf--small .mf__path { max-width: 560px; }
+.mf--small .mf__stage { grid-template-columns: minmax(0, 96px) minmax(64px, 104px) minmax(0, 1fr); }
+.mf--small .mf__to { grid-template-columns: minmax(40px, 56px) auto minmax(0, 1fr); }
+.mf--small .mf__cases { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 560px; }
+
+/* phones (by the figure's own width): the notes go, the boxes and the words close up */
+@container (max-width: 480px) {
+  .mf .mf__stage { grid-template-columns: minmax(0, 64px) minmax(64px, 76px) minmax(0, 1fr); padding-inline: 0; }
+  .mf .mf__to { grid-template-columns: minmax(36px, 48px) auto minmax(0, 1fr); column-gap: var(--s-2); }
+  .mf .mf__note { display: none; }
+  .mf .mf__onwire { font-size: 9px; letter-spacing: .06em; }
+  .mf .mf__who { font-size: 10px; letter-spacing: .1em; }
+  .mf .mf__share { font-size: var(--t-body); }
+  .mf .mf__cases, .mf--small .mf__cases { grid-template-columns: minmax(0, 1fr); }
+  .mf .mf__cases li { padding-inline: 0; }
+}
+
+/* drawn in, in the order the money moves: the wallet, the wires, the recipients top to bottom;
+   then a token runs from the wallet to each recipient, the station's first (2026-11-15) */
+.mf .mf__from { --draw-delay: 0s; } .mf .mf__fork { --draw-delay: var(--d-3); }
+.mf .mf__to:nth-of-type(1) { --draw-delay: var(--d-4); } .mf .mf__to:nth-of-type(2) { --draw-delay: var(--d-5); } .mf .mf__to:nth-of-type(3) { --draw-delay: calc(var(--d-5) + var(--d-2)); }
+.mf.is-drawn .mf__comet { opacity: 1; animation: comet calc(var(--motion) * 2.2s) linear infinite; }
+.mf .mf__comet:nth-of-type(3) { animation-delay: -.7s; } .mf .mf__comet:nth-of-type(4) { animation-delay: -1.4s; }

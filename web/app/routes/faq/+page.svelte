@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // FAQ - RogerAI
   // Ported from web/src/faq.html (2026-10-29); the copy is the legacy copy.
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -16,6 +17,14 @@
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What do band, station, Tower and grant key mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "band: a model on the network. station: a machine serving a model. Tower: the relay that routes requests (RogerAI runs one; you can run your own). grant key: a private key that lets an app use a band. The manual's glossary defines the rest of the words."
+        }
+      },
       {
         "@type": "Question",
         "name": "Do I need an account to use RogerAI?",
@@ -106,6 +115,14 @@
       },
       {
         "@type": "Question",
+        "name": "Can I train a model on my own data?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The model is trained on RogerAI's GPUs and served privately, on a band only you can reach. The price is on request."
+        }
+      },
+      {
+        "@type": "Question",
         "name": "How much do I keep of what I earn?",
         "acceptedAnswer": {
           "@type": "Answer",
@@ -117,7 +134,7 @@
         "name": "When do I actually get paid?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Earnings accrue immediately; the principal (90%) is held 30 days and a 10% reserve slice stays back until day 90 to cover the late-chargeback tail. After that you request a payout and payable balances are released on a monthly batch, with a minimum of $25. Stripe Connect onboarding has to be complete first, and Stripe rather than RogerAI holds your identity documents."
+          "text": "Earnings accrue immediately; the principal (90%) is held 30 days and a 10% reserve slice stays back until day 90. After that you request a payout and payable balances are released on a monthly batch, with a minimum of $25. Stripe Connect onboarding has to be complete first, and Stripe rather than RogerAI holds your identity documents."
         }
       },
       {
@@ -248,18 +265,12 @@
       </div>
     </section>
 
-    <nav class="toc-tuner" data-tuner aria-label="Sections">
-      <div class="wrap toc-tuner__band">
-      <div class="toc-tuner__readout" aria-hidden="true"></div>
-      <ol class="toc-tuner__scale">
-        <li><a class="toc-tuner__st" href="#start"><b>&sect;1</b><span class="toc-tuner__name">GETTING STARTED</span></a></li>
-        <li><a class="toc-tuner__st" href="#cost"><b>&sect;2</b><span class="toc-tuner__name">WHAT IT COSTS</span></a></li>
-        <li><a class="toc-tuner__st" href="#share"><b>&sect;3</b><span class="toc-tuner__name">SHARING YOUR GPU</span></a></li>
-        <li><a class="toc-tuner__st" href="#privacy"><b>&sect;4</b><span class="toc-tuner__name">PRIVACY AND SAFETY</span></a></li>
-      </ol>
-      <span class="toc-tuner__needle" aria-hidden="true"></span>
-      </div>
-    </nav>
+    <TocTuner sections={[
+      { id: "start", no: "§1", name: "GETTING STARTED" },
+      { id: "cost", no: "§2", name: "WHAT IT COSTS" },
+      { id: "share", no: "§3", name: "SHARING YOUR GPU" },
+      { id: "privacy", no: "§4", name: "PRIVACY AND SAFETY" },
+    ]} />
 
     <section class="section" id="index">
       <div class="wrap">
@@ -271,6 +282,7 @@
           <div class="page-index__group">
             <a class="page-index__head" href="#start">Getting started</a>
             <ol>
+              <li><a class="page-index__link" href="#q-words-band-station-tower">What do band, station, Tower and grant key mean?</a></li>
               <li><a class="page-index__link" href="#q-need-account-rogerai">Do I need an account to use RogerAI?</a></li>
               <li><a class="page-index__link" href="#q-install">What do I install, and on what?</a></li>
               <li><a class="page-index__link" href="#q-will-work-tools-already">Will it work with the tools I already use?</a></li>
@@ -287,6 +299,7 @@
               <li><a class="page-index__link" href="#q-answer-comes-back-empty">What if the answer comes back empty or unusable?</a></li>
               <li><a class="page-index__link" href="#q-station-over-report-many">Can a station over-report how many tokens it served?</a></li>
               <li><a class="page-index__link" href="#q-add-money-holds-card">How do I add money, and who holds my card?</a></li>
+              <li><a class="page-index__link" href="#q-train-model-own-data">Can I train a model on my own data?</a></li>
             </ol>
           </div>
           <div class="page-index__group">
@@ -323,6 +336,17 @@
         </div>
 
         <div class="faq__group tint-panel">
+          <div class="faq__item">
+            <h3 class="faq__q" id="q-words-band-station-tower">What do band, station, Tower and grant key mean?</h3>
+            <div class="faq__a">
+              <p><b>band</b>: a model on the network. <b>station</b>: a machine serving a model.
+                 <b>Tower</b>: the relay that routes requests (RogerAI runs one; you can run your
+                 own). <b>grant key</b>: a private key that lets an app use a band. The manual's
+                 glossary defines the rest of the words.</p>
+              <a class="faq__more tlink" href="/manual.html#glossary">Manual &middot; what the words mean &rarr;</a>
+            </div>
+          </div>
+
           <div class="faq__item">
             <h3 class="faq__q" id="q-need-account-rogerai">Do I need an account to use RogerAI?</h3>
             <div class="faq__a">
@@ -454,6 +478,15 @@
               <a class="faq__more tlink" href="/privacy.html">Privacy &middot; payments and payouts &rarr;</a>
             </div>
           </div>
+
+          <div class="faq__item">
+            <h3 class="faq__q" id="q-train-model-own-data">Can I train a model on my own data?</h3>
+            <div class="faq__a">
+              <p>Yes. The model is trained on RogerAI's GPUs and served privately, on a band only
+                 you can reach. The price is on request.</p>
+              <a class="faq__more tlink" href="/research-custom-tuning.html">Custom tuning &middot; how it works &rarr;</a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -482,8 +515,8 @@
             <h3 class="faq__q" id="q-when-actually-get-paid">When do I actually get paid?</h3>
             <div class="faq__a">
               <p>Earnings accrue immediately; the principal (90%) is held 30 days and a 10%
-                 reserve slice stays back until day 90 to cover the
-                 late-chargeback tail before they become payable. After that you request a payout
+                 reserve slice stays back until day 90 before they become payable. After that you
+                 request a payout
                  and payable balances are released on a monthly batch, with a minimum of $25. Stripe Connect onboarding has to be complete first, and Stripe rather
                  than RogerAI holds your identity documents.</p>
               <a class="faq__more tlink" href="/manual.html#s7">Manual &middot; earnings and payouts &rarr;</a>

@@ -2,4 +2,3 @@
 // still the plain script in src/js, in the order the page ran them.
 import "../../src/js/wave-mark.js";
 import "../../src/js/wave-mark-spectrum.js";
-import "../../src/js/wave-jobs.js";

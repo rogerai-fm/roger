@@ -54,7 +54,9 @@ test("the homepage Labs card presents the Wave program, not a download", () => {
   assert.doesNotMatch(section, /huggingface\.co\/rogerai-fyi\/wave-/, "no artifact link");
   // What it MUST say instead: the honest status, and the independence promise.
   assert.match(sectionText, /TRAINED/i);
-  assert.match(sectionText, /no checkpoint has been released/i);
+  // 2026-11-21 (founder): the "no checkpoint has been released" line is struck from the card;
+  // the no-download, no-artifact-link and no-AVAILABLE asserts above carry the honesty.
+  assert.doesNotMatch(sectionText, /no checkpoint has been released/i);
   // Internal programme state is deliberately NOT published. It is not something a visitor
   // needs, and it creates a claim that has to be kept current as the work moves.
   assert.doesNotMatch(sectionText, /bake-off/i, "no internal programme stage on a public page");

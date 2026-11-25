@@ -262,7 +262,7 @@
                 <span class="install__copy" aria-hidden="true">copy</span>
               </button>
               <p class="mono qsl__line">then point any OpenAI client at the local endpoint:</p>
-              <p class="mono qsl__endpoint">http://127.0.0.1:11434/v1 <span class="qsl__epnote">· key-scoped</span></p>
+              <p class="mono qsl__endpoint">http://127.0.0.1:4141/v1 <span class="qsl__epnote">· key-scoped</span></p>
             </div>
           </aside>
         </div>

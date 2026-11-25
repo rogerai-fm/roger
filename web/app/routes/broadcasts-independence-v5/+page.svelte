@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Independence Release Broadcast · v5.0.0 - RogerAI
   // Ported from web/src/broadcasts-independence-v5.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -63,21 +64,14 @@
         </figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s0"><b>§0</b><span class="toc-tuner__name">ON THE DIAL IN V5.0.0</span></a></li>
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">OWN YOUR SILICON</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">NO LOCK-IN</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">SIGNED RECEIPTS YOU HOLD</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">RUN YOUR OWN STATION</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">CUT THE CORD</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s0", no: "§0", name: "ON THE DIAL IN V5.0.0" },
+        { id: "s1", no: "§1", name: "OWN YOUR SILICON" },
+        { id: "s2", no: "§2", name: "NO LOCK-IN" },
+        { id: "s3", no: "§3", name: "SIGNED RECEIPTS YOU HOLD" },
+        { id: "s4", no: "§4", name: "RUN YOUR OWN STATION" },
+        { id: "s5", no: "§5", name: "CUT THE CORD" },
+      ]} />
 
       <!-- ---- the narrative ---- -->
       <div class="bc-post__body">

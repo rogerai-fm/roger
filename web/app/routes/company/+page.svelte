@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // RogerAI Company - American AI research and infrastructure
   // Ported from web/src/company.html (2026-10-29); the copy is the legacy copy.
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -6,12 +7,13 @@
   import Nav from "#lib/ui/Nav.svelte";
   import OnAir from "#lib/ui/OnAir.svelte";
   import Rail from "#lib/ui/Rail.svelte";
+  import CompanyFigure from "#lib/ui/CompanyFigure.svelte";
   const head = siteHead({
     title: 'RogerAI Company - American AI research and infrastructure',
     desc: 'RogerAI is an AI company in Orange County, California, building local models and inference infrastructure for practical deployment.',
     og: { type: 'website', title: 'RogerAI - built in Orange County, useful anywhere', desc: 'A founder-led AI company building models and inference infrastructure for practical local AI.', url: 'https://rogerai.fm/company.html', image: 'https://rogerai.fm/og-company.png' },
-    css: [...CSS_SHARED, 'research.css', 'company.css'],
-    scripts: [{ runtime: true }],
+    css: [...CSS_SHARED, 'research.css', 'company.css', 'company-crew.css'],
+    scripts: [{ runtime: true }, { page: "company" }],
   });
 </script>
 <svelte:head>{@html head}</svelte:head>
@@ -58,19 +60,12 @@
       </div>
     </aside>
 
-    <!-- the page's table of contents: the shared tuner, the § labels the sections carry -->
-    <nav class="toc-tuner" data-tuner aria-label="Sections">
-      <div class="wrap toc-tuner__band">
-      <div class="toc-tuner__readout" aria-hidden="true"></div>
-      <ol class="toc-tuner__scale">
-        <li><a class="toc-tuner__st" href="#work"><b>§1</b><span class="toc-tuner__name">WHAT WE BUILD</span></a></li>
-        <li><a class="toc-tuner__st" href="#focus"><b>§2</b><span class="toc-tuner__name">FOCUS</span></a></li>
-        <li><a class="toc-tuner__st" href="#origin"><b>§3</b><span class="toc-tuner__name">ORIGIN &amp; OPENNESS</span></a></li>
-        <li><a class="toc-tuner__st" href="#contact"><b>§4</b><span class="toc-tuner__name">CONTACT</span></a></li>
-      </ol>
-      <span class="toc-tuner__needle" aria-hidden="true"></span>
-      </div>
-    </nav>
+    <TocTuner sections={[
+      { id: "work", no: "§1", name: "WHAT WE BUILD" },
+      { id: "focus", no: "§2", name: "FOCUS" },
+      { id: "origin", no: "§3", name: "ORIGIN & OPENNESS" },
+      { id: "contact", no: "§4", name: "CONTACT" },
+    ]} />
 
     <section class="section" id="work">
       <div class="wrap">
@@ -83,7 +78,7 @@
         </div>
         <div class="co-cards" data-reveal data-reveal-delay="60">
           <article class="tint-panel co-card">
-            <header><span class="research-kicker">PRODUCT</span><span class="status">SHIPPING</span></header>
+            <header><span class="research-kicker">PRODUCT</span><span class="status">ACTIVE</span></header>
             <h3>The RogerAI network</h3>
             <p>An OpenAI-compatible endpoint over models running across community and
                private hardware. It handles discovery, capacity-aware routing, failover,
@@ -105,11 +100,11 @@
             <dl>
               <div><dt>Programs</dt><dd><a href="/research.html">Research notebook</a></dd></div>
               <div><dt>Evidence</dt><dd><a href="/broadcasts.html">Open Air Waves</a></dd></div>
-              <div><dt>Weights</dt><dd><a href="https://huggingface.co/rogerai-fyi">huggingface.co/rogerai-fyi</a></dd></div>
+              <div><dt>Weights</dt><dd>Wave models are served on the network; their weights are not downloadable yet. Published open-model builds: <a href="https://huggingface.co/rogerai-fyi">huggingface.co/rogerai-fyi</a></dd></div>
             </dl>
           </article>
           <article class="tint-panel co-card">
-            <header><span class="research-kicker">POSITION</span></header>
+            <header><span class="research-kicker">POSITION</span><span class="status">ACTIVE</span></header>
             <h3>Frontier capability, local footprint</h3>
             <p>Two directions, one goal: make frontier-capability models reachable on
                hardware you control, and make small models good enough that the frontier is
@@ -118,6 +113,9 @@
             <p>Our models ship in open formats on standard runtimes, so nothing we publish
                depends on RogerAI continuing to exist.</p>
           </article>
+        </div>
+        <div class="co-crew" data-reveal data-reveal-delay="120">
+          <CompanyFigure />
         </div>
       </div>
     </section>

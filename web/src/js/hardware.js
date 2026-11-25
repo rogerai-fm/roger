@@ -75,7 +75,9 @@
   Object.keys(stops).forEach(function (name) {
     var g = stops[name];
     if (!firstCard[name]) return; // a stop with no card is not a control
-    var label = (g.querySelector(".hw-stop__tier") || {}).textContent || name;
+    // the tier name: data-tier since the words moved to HTML spans over the stage (2026-11-23);
+    // the SVG text fallback is the older drawing
+    var label = g.getAttribute("data-tier") || (g.querySelector(".hw-stop__tier") || {}).textContent || name;
     g.setAttribute("role", "button");
     g.setAttribute("tabindex", "0");
     // an svg with role="img" hides every child from assistive tech; once it holds buttons

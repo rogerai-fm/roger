@@ -220,7 +220,8 @@ test("plate: the status words come from the stage tokens, not hand-typed copy", 
   const src = SRC_INDEX().match(/<a class="hero__proof"[\s\S]*?<\/a>/)[0];
   // the page reads the stage word through the data (app: facts.waveStage; legacy: {{wave-stage}})
   assert.match(src, /PICO (?:\{\{wave-stage:pico\}\}|\{@html facts\.waveStage\('pico'\)\}) · NANO (?:\{\{wave-stage:nano\}\}|\{@html facts\.waveStage\('nano'\)\})/);
-  assert.match(src, /aria-label="The Wave Spectrum at RogerAI Labs"/);
+  // the plate's own words are its accessible name (no aria-label: WCAG 2.5.3, 2026-11-14)
+  assert.doesNotMatch(src, /<a class="hero__proof"[^>]*aria-label=/);
   assert.match(src, /href="\/research\.html"/);
 });
 
@@ -376,9 +377,9 @@ const IMPLIES = {
     "Wave Pico (293M) is on air right now as a free band",
     // founder 2026-11-21: Nano's fire controller and fire vision on the market since 2026-11-20
     // 20:27 PT, behind market guards, as specialized models; Nano chat stays off the market
-    "Fire controller and fire vision on air as specialized models &middot; chat off the market",
+    "Fire controller and fire vision on air as specialized models",
     "874&ndash;2,899 MB &middot; fire models on air",
-    "Wave Nano 1.45B, 874 to 2,899 MB, fire models on air, chat off the market",
+    "Wave Nano 1.45B, 874 to 2,899 MB, fire models on air",
     // founder 2026-11-22: Nano's short labels name the fire models, so none reads Nano on air as a whole
     "FIRE ON AIR", "Fire models on air", "Scratch &middot; fire models on air",
   ],

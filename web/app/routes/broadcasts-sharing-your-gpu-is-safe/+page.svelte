@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // The wall between your GPU and your files is four API calls wide.
   // Ported from web/src/broadcasts-sharing-your-gpu-is-safe.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -86,20 +87,13 @@
         <figcaption class="fig mono">FIG. 1 &middot; A SEALED RECEIVER. ONE WIRE IN, ONE WIRE OUT, NOTHING ELSE.</figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">TWO MACHINES, ONE EXCHANGE</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">WHAT YOUR GPU ACTUALLY SEES</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">WHERE A TOOL CALL ACTUALLY HAPPENS</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">NO DOOR IN, ONLY A KNOCK OUT</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "TWO MACHINES, ONE EXCHANGE" },
+        { id: "s2", no: "§2", name: "WHAT YOUR GPU ACTUALLY SEES" },
+        { id: "s3", no: "§3", name: "WHERE A TOOL CALL ACTUALLY HAPPENS" },
+        { id: "s4", no: "§4", name: "NO DOOR IN, ONLY A KNOCK OUT" },
+        { id: "s5", no: "§5", name: "FAQ" },
+      ]} />
 
       <div class="bc-post__body">
 
@@ -281,13 +275,16 @@
             it to. (A couple of RogerAI's own local tools, the browser
             console and the terminal's own proxy, do bind a port, but only
             on <code>127.0.0.1</code> - your own machine talking to itself,
-            unreachable from your network or beyond.) Prompts are also
-            screened by a broker-side moderation service before they reach
-            your station, though we will not overstate that one: it is a
+            unreachable from your network or beyond.) Prompts the broker
+            dispatches are also screened by a broker-side moderation service
+            before they reach your station, though we will not overstate that
+            one: it is a
             real, active layer, not an absolute guarantee, and if the
             screener itself goes down it is built to fail open with a
             loud internal alert rather than silently block everyone's
-            traffic.
+            traffic. Prompts that reach you through a relay (a Tower) are not
+            pre-screened; policy enforcement on that path happens afterwards,
+            on a sample, from the signed transcripts your station keeps.
           </p>
         </section>
 

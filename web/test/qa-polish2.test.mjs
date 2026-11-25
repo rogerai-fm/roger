@@ -34,15 +34,20 @@ const DIAGRAMS = [
   // page, sheet, the svg's class hook, viewBox width, smallest label (SVG units), and the
   // narrowest desktop column it sits in (measured, 1024-1920; Industrial from 1280, as its
   // 1024 column is 842px and a legible floor must scroll there)
-  { page: "tower.html", sheet: "tower.css", svg: "signal__svg", vbw: 720, smallest: 9, desktop: 889 },
-  { page: "tower.html", sheet: "tower.css", svg: "tower__svg", vbw: 640, smallest: 8.5, desktop: 889 },
+  // (the tower's signal path left this list on 2026-11-22: its words are HTML over an isometric
+  //  stage inside the same scroll box, so no SVG label can shrink; .signal still sets --diagram-min)
+  // (the tower's patch panel left this list on 2026-11-23: its words are HTML over an isometric stage that scales
+  //  to the column, so the scroll box went with the SVG text)
   { page: "pricing.html", sheet: "pricing.css", svg: "rwire__svg", vbw: 958, smallest: 16, desktop: 922 },
-  { page: "research-industry.html", sheet: "research.css", svg: "purdue__svg", vbw: 720, smallest: 9, desktop: 888 },
-  { page: "research-wave-family.html", sheet: "wave-family.css", svg: "wf-orbit__svg", vbw: 900, smallest: 16, desktop: 882 },
+  // (the industrial page's placement diagram left this list on 2026-11-22: its level names and labels are HTML
+  //  beside and over an isometric stage that scales to the column, so the scroll box went with the SVG text)
+  // (the Wave Infinite loop left this list on 2026-11-23: its words are HTML over an isometric stage that scales
+  //  to the column, so the scroll box went with the SVG text)
   // polish3: the Hardware ladder (its own 780px scroller left 7.3px labels at 390) and the
   // Research scope (a 480-unit PPI shrunk to 350px: 8px labels; its smallest phone label is
   // 11 units, the bearings step up to 12 at <=720; on a desktop it sits in a 360px column)
-  { page: "research-hardware.html", sheet: "research-hardware.css", svg: "hw-ladder", vbw: 1180, smallest: 11, desktop: 922 },
+  // (the hardware ladder left this list on 2026-11-23: its words are HTML spans over an isometric stage that keeps
+  //  the same scroll box and the same 780px / 1182px floors, so there is no SVG label left to measure)
   { page: "research.html", sheet: "research.css", svg: "scope__ppi", vbw: 480, smallest: 11, desktop: 360 },
 ];
 

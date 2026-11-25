@@ -162,7 +162,8 @@ test("each shared component is defined in components.css and nowhere else", () =
 test("components.css styles only components: no page class rides on the shared layer", () => {
   // components.css must not carry page-specific selectors: every class in it is a component's
   // (or a state/hook it documents), so no page's markup is styled from the shared layer by accident
-  const STATES = new Set(["is-copied", "is-current", "is-tuned", "is-dragging", "is-tuning", "is-selected", "is-live", "is-off", "is-quiet", "is-out", "is-in", "inline", "fig", "tok", "beacon"]);
+  const STATES = new Set(["is-copied", "is-current", "is-tuned", "is-dragging", "is-tuning", "is-selected", "is-live", "is-off", "is-quiet", "is-out", "is-in", "inline", "fig", "tok", "beacon",
+    "is-drawing", "is-drawn", "is-settled"]);   // the drawn-in figure's three states (draw.js, 2026-11-15)
   const blocks = new Set(selectors(read("styles/components.css")).map(leadClass).filter(Boolean).map(blockOf));
   for (const sel of selectors(read("styles/components.css"))) {
     for (const [, cls] of sel.matchAll(/\.([\w-]+)/g)) {
@@ -180,12 +181,12 @@ test("components.css styles only components: no page class rides on the shared l
 const COLOR = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\(/g;
 const CSS_COLOR_BUDGET = {
   "app.css": 9,                        // phone/screenshot drop shadows per theme
-  "base.css": 2,                       // the OC orange's drop shadow, the nav panel shadow
+  "base.css": 1,                       // the nav panel shadow (the OC orange's drop shadow went 2026-11-23)
   "billing.css": 1,                    // modal scrim
   "broadcast-routing.css": 5,          // the routing diagram's palette
   "home.css": 20,                      // the reel's film black, book shadows
   "models.css": 2,                     // modal scrim
-  "playbox.css": 56,                   // Playbox deck palette
+  "playbox.css": 55,                   // Playbox deck palette (the cassette's drop shadow went 2026-11-23)
   "research.css": 3,                   // photo credit plate over photography
   "wave-factory.css": 86,              // Playbox factory deck (self-contained game)
   "wave-patch.css": 168,               // Playbox mesh deck (self-contained game)
@@ -346,6 +347,11 @@ const TWIN_EXCEPTIONS = {
   "tower.css .tower__head = wave-family.css .wf-rail__head": "a figure's title bar on two different instruments: " + LAYOUT,
   "tower.css .run__note = wave-family.css .wf-bandnote": "a small note under a figure on two pages: " + LAYOUT,
   "wave-factory.css .cl-say__prov = wave-factory.css .cl-auto__note": "inside the Playbox factory game (self-contained; its type-floor test pins each rule)",
+  // The figure's mono name on a second page's own sheet (oil-gas.css, 2026-11-21), so
+  // research-oil-gas.html does not carry custom-tuning.css; the ink stroke twin went when FIG. 1
+  // moved to the shared isometric hand (components.css .iso__*, 2026-11-22). Promote the name to
+  // components.css when custom-tuning.css is next touched, and drop these three.
+  "custom-tuning.css .tf__name = oil-gas.css .og__name": "the figure's mono name, same hand on a second page sheet",
 };
 function classDecls() {
   const out = [];
@@ -406,7 +412,6 @@ test("no component exists twice under two names (identical or near-identical dec
 const RED = /var\(--live(-glow|-wash|-tint)?\b|224,\s*35,\s*28|255,\s*68,\s*56|#E0231C|#FF4438/i;
 const RED_LAMPS = {
   "base.css .brand__pulse": "the brand mark's on-air beacon (3px)",
-  "base.css .ping__eye": "Ping's eye lamp (3px)",
   "home.css .pingband__grille": "the LED banner's 6px grille dot (5px)",
   'home.css .pingdeck[data-ping-state="onair"] .pingdeck__led, .pingdeck[data-ping-state="transmit"] .pingdeck__led': "the deck's on-air / transmit LED (6px)",
   "home.css .twoway__beam::after": "the 6px dot travelling the beam (6px)",

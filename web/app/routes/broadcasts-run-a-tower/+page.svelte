@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Run a RogerAI Tower and earn as a relay operator
   // Ported from web/src/broadcasts-run-a-tower.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -67,22 +68,15 @@
         <figcaption class="fig mono">FIG. 1 - THE MAST IN THE MIDDLE</figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">THE THIRD JOB</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">WHAT IT CAN SEE</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">THE MONEY</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">THE OTHER REASON</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">BRINGING ONE UP</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">WHY BOTHER</span></a></li>
-          <li><a class="toc-tuner__st" href="#s7"><b>§7</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "THE THIRD JOB" },
+        { id: "s2", no: "§2", name: "WHAT IT CAN SEE" },
+        { id: "s3", no: "§3", name: "THE MONEY" },
+        { id: "s4", no: "§4", name: "THE OTHER REASON" },
+        { id: "s5", no: "§5", name: "BRINGING ONE UP" },
+        { id: "s6", no: "§6", name: "WHY BOTHER" },
+        { id: "s7", no: "§7", name: "FAQ" },
+      ]} />
 
       <blockquote class="bc-answer" data-reveal>
         <b>Quick answer.</b> A <b>Tower</b> is a relay you run on your own Linux box. Consumers submit
@@ -290,7 +284,7 @@
             </ol>
             <p>So: expect your relay figure to start at zero and to move with those two things
               rather than with the day you installed. Run a Tower because you want this middle to
-              belong to more than one party; treat the 10% as upside on that, not as a
+              belong to more than one party; treat the 5% as upside on that, not as a
               projection.</p>
           </div>
         </section>
@@ -305,7 +299,7 @@
           <ul class="bc-dial">
             <li><b>joined</b> - a child relay of the public network. Core stays the admission,
               routing, settlement and revocation authority, consumers are routed to you, and
-              this is the mode that earns the 10%.</li>
+              this is the mode that earns the 5%.</li>
             <li><b>standalone</b> - your own local network with <b>its own trust root</b>. It
               performs no RogerAI discovery, settlement or advertisement, and that is structural
               rather than a setting you could flip: a standalone Tower's config will not even
@@ -356,7 +350,7 @@
           <p>
             Enrolling is a signed act tied to your account, because putting a relay on the network
             under your name is an account decision - that is what the <code>login</code> step is
-            for, and it is also what makes the 10% yours. You attach nobody by hand - and cannot:
+            for, and it is also what makes the 5% yours. You attach nobody by hand - and cannot:
             Core decides which Tower each node lands on (see the note in &sect;3 for what that
             means for a new Tower). From there,
             <code>roger-tower status</code> shows admission state and attached nodes,

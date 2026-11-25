@@ -43,13 +43,13 @@
 /* the composition: desk set behind, handheld in front */
 .app-hero__stage { margin-top: clamp(28px, 4vw, 48px); width: 100%; }
 .app-hero__stage > .fig { display: block; margin-bottom: var(--s-3); }
-.app-hero__devices { position: relative; max-width: 840px; padding-bottom: clamp(24px, 5vw, 56px); }
+.app-hero__devices { position: relative; max-width: 760px; padding-bottom: clamp(24px, 5vw, 56px); }
 .app-hero__mac { display: block; width: min(100%, 720px); }
 /* the handheld overlaps the desk set's corner; the selector carries the parent
    so the later .app-shot { position: relative } base can't flatten it back
    into flow (equal specificity would let source order win). */
 .app-hero__devices .app-hero__phone {
-  position: absolute; right: 0; bottom: 0; width: clamp(130px, 24%, 200px);
+  position: absolute; right: 0; bottom: 0; width: clamp(130px, 26%, 210px);
   box-shadow: 0 18px 44px rgba(21, 20, 15, .18);
 }
 /* the hero desk set stays chromeless: the composition is the frame (no window
@@ -94,6 +94,16 @@
   border-radius: var(--r-md, 6px) var(--r-md, 6px) 0 0;
 }
 .app-shot--mac img { border-top: 1px solid var(--hairline); border-radius: 0 0 var(--r-md, 6px) var(--r-md, 6px); }
+/* the 1.3 App Store plates (2026-11) are composites: the headline, the art and the
+   window are all in the picture, so they mount chromeless - no title tape, a plain
+   hairline and the page's rounded corners. The window in the picture is the chrome. */
+.app-shot--plate::before { content: none; }
+.app-shot--plate img { border-top: 1px solid var(--hairline); border-radius: var(--r-md, 6px); }
+/* a phone-sized App Store composite already draws its phone: mount it as a plate
+   (hairline, the page's corners), never a bezel around the bezel. */
+.app-shot--phone.app-shot--plate img { border: 1px solid var(--hairline); border-radius: var(--r-md, 6px); }
+/* the wrist set: a watch capture reads as the watch, a rounder bezel than the handheld */
+.app-shot--watch img { border: 1.5px solid var(--ink-700); border-radius: clamp(18px, 12%, 40px); }
 /* the tune sheet: crop the empty scrim below the sheet so the plate is all signal */
 .app-shot--crop img { aspect-ratio: 780 / 1100; object-fit: cover; object-position: top; }
 /* the shots are light-UI captures; in the dark room, adapt, don't invert (founder
@@ -104,6 +114,7 @@
   filter: brightness(.76) contrast(1.12) sepia(.08);
   padding: 5px; background: var(--paper-3); border-color: var(--hairline-2);
 }
+[data-theme="dark"] .app-shot--plate img { padding: 0; filter: brightness(.85) contrast(1.06); }
 [data-theme="dark"] .app-shot img,
 [data-theme="dark"] .app-shot--mac::before { border-top-color: var(--ink-900); }
 [data-theme="dark"] .app-hero__phone { box-shadow: 0 18px 44px rgba(0, 0, 0, .5); }
@@ -141,17 +152,23 @@
    for live signals. */
 .app-ico { flex: 0 0 auto; color: var(--ink-400); }
 
-/* media arrangements: a phone pair, a phone-over-mac stack, a phone trio */
+/* media arrangements: a phone pair, a phone beside the desk set, a phone trio.
+   (2026-11-24 UX pass) Every plate in a row reserves two caption lines and
+   sets its caption flush to the image, so a caption that wraps never drops its
+   image below its neighbour's; image tops line up. */
+.app-feature__media--pair .app-shot > .fig,
+.app-feature__media--trio .app-shot > .fig { min-height: 2lh; display: flex; align-items: flex-end; }
 .app-feature__media--pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5); align-items: start; }
-/* phone + mac: STACK them - a 1280px mac UI squeezed beside a phone is
-   illegible grey mush; full-width below, it reads. The phone centers over it. */
-.app-feature__media--pair:has(.app-shot--mac) { grid-template-columns: 1fr; gap: var(--s-6); }
-.app-feature__media--pair:has(.app-shot--mac) .app-shot--phone { max-width: 300px; justify-self: center; }
-.app-feature__media--pair:has(.app-shot--mac) .app-shot--mac { max-width: 700px; justify-self: center; width: 100%; }
+/* phone + desk set: side by side on one bottom edge, the phone in the narrow
+   track, so neither plate dwarfs the other and the copy column has no hole. */
+.app-feature__media--pair:has(.app-shot--mac) { grid-template-columns: minmax(0, 34fr) minmax(0, 66fr); align-items: stretch; }
+/* captions on one top line, images on one bottom edge */
+.app-feature__media--pair:has(.app-shot--mac) .app-shot > .fig { min-height: 0; }
+.app-feature__media--pair:has(.app-shot--mac) .app-shot img { margin-top: auto; }
 .app-feature__media--trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); align-items: start; }
 
 /* ---------- the desk set (full-bleed mac plate) ------------------ */
-.app-desk__stage { max-width: 960px; }
+.app-desk__stage { max-width: 960px; display: grid; gap: var(--s-7, 40px); }   /* two plates since 2026-11: Tune In, then Ping */
 .app-desk__stage .app-shot img { box-shadow: 0 24px 56px rgba(21, 20, 15, .10); }
 [data-theme="dark"] .app-desk__stage .app-shot img { box-shadow: 0 24px 56px rgba(0, 0, 0, .45); }
 
@@ -227,10 +244,22 @@
   /* the handheld stands taller than the desk set here: room above it, so it (and
      its stamp) clears the FIG. caption instead of sitting on it */
   .app-hero__devices { padding-top: var(--s-12); }
-  .app-feature__media--pair { grid-template-columns: 1fr 1fr; }
-  .app-feature__media--pair:has(.app-shot--mac) { grid-template-columns: 1fr; }
-  .app-feature__media--trio { grid-template-columns: 1fr 1fr; }
-  .app-feature__media--trio .app-shot:last-child { grid-column: span 2; max-width: 60%; margin-inline: auto; }
+  /* one phone width on a phone: half the measure, the same as a pair's cell, so
+     every handheld plate on the page is one size, whatever its caption says */
+  .app-feature__media { --phone-w: calc((100% - var(--s-5)) / 2); }
+  .app-feature__media--pair:has(.app-shot--mac) { grid-template-columns: 1fr; gap: var(--s-5); }
+  .app-feature__media--pair:has(.app-shot--mac) .app-shot--phone { width: var(--phone-w); }
+  /* a phone trio becomes a swipe strip: same width as every other handheld, the
+     next plate peeking at the edge so the reader knows there is more */
+  .app-feature__media--trio:not(:has(.app-shot--watch)) {
+    display: flex; gap: var(--s-5); overflow-x: auto; scroll-snap-type: x mandatory;
+    margin-inline: calc(-1 * var(--gutter, 20px)); padding-inline: var(--gutter, 20px);
+    scroll-padding-inline: var(--gutter, 20px); scrollbar-width: none;
+  }
+  .app-feature__media--trio:not(:has(.app-shot--watch))::-webkit-scrollbar { display: none; }
+  .app-feature__media--trio:not(:has(.app-shot--watch)) .app-shot { flex: 0 0 calc((100% - var(--s-5)) / 2.2); scroll-snap-align: start; }
+  /* the wrist set stays three across: three small faces fit a phone */
+  .app-feature__media--trio:has(.app-shot--watch) { gap: var(--s-2); }
 }
 
 /* ---------- the desktop pair: one rotating figure per section ----

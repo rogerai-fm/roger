@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // How to run a local LLM on your own GPU (free)
   // Ported from web/src/broadcasts-run-local-llm.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -35,21 +36,14 @@
      (the page's doc comment, from the legacy file; its sheets are the css: list above) -->
 
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">THE BASICS</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">THE FREE PATH</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">SIZING</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">WIRING IT UP</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">WHEN YOURS ISN'T ENOUGH</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "THE BASICS" },
+        { id: "s2", no: "§2", name: "THE FREE PATH" },
+        { id: "s3", no: "§3", name: "SIZING" },
+        { id: "s4", no: "§4", name: "WIRING IT UP" },
+        { id: "s5", no: "§5", name: "WHEN YOURS ISN'T ENOUGH" },
+        { id: "s6", no: "§6", name: "FAQ" },
+      ]} />
 
       <!-- QUICK ANSWER: 40-60 words, answered directly. AI engines pull this near-verbatim. -->
       <blockquote class="bc-answer" data-reveal>

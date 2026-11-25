@@ -366,23 +366,24 @@
     panels.forEach(function (p) { if (p !== except) setOpen(p, false); });
   }
 
-  /* The Playbox decks are a disclosure nested INSIDE the Models panel. It is
-     not one of `panels` (those are the top-level groups and close each other),
-     so it gets its own tiny handler - same contract, same attributes. */
-  var deckBtn = document.getElementById("navDecksBtn");
-  var deckPanel = document.getElementById("navDecksPanel");
-  if (deckBtn && deckPanel) {
-    deckBtn.addEventListener("click", function (e) {
+  /* A disclosure nested INSIDE a panel (the Playbox decks under Models, the model
+     pages under Models and status in Research, 2026-11-23). It is not one of `panels`
+     (those are the top-level groups and close each other), so each gets its own tiny
+     handler - same contract, same attributes; the button names its panel by
+     aria-controls and carries both of its labels (data-show, data-hide). */
+  Array.prototype.forEach.call(document.querySelectorAll(".nav__more--sub"), function (subBtn) {
+    var subPanel = document.getElementById(subBtn.getAttribute("aria-controls"));
+    if (!subPanel) return;
+    subBtn.addEventListener("click", function (e) {
       e.stopPropagation();
-      var open = deckBtn.getAttribute("aria-expanded") === "true";
-      deckBtn.setAttribute("aria-expanded", open ? "false" : "true");
-      deckPanel.hidden = open;
+      var open = subBtn.getAttribute("aria-expanded") === "true";
+      subBtn.setAttribute("aria-expanded", open ? "false" : "true");
+      subPanel.hidden = open;
       /* the label states the ACTION the press will perform, matching the
          way the arrow turns - a screen reader hears what the arrow shows */
-      deckBtn.setAttribute("aria-label",
-        open ? "Show the three Playbox decks" : "Hide the three Playbox decks");
+      subBtn.setAttribute("aria-label", subBtn.getAttribute(open ? "data-show" : "data-hide"));
     });
-  }
+  });
 
   panels.forEach(function (entry) {
     entry.btn.addEventListener("click", function () {

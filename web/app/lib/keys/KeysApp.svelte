@@ -232,7 +232,7 @@
         </select>
       </div>
       <button type="submit" class="primary">Mint account key</button>
-      <p class="kf__err" id="akErr" hidden={!akErr}>{akErr}</p>
+      <p class="kf__err" id="akErr" role="alert" hidden={!akErr}>{akErr}</p>
     </form>
 
     <div class="kf__reveal" id="akReveal" hidden={!akSecret} onclick={akRevealClick}>{@html akSecret ? AK.revealHTML(akSecret) : ""}</div>
@@ -293,7 +293,7 @@
         <div class="kf__adv-body">
           <div class="kf__field">
             <span class="kf__k">Billing</span>
-            <div class="kf__opts" role="radiogroup" aria-label="Billing">
+            <div class="kf__opts" role="group" aria-label="Billing">
               {#each [["free", "Free"], ["self", "Self ($0)"], ["priced", "Sponsored"]] as [m, label]}
                 <button type="button" class="kf__opt{billMode === m ? ' is-active' : ''}" data-bill={m} aria-pressed={billMode === m ? "true" : "false"} onclick={() => setBill(m)}>{label}</button>
               {/each}
@@ -340,7 +340,7 @@
 
           <div class="kf__field">
             <span class="kf__k">Node scope</span>
-            <div class="kf__opts" role="radiogroup" aria-label="Node scope">
+            <div class="kf__opts" role="group" aria-label="Node scope">
               {#each [["all", "All my nodes"], ["pick", "Pick nodes"]] as [m, label]}
                 <button type="button" class="kf__opt{scopeMode === m ? ' is-active' : ''}" data-scope={m} aria-pressed={scopeMode === m ? "true" : "false"} onclick={() => (scopeMode = m)}>{label}</button>
               {/each}
@@ -352,7 +352,7 @@
 
           <div class="kf__field">
             <span class="kf__k">Model scope</span>
-            <div class="kf__opts" role="radiogroup" aria-label="Model scope">
+            <div class="kf__opts" role="group" aria-label="Model scope">
               {#each [["all", "Any model"], ["pick", "Pick models"]] as [m, label]}
                 <button type="button" class="kf__opt{modelScope === m ? ' is-active' : ''}" data-mscope={m} aria-pressed={modelScope === m ? "true" : "false"} onclick={() => (modelScope = m)}>{label}</button>
               {/each}
@@ -365,7 +365,7 @@
       </details>
 
       <button type="submit" class="primary" id="createBtn" disabled={minting}>{minting ? "Minting..." : "Mint key"}</button>
-      <p class="kf__err" id="createErr" hidden={!createErr}>{createErr}</p>
+      <p class="kf__err" id="createErr" role="alert" hidden={!createErr}>{createErr}</p>
     </form>
 
     <!-- the one-time secret reveal -->

@@ -158,7 +158,7 @@
       ],
       "vlCredit": "Data credit. The vision module and the camera smoke detector it works with were trained in part on HPWREN archived data (CC BY-NC 4.0; commercial use under HPWREN&rsquo;s no-fee Commercial Use Permission, registration filed by RogerAI). Data courtesy of HPWREN, University of California San Diego. FIgLib: Dewangan et al. (2022), Remote Sensing 14(4), 1007. HPWREN data are not intended for decision-making. The fire-decision adapter uses no HPWREN data.",
       "parts": [
-        { "title": "Chat.", "text": "The base model on its own: telemetry, the fleet, the fire-site rollup, and conversation. Off the market until it passes the release gate." },
+        { "title": "Chat.", "text": "The base model on its own: telemetry, the fleet, the fire-site rollup, and conversation." },
         { "title": "Fire sensor-reading adapter.", "text": "Routed per request. Reads a fire site&rsquo;s sensor frame: threat call, escalation, source, wind alignment and regime. Ships in the release; not on the band." },
         { "title": "Fire-decision controller adapter.", "text": "Routed per request. Gives the site controller its decision from camera, chemistry and wind, plans its tool calls, names missing inputs, answers override requests, and steps back once a person acknowledges. On the market behind a market guard as <code>wave-nano-fire-controller</code>, a specialized model, not a chat model." },
         { "title": "Vision fire-confirm module.", "text": "Nano-VL. After the camera detector alarms, it confirms smoke on the frame and describes it. On the market behind a market guard as <code>wave-nano-fire-vision</code>, a specialized model, not a chat model." }

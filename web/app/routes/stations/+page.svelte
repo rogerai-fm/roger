@@ -17,4 +17,4 @@
 <svelte:head>{@html head}</svelte:head>
   <Nav variant='lean' home='/' promo={false} />
 <Island name="stations" component={StationsApp} />
-  <Footer />
+  <Footer anchors='/' />

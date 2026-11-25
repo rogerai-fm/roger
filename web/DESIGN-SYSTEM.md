@@ -33,6 +33,14 @@ is the module that wakes on the hook (every page loads it: `app/runtime.js` bund
 | Anchor hold | `[data-anchor-hold]` | `anchor-hold.js` | homepage |
 | Cycle word | `.cycle-word` (`--tune`), `[data-cycle]` (`-hrefs`, `-store`, `-fit`, `-reserve`) | `cycle.js` `[data-cycle]` | nav App item (every page), homepage headline |
 | Figure | `.figure` (`--plate`, `--phone`, `--chart`, `--mono`) | - | the articles |
+| Money figure | `MoneyFigure.svelte` (`app/lib/ui`), `.mf` (`--full`, `--small`); its rules in `money-figure.css`, a sheet the page lists | - | Pricing §2 (`size="full"`), homepage §8 (`size="small"`) |
+| Band figure | `BandFigure.svelte` (`app/lib/ui`), `.bf`; its rules in `band-figure.css`, a sheet the page lists | `scrub.js` (runtime, `data-scrub-auto`), `draw.js` (page script) | Homepage §5 |
+| Guard figure | `GuardFigure.svelte` (`app/lib/ui`), `.gf`; its rules in `guard-figure.css`, a sheet the page lists | `scrub.js` (runtime, `data-scrub-auto`), `draw.js` (page script) | Pricing §3 |
+| Hold figure | `HoldFigure.svelte` (`app/lib/ui`), `.hf`; its rules in `hold-figure.css`; the page's `.lifecycle` list as children | `scrub.js` (runtime, `data-scrub-auto`), `draw.js` (page script) | Pricing §4 |
+| Oil and gas figures | `UseCaseFigure.svelte`, `PipeFigure.svelte`, `CrossCheckFigure.svelte` (`app/lib/ui`), `.og` `.pf` `.xf`; their rules in `oil-gas.css` | `scrub.js` (runtime, `data-scrub-auto`), `draw.js` (page script) | research-oil-gas §hero, §3, §4 |
+| Custom-tuning figures | `TuningFigure.svelte` `.tf`, `AddonShelfFigure.svelte` `.as`, `ReportFigure.svelte` `.rf`, `PrivateBandFigure.svelte` `.pb`, `HandoffFigure.svelte` `.ho` (`custom-tuning.css`, page sheet) | `scrub.js` (FIG. 1, 2, 5), `keyswitch.js` (FIG. 4), `barslider.js` (FIG. 3), the last two as the page's own script | Custom tuning |
+| Key switch | `[data-keyswitch]` buttons with `data-key` inside a `[data-keyed]` figure | `keyswitch.js` (page script) | Custom tuning FIG. 4 |
+| Bar slider | `[data-barslider]` on the `[data-bar-row]` itself, a range laid over the row's track with its thumb as the red tick, inside a `[data-report]` figure | `barslider.js` (page script) | Custom tuning FIG. 3 |
 | Scroll box | `.scroll-box` (`--diagram`) | - | every wide table; the Tower, Pricing, Industrial, Wave family, Hardware ladder and Research scope diagrams |
 | Data table | `.data-table` | - | articles, manual, Integrations, Hardware, Wave family |
 | Code block | `.code-block` | `site.js` (adds the copy button) | the manual, Integrations, 3 articles |
@@ -360,6 +368,112 @@ another when the list is laid out whole (broadcast 016's training row starts on 
 step, the payoff). A sideways gallery ignores the attribute: loading never scrolls a gallery,
 it shows its first item, and the needle starts on that item so the two agree (on a phone
 the training row starts on Step 0). No-JS: the complete static list, no control.
+`data-scrub-auto` (2026-11-14): the list plays itself while it is in view, one item every 2.8 s,
+so a figure tells its story without a drag; the reader's first pointer, key or swipe stops it for
+good. Off under reduced motion. The custom-tuning figures 1, 2 and 5 use it.
+
+### Drawn-in figure and comets
+A figure marked `data-draw` draws itself in the first time it scrolls into view: `draw.js`
+(a page's own script) measures every SVG stroke's on-screen length into `--len`, adds
+`.is-drawing` (each line hidden behind a dash as long as itself, fills clear) and on view
+`.is-drawn`; the page sheet's rules then run the dash out and fade the fills up, part by part
+(`--draw-delay` per part, `--d-N` tokens only), and `.is-settled` a few seconds later lets the
+dash rules go. Shapes with a dash pattern of their own keep it (`data-draw-skip`). A number
+marked `data-count` (with `data-count-suffix`) counts up on the same cue. A comet is a `path`
+over a cable with class `tf__comet`: a dash a seventh of `--len` long travelling the cable's
+length once per loop, shown only in the state it explains and `display: none` under reduced
+motion. Without JS or under reduced motion the figure is complete at first paint. First use:
+the five custom-tuning figures (2026-11-15).
+
+### Band figure
+`<BandFigure fig={5} />`: your tools, one wire, RogerAI, a fan to three stations (two home GPUs and a
+Tower). A scrubbed step list (`data-scrub data-scrub-auto`) plays three steps itself until the reader
+touches it: 1 the strongest station answers and the request runs the wire there and back as a comet;
+2 it fades (lamp out, route dashed, a cross, no comet, the receipt dims); 3 the next station answers
+and the address plate flashes once, because nothing on the reader's side changed. `data-draw`: the
+figure draws itself in on first view. Reduced motion, no JS and print get step 1 as the still. Every
+rule in `band-figure.css` leads with `.bf`; colours are tokens; motion is `--d-*` and `--motion`.
+First use: homepage §5 (2026-11-20).
+
+### Guard figure
+`<GuardFigure fig={2} />`: one price scale per million tokens out, drawn schematically (the caption
+says so), three rules on it ($10, $20, $100), a gate for the reader's own ceiling that slides, and
+stations as price tags at the price each asked. A scrubbed step list (`data-scrub data-scrub-auto`)
+plays four steps: 1 the $10 ceiling holds and the request runs to the $4 tag; 2 the gate slides to
+$24 with the typed number shown, the $14 tag comes within reach; 3 a $140 tag lands past the end and
+is crossed out; 4 the $14 tag drifts to $30, past the gate, greys, and the request runs to the $4 tag
+again. Every dollar figure is a policy constant (manual §6) or the reader's example ceiling. `data-draw`;
+reduced motion, no JS and print get step 1. Every rule in `guard-figure.css` leads with `.gf`. First
+use: pricing §3 (2026-11-21).
+
+### Hold figure
+`<HoldFigure fig={3}>…</HoldFigure>`: a day ruler (0, 30, 90), the earning as two chips (the principal,
+the 10% reserve slice), the bank at the end. The page's own `<ol class="lifecycle" data-scrub
+data-scrub-auto>` is passed in as children and is the figure's step list, so the page keeps its words
+and its contract: 1 Accrued, the earning at day 0; 2 Held, the hold spans show and the chips wait,
+dashed; 3 Payable, each chip at the end of its hold, lit; 4 Paid, both chips run into the bank and its
+lamp lights. `data-draw`; reduced motion, no JS and print get stage 1. Every rule in `hold-figure.css`
+leads with `.hf`. First use: pricing §4 (2026-11-21).
+
+### Oil and gas figures
+`<UseCaseFigure fig={1} />`, `<PipeFigure fig={2} />`, `<CrossCheckFigure fig={3} />` on
+research-oil-gas.html (2026-11-21), their rules in `src/styles/oil-gas.css` (listed by that
+page only). The same contract as the custom-tuning figures: `role="group"` named by the caption,
+inline SVG with no `<text>`, words in HTML, `currentColor` strokes, tokens for every colour, no
+inline style, `data-draw` (draw.js) for the draw-in, a `data-scrub data-scrub-auto` list under
+the stage whose tuned item the picture reads through `:has()`, comets on `--motion`, transitions
+on `--d-N`. FIG. 1 and FIG. 2 draw in the isometric hand (next section); FIG. 3 is a flat chart
+(four records on a day ruler, its SVG `preserveAspectRatio="none"` so the traces follow the rows
+at any aspect, a tap, a skew, the flag) with the page's mono name `.og__name` under it. FIG. 1
+(isometric since 2026-11-22, generated by `computer-scientist/article/fig1_iso_gen.py` between
+the `iso:begin` / `iso:end` markers of `UseCaseFigure.svelte`): a bench with the five kinds of
+record a site keeps as objects on its far row, the model's console with its adapter slot and
+cartridge, a sheet on a stand that takes the tuned job's shape (flag, answer, ranked list,
+ledger); the records a job reads light, lift and send comets along the bench into the slot.
+FIG. 2 (isometric since 2026-11-22, `fig2_iso_gen.py`, `PipeFigure.svelte`): a section of
+ground cut open, the line on the trench floor, six instruments where they work, the model's
+console on the far bank; the tuned method sharpens, lifts 3px, lights its lamp and its way
+carries the comet along the bank; the lit instrument moves a little (creep, hop, hover, waves)
+under no-preference only. Stills: job 1, the pig, a normal day.
+
+### The isometric figure hand (`.iso__*`, components.css, 2026-11-22)
+The site's hand for any figure that should read as an object, and the founder's direction for
+every figure on the site (the flat hand stays for charts and rulers). One camera (azimuth 30,
+elevation 30; parallel edges stay parallel), every part filled with paper and painted back to
+front so the drawing occludes itself with no filter and no script beyond draw.js; tones by facing
+(`.iso__face` paper, `--s1` front 5% ink, `--s2` end 11%, `--cav` 20%, as color-mix of
+`currentColor` into `--paper`, which the colour guard allows); three line weights of the one ink
+by stroke-opacity (`.iso__ln`, `--lo`, `--faint`), all scaled by `--edge`; a part is a group
+`.iso__m` (`--edge: .5` at rest; the figure's sheet sets 1.25 on the lit one and lifts it 2 to
+3px); the lamp `.iso__lamp` (`--on` for one that is always lit) is the one red; flat halos
+(`.iso__halo`, `--part` shown only when lit), `.iso__way` and `.iso__comet` for a record's path
+and its comet; `.iso__stage`, `.iso__tags` / `.iso__tag`, `.iso__name`, `.iso__sub`, `.iso__label`
+for the stage, the tuned step's line, and the mono names, sub-lines and tags placed over the
+picture by percent (a figure hides what collides under 560px, and its caption carries the words;
+a vertical stack keeps its level names in an HTML column beside the stage, a list under the
+picture on phones: the industrial page's placement diagram). Every figure is generated by a small script beside
+`computer-scientist/article/isolib.py` (the camera and the primitives: tube, box, standing
+cylinder, disc, line, poly, lamp, halo, frame), so the camera stays one; the generator writes between markers in the
+component and prints the label positions. Never animate an SVG filter: phones and Firefox render
+them on the CPU. Motion is transform and opacity only, under `prefers-reduced-motion:
+no-preference`, and the still is the default state. The backlog of every figure on the site with
+an evaluation each: `computer-scientist/figure-backlog-2026-11-22/`.
+
+### Film plate
+```html
+<figure class="figure figure--plate film" role="group" aria-labelledby="...">
+  <div class="film__screen">
+    <video data-film data-film-src="assets/.../loop.mp4" poster="assets/.../loop.webp" width="832" height="432" muted loop playsinline preload="none" aria-label="..."></video>
+  </div>
+  <figcaption class="fig" id="...">...</figcaption>
+</figure>
+```
+A short drawn loop on the tinted ground. The markup ships the poster and no `src`, so the page
+costs the poster and nothing more; `film.js` (a page's own script) sets the `src` when the plate
+is on screen, plays it muted in a loop, and pauses it off screen. Reduced motion, no JS, or no
+IntersectionObserver: the poster is the picture. The clip is rendered from an approved still on
+our own GPUs (`article/tune_loop_gen.py` in the lab); the poster is its first frame. First use:
+the custom-tuning hero (2026-11-15).
 
 ### Range twin
 ```html
@@ -477,6 +591,48 @@ routing process figure and the economics chart and formula used to). Known and l
 chart SVGs carry their own "FIG. n" title inside the drawing (an SVG edit), the economics
 chart's caption is set in the prose face (its caption is a paragraph), and three articles
 have no hero art (new art, not CSS).
+
+### Money figure
+`<MoneyFigure fig={1} />` (`size="full"`, the default) or `<MoneyFigure fig={2} size="small" />`:
+the money drawn once, on the figure plate, in the house instrument style (inline SVG boxes in
+`currentColor`, HTML labels, no SVG `<text>`, no inline style, no colour literal). The wallet
+pays per token; a fork carries it to the station (90%) and RogerAI (10%), or, in the full size,
+also through a Tower (90 / 5 / 5); the cases the drawings do not cover (a free model, the
+curated list + 10%, custom tuning: price on request) are short rows under it. Every number is a
+rule the pricing page already prints, never a price. The small size draws the direct path only
+and folds the Tower split into the case rows. `role="group"` named by its caption; still by
+design (reduced motion and print show the same picture); the labels are HTML, so nothing needs
+the diagram scroll box. Its rules live in `src/styles/money-figure.css` (lead class `.mf` on
+every rule), a sheet of its own so the homepage can list it too; it moves to `components.css`
+when that second page lands.
+### Custom-tuning figures (interactive, SVG + CSS)
+```html
+<figure class="figure figure--plate tf" role="group" aria-labelledby="tf-cap-1">
+  <div class="tf__stage"> ...inline SVG glyphs, no <text>; names in HTML... </div>
+  <ol class="tf__steps" data-scrub data-scrub-start="2" aria-label="..."><li><b>Records</b><span>...</span></li>...</ol>
+  <figcaption class="fig" id="tf-cap-1">FIG. 1 - ...</figcaption>
+</figure>
+```
+Five figures on the custom-tuning page, one Svelte component each in `app/lib/ui`
+(`TuningFigure`, `AddonShelfFigure`, `ReportFigure`, `PrivateBandFigure`, `HandoffFigure`),
+their rules in `src/styles/custom-tuning.css` (listed by that page's `siteHead` css, so no
+other page carries the bytes). The contract they share: a figure is a `role="group"` named by
+its caption (it holds a control), never `role="img"`; the drawing is inline SVG with no
+`<text>` (words are HTML at `--t-micro` or larger, so the contrast and diagram guards have
+nothing to measure inside the SVG); strokes are `currentColor` with `vector-effect:
+non-scaling-stroke`, faces `var(--paper)`, and the one red is a lamp or a tick (`--live`),
+never a glow; every colour is a token; no inline style (a value that must move is an SVG
+attribute, set by the page script). The glyph strokes, the name and note type and the step
+list are FIG. 1's `.tf__*` rules and the other four reuse them, so the five draw in one hand.
+Each figure's still picture (JS off, print, reduced motion) is complete and is the state the
+caption describes; interaction is an overlay: `[data-scrub]` tunes a station and the picture
+reads it through `:has(li:nth-child(k).is-tuned)`, the key switch and the bar slider flip one
+attribute. Motion durations multiply `--motion` (tokens.css: 1, or 0 under reduced motion),
+so a reduced-motion reader gets the still picture, never a sped-up one. The stage is a grid
+whose columns are the glyphs' own viewBox widths at one shared height (104 units), so the
+cables between cells leave and land on the stubs at every width; a cable column is an SVG
+with `preserveAspectRatio="none"` stretched to the row. Written up with the references in
+the lab's tuning illustration plan (2026-11-13).
 
 ### Scroll box
 `<div class="scroll-box"><table>...</table></div>`: anything wider than a phone scrolls

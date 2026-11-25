@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // How much VRAM do you need to run an LLM? (2026)
   // Ported from web/src/broadcasts-vram-for-llm.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -41,21 +42,14 @@
         <figcaption class="fig mono">FIG. 1 - THE VRAM GAUGE</figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">THE CHART</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">THE MATH</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">QUANTIZATION</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">BUYING</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">WHEN IT WON'T FIT</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "THE CHART" },
+        { id: "s2", no: "§2", name: "THE MATH" },
+        { id: "s3", no: "§3", name: "QUANTIZATION" },
+        { id: "s4", no: "§4", name: "BUYING" },
+        { id: "s5", no: "§5", name: "WHEN IT WON'T FIT" },
+        { id: "s6", no: "§6", name: "FAQ" },
+      ]} />
 
       <blockquote class="bc-answer" data-reveal>
         <b>Quick answer.</b> A 4-bit (Q4) model needs roughly <b>0.6&nbsp;GB of VRAM per billion

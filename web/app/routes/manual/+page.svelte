@@ -7,12 +7,16 @@
   import Nav from "#lib/ui/Nav.svelte";
   import OnAir from "#lib/ui/OnAir.svelte";
   import Rail from "#lib/ui/Rail.svelte";
+  import WaveJobs from "#lib/ui/WaveJobs.svelte";
+  import { content } from "#lib/content.js";
+  // Appendix B6 reads the Nano page's own facts, so the numbers match it
+  const nano = content('research-wave-nano.html');
   const head = siteHead({
     title: 'Operating Manual - RogerAI',
     desc: 'The RogerAI operating manual: install the CLI, tune in to a model, go on air with your GPU, mint private grant keys, top up your wallet, take payouts, and verify lineage. Every command, written plainly.',
     canonical: 'https://rogerai.fm/manual.html',
-    css: [...CSS_SHARED, 'manual.css'],
-    scripts: [{ runtime: true }],
+    css: [...CSS_SHARED, 'manual.css', 'tier-table.css'],
+    scripts: [{ runtime: true }, { page: "manual" }],
   });
 </script>
 <svelte:head>{@html head}</svelte:head>
@@ -43,11 +47,37 @@
         </p>
         <div class="man-cover__meta">
           <span>Set: <b>roger</b></span>
-          <span>Version: <b data-cli-version>v7.0.0</b></span>
+          <span>Version: <b data-cli-version>v7.1.1</b></span>
           <span>Broker: <b>broker.rogerai.fm</b></span>
           <span>Protocol: <b>OpenAI-compatible</b></span>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============================ GLOSSARY ============================ -->
+  <!-- The words first (site audit 2026-11-13, fix 2): four words carry the whole product,
+       so they are defined before the quickstart uses them. Other pages link
+       /manual.html#glossary as "what the words mean". The rest of the list is the manual's
+       own glossary, moved up from §0 whole. -->
+  <section class="man-quick" id="glossary">
+    <div class="wrap">
+      <span class="man-quick__eyebrow">Glossary - four words first</span>
+      <h2 class="man-quick__h">What the words mean.</h2>
+      <p class="man-quick__lead">Four words carry the whole manual: band, station, Tower and
+        grant key. The rest of the list is the radio vocabulary the commands use.</p>
+      <dl class="man-gloss">
+        <div><dt>band</dt><dd>a model on the network. Every model id (for example <code>qwen3-coder-30b</code>) is a band you can tune to. More stations on a band = stronger signal.</dd></div>
+        <div><dt>station</dt><dd>a machine serving a model. Usually one home GPU. Owners set their own price; the broker ranks them.</dd></div>
+        <div><dt>Tower</dt><dd>the relay that routes requests (RogerAI runs one; you can run your own). It ranks and picks a station for your request, meters what it used, and counter-signs the receipt. The API, this manual and the source call it the <b>broker</b>. Same service, older name. <a href="/tower.html">How it routes and signs &rarr;</a></dd></div>
+        <div><dt>grant key</dt><dd>a private key that lets an app use a band. Owner-issued (<code>rog-grant_...</code>), it lets your bots, family, or your own remote box use your models with no login - free or at a price you sponsor. See §5.</dd></div>
+        <div><dt>channel</dt><dd>Your live connection to a station: a local endpoint + key the radio opens for you, plus the in-app chat session.</dd></div>
+        <div><dt>on air</dt><dd>Serving. A station that is on air is advertised in the band and can take traffic.</dd></div>
+        <div><dt>tune in</dt><dd>Consuming. You pick a band, set margins, and the radio locks the strongest station.</dd></div>
+        <div><dt>lineage receipt</dt><dd>The signed record co-produced for every request: model, shard, token counts, price - node-signed and broker counter-signed (Ed25519). See §10.</dd></div>
+        <div><dt>verified operator</dt><dd>The <span class="cs">&#10003;</span> mark of a GitHub-linked operator that co-signs each token's lineage. It is an IDENTITY badge - it does NOT by itself mean the node is confidential.</dd></div>
+        <div><dt>confidential <span class="cs">&#9670;</span></dt><dd>The gold <span class="cs">&#9670;</span> is granted ONLY to a node that passes real TEE remote attestation: the broker cryptographically verifies a hardware quote (AMD SEV-SNP signature chain to the AMD root, a nonce binding that prevents replay, and an allowlisted launch measurement) and re-checks it on a cadence. Nodes without it are plainly "standard". See §4 and §10.</dd></div>
+      </dl>
     </div>
   </section>
 
@@ -99,7 +129,7 @@
   <!-- ============================ CONTENTS ============================ -->
   <!-- The contents as the site's tuning scale (components.css .toc-tuner): in the page,
        never pinned; the needle rests on the section in view while the scale is on screen.
-       Under 760px its 20 stations become a two-column contents list. -->
+       Under 760px its 26 stations become a two-column contents list. -->
   <nav class="toc-tuner man-contents" data-tuner aria-label="Manual contents">
     <div class="wrap man-contents__head"><span class="sectionno">Contents</span></div>
     <div class="wrap toc-tuner__band">
@@ -112,8 +142,10 @@
       <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">Tune in</span></a></li>
       <li><a class="toc-tuner__st" href="#sPlay"><b>§P</b><span class="toc-tuner__name">Playbox</span></a></li>
       <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">Go on air</span></a></li>
+      <li><a class="toc-tuner__st" href="#sModel"><b>§M</b><span class="toc-tuner__name">Local models</span></a></li>
       <li><a class="toc-tuner__st" href="#sTower"><b>§T</b><span class="toc-tuner__name">Run a Tower</span></a></li>
       <li><a class="toc-tuner__st" href="#sLAN"><b>§L</b><span class="toc-tuner__name">LAN mode</span></a></li>
+      <li><a class="toc-tuner__st" href="#sEdge"><b>§E</b><span class="toc-tuner__name">Edge</span></a></li>
       <li><a class="toc-tuner__st" href="#sV"><b>§V</b><span class="toc-tuner__name">Voices</span></a></li>
       <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">Private channels</span></a></li>
       <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">Wallet &amp; billing</span></a></li>
@@ -124,6 +156,10 @@
       <li><a class="toc-tuner__st" href="#s11"><b>§11</b><span class="toc-tuner__name">Troubleshooting</span></a></li>
       <li><a class="toc-tuner__st" href="#sAPI"><b>B</b><span class="toc-tuner__name">The API</span></a></li>
       <li><a class="toc-tuner__st" href="#sTOOLS"><b>B2</b><span class="toc-tuner__name">In your editors</span></a></li>
+      <li><a class="toc-tuner__st" href="#sTune"><b>B3</b><span class="toc-tuner__name">Custom tuning</span></a></li>
+      <li><a class="toc-tuner__st" href="#sMoney"><b>B4</b><span class="toc-tuner__name">The money, in full</span></a></li>
+      <li><a class="toc-tuner__st" href="#sFamily"><b>B5</b><span class="toc-tuner__name">The Wave family</span></a></li>
+      <li><a class="toc-tuner__st" href="#sNano"><b>B6</b><span class="toc-tuner__name">Wave Nano</span></a></li>
       <li><a class="toc-tuner__st" href="#schangelog"><b>C</b><span class="toc-tuner__name">Changelog</span></a></li>
     </ol>
     <span class="toc-tuner__needle" aria-hidden="true"></span>
@@ -158,19 +194,8 @@
               default, no login; set a price and sign in once to earn.
             </p>
 
-            <h3>Glossary</h3>
-            <dl class="man-gloss">
-              <div><dt>band</dt><dd>A model. Every model id (for example <code>qwen3-coder-30b</code>) is a band you can tune to. More stations on a band = stronger signal.</dd></div>
-              <div><dt>station</dt><dd>A provider node - one home GPU serving a band. Owners set their own price; the broker ranks them.</dd></div>
-              <div><dt>broker &middot; the tower</dt><dd>The service every station dials into: it ranks and picks a station for your request, meters what it used, and counter-signs the receipt. <b>The site calls it the Tower</b>; the API, this manual and the source call it the <b>broker</b>. Same service, older name. <a href="/tower.html">How it routes and signs &rarr;</a></dd></div>
-              <div><dt>channel</dt><dd>Your live connection to a station: a local endpoint + key the radio opens for you, plus the in-app chat session.</dd></div>
-              <div><dt>on air</dt><dd>Serving. A station that is on air is advertised in the band and can take traffic.</dd></div>
-              <div><dt>tune in</dt><dd>Consuming. You pick a band, set margins, and the radio locks the strongest station.</dd></div>
-              <div><dt>lineage receipt</dt><dd>The signed record co-produced for every request: model, shard, token counts, price - node-signed and broker counter-signed (Ed25519). See §10.</dd></div>
-              <div><dt>grant key</dt><dd>An owner-issued private credential (<code>rog-grant_...</code>) that lets your bots, family, or your own remote box use your models with no login - free or at a price you sponsor. See §5.</dd></div>
-              <div><dt>verified operator</dt><dd>The <span class="cs">&#10003;</span> mark of a GitHub-linked operator that co-signs each token's lineage. It is an IDENTITY badge - it does NOT by itself mean the node is confidential.</dd></div>
-              <div><dt>confidential <span class="cs">&#9670;</span></dt><dd>The gold <span class="cs">&#9670;</span> is granted ONLY to a node that passes real TEE remote attestation: the broker cryptographically verifies a hardware quote (AMD SEV-SNP signature chain to the AMD root, a nonce binding that prevents replay, and an allowlisted launch measurement) and re-checks it on a cadence. Nodes without it are plainly "standard". See §4 and §10.</dd></div>
-            </dl>
+            <p>The words this manual uses (band, station, Tower, grant key and the rest) are
+              defined at the top of the page: <a href="#glossary">what the words mean</a>.</p>
           </section>
 
           <!-- ============== §1 INSTALLATION ============== -->
@@ -516,7 +541,9 @@
             <h3>Headless: <code>roger use</code></h3>
             <p>This is the drop-in for Hermes, your bots, or any tool that speaks OpenAI.
               Pick a band, set margins, and the broker locks the strongest station and
-              hands you a local endpoint + key. When a station fades, it re-tunes.</p>
+              hands you a local endpoint + key. When a station fades, it re-tunes. If this
+              machine serves the band itself (§M), <code>use</code> takes that first, free,
+              before your Edge and the market; <code>--market</code> skips it.</p>
             <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger use qwen3-coder-30b --max-out 0.30
 <span class="code-block__prompt" aria-hidden="true">$</span> roger use qwen3-coder-30b --max-out 0.40 --advanced --min-tps 40 --port 4141</pre></div>
             <span class="man-fig">FIG. 2 - ROUTING &amp; PORTS</span>
@@ -891,6 +918,81 @@
               bands until the next probe or a real request refreshes it.</p>
           </section>
 
+          <!-- ============== §M LOCAL MODELS ============== -->
+          <section class="man-sec" id="sModel">
+            <span class="man-sec__no">§M · Local models (roger serves it)</span>
+            <h2>Serve a model yourself</h2>
+            <p class="man-lead">No Ollama, no llama.cpp of your own. <code>roger model</code>
+              finds a GGUF on the model hub or on this disk, judges whether it fits this
+              machine, fetches it with your consent, and serves it on a pinned llama.cpp
+              runtime that roger downloads and verifies. The serve binds
+              <code>127.0.0.1</code> with a key of its own. It reaches the band only through
+              <code>roger share</code> (§4) or your Edge (§E).</p>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger model search &lt;words&gt;              <span class="code-block__comment"># repos on the model hub: the authors' word, not ours</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model files owner/repo             <span class="code-block__comment"># every quantisation, judged against this machine</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model get owner/repo:Q4_K_M         <span class="code-block__comment"># asks first; sha256 checked; counts against the disk budget</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model serve wave-nano-1.45b         <span class="code-block__comment"># a short name: a file here, or one served nearby</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model serve ./my-model.gguf         <span class="code-block__comment"># a file you already have</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model status                        <span class="code-block__comment"># file, quant, sha256, context, build, measured speed</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model stop
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model rm &lt;name&gt;                    <span class="code-block__comment"># asks first</span></pre></div>
+            <p>Bare <code>roger model</code> lists what is on this disk and what is serving.
+              <code>get</code> and <code>serve</code> say about four lines by default;
+              <code>--verbose</code> prints the full sum (weights, cache, working memory,
+              reserve) behind the fit verdict. A short name resolves to a file on this disk
+              first, then to a model served nearby (this machine, your Edge, a pinned Tower),
+              then to a hub lookup you pick from; nothing guessed is ever fetched. A file
+              dropped into <code>&lt;config&gt;/local/models/</code> is a row by its name. A
+              licence is shown and recorded as its author published it; it stops nothing.</p>
+
+            <h3>What <code>serve</code> takes</h3>
+            <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">--quant Q</span><span class="man-plate__v">the quantisation, such as <code>Q4_K_M</code>. Unsaid, the rule picks Q4_K_M when it fits comfortably, else the largest that fits comfortably, else the largest that fits at all</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">--ctx N</span><span class="man-plate__v">context length; it changes the sum, and the verdict names it</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">--port N</span><span class="man-plate__v">pin the loopback port</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">--detach</span><span class="man-plate__v">keep serving after this terminal closes; <code>status</code> and <code>stop</code> still reach it</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">--add</span><span class="man-plate__v">a second model beside the first, only when both fit together; else roger says so and offers the switch</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">--adapter &lt;name | file.gguf&gt;</span><span class="man-plate__v">a LoRA served on its base model; the band is <code>&lt;base&gt;+&lt;adapter&gt;</code>. An adapter file is never offered as a model of its own</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">--hub</span><span class="man-plate__v">skip the nearby sources and ask the model hub</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">--on &lt;node&gt;</span><span class="man-plate__v">serve on an Edge member instead, by exact <code>owner/repo:QUANT</code>, under an authority-signed grant</span></div>
+            </div>
+            <p>Switching models is one action: the new one is proved before the old one
+              stops, and a failed switch leaves the old one serving. In the app, every model
+              on this disk is a row of <b>[2] SHARE</b> you can serve from, and the last row
+              gets a new one.</p>
+
+            <h3>The runtime, and what it may use</h3>
+            <p>roger fetches one pinned llama.cpp build for this machine and checks its digest
+              before it runs: CPU everywhere, Vulkan on Linux and Windows (NVIDIA, AMD and
+              Intel in one build), CUDA 12.8 on Linux x64 and 12.4 on Windows x64, Metal on
+              Apple silicon. <code>auto</code>, the default, asks each GPU build which devices
+              it can use and falls back to CPU, saying why. A model that fits on one card is
+              pinned to the freest card, because one card answers faster than a split.</p>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger model runtime [auto | cpu | gpu | vulkan | cuda]   <span class="code-block__comment"># which build serves; status names it</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model idle [&lt;duration&gt; | off]                      <span class="code-block__comment"># stop a serve nobody is using; off by default</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger model budget [&lt;size, like 20G&gt; | off]              <span class="code-block__comment"># cap the disk roger's own fetches use; none by default</span></pre></div>
+            <p>Under a budget the least recently served model roger fetched goes first, never
+              one being served or one you placed by hand, and it is said before the fetch.
+              Lowering the budget below what is on disk removes nothing by itself.</p>
+
+            <h3>Your own serve comes first</h3>
+            <p><code>roger use &lt;model&gt;</code> takes this machine's own serve before
+              anything else: no market lookup, nothing billed, and the first line says it is
+              local. Then your Edge, then the market. The app's chat, the agent,
+              <code>roger webui</code> and <code>roger resume</code> do the same outside LAN
+              mode. A session opened on the own serve stays on this machine and its Edge; it
+              does not fall to the market mid-session. <code>--market</code> skips the own
+              serve on purpose and says so; a named node, a Tower or a private band
+              (<code>--freq</code>) is what it names. In LAN mode <code>roger --lan search</code>
+              lists the own serve and <code>roger --lan use</code> opens it (§L).</p>
+            <div class="man-note">
+              <span class="man-note__tag">not built</span>
+              A platform with no pinned runtime says so plainly, and says what it can do;
+              there is no Jetson build yet. A Wave model is not on the hub: serve it from the
+              file you have.
+            </div>
+          </section>
+
           <!-- ============== §T RUN A TOWER ============== -->
           <section class="man-sec" id="sTower">
             <span class="man-sec__no">§T · Run a Tower (relay)</span>
@@ -947,6 +1049,11 @@
 <span class="code-block__prompt" aria-hidden="true">$</span> roger tower register --dir /var/lib/roger-tower              <span class="code-block__comment"># enroll this Tower against the broker</span>
 <span class="code-block__prompt" aria-hidden="true">$</span> roger tower status --dir /var/lib/roger-tower                <span class="code-block__comment"># admission state, lease, attached nodes</span>
 <span class="code-block__prompt" aria-hidden="true">$</span> roger tower serve --dir /var/lib/roger-tower --hub :8444 --relay-public YOUR.HOST:8444 --hub-tls   <span class="code-block__comment"># hold the link + host the data plane, encrypted</span></pre></div>
+            <p>A joined Tower has two ids. <code>status</code> prints the one RogerAI assigned
+              at registration marked <i>quote this id to RogerAI</i>, and the one
+              <code>init</code> minted labelled <i>local id</i>. Quote the first when you write
+              in; it is the one the approval names. Once admitted, <code>status</code> also
+              shows the Tower's trust stage and what the next stage needs.</p>
             <div class="man-note">
               <span class="man-note__tag">--mode is not optional</span>
               A data directory is initialized as <b>one mode for life</b>. To change mode you
@@ -1036,8 +1143,12 @@
             <p>You attach nobody by hand, and cannot: an ordinary <code>roger share</code>
               puts a node on the relay fabric by itself - one signed call registers its keys,
               model and its own listed price - and <b>Core</b> decides which Tower it lands on.
-              Placement is first-fit today, so a new Tower may wait while an established one
-              takes attachments; locality- and load-aware placement is being built.
+              Placement is ranked: Core picks the Tower by distance from the node, its
+              health and its trust stage, and moves idle Stations between Towers when a
+              better one is there; a moved node prints where it went in
+              <code>roger share</code>. A new Tower starts at the <b>new</b> stage and climbs
+              to <b>proving</b> and <b>established</b> on passed health checks; each stage
+              caps how many community Stations it may hold, and a failed check drops it back.
               <code>roger tower station revoke</code> is your kill switch for a node serving
               under your Tower, and <code>roger tower probe --model NAME</code> drives the
               whole sealed loop as a consumer to prove your Tower carries work.
@@ -1115,6 +1226,71 @@
               or shared to, while the LAN dial serves from this machine and your Edge alone. Your
               Tower list is kept; remove a Tower for good with <code>roger lan rm</code>.
             </div>
+          </section>
+
+          <!-- ============== §E EDGE ============== -->
+          <section class="man-sec" id="sEdge">
+            <span class="man-sec__no">§E · Edge (your own devices)</span>
+            <h2>Your devices, one Edge</h2>
+            <p class="man-lead">An Edge is the set of machines you own, joined under one root
+              you hold. Members find each other on your network, prove themselves by
+              certificate, and use each other's models with no Tower and no market in the
+              way. <b>[3] EDGE</b> in the app is its screen; <code>roger edge</code> is the
+              command, and bare <code>roger edge</code> shows the fleet.</p>
+
+            <h3>Make one, add a device</h3>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger edge setup                          <span class="code-block__comment"># interactive: a new Edge, or join one</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger edge authority local &lt;name&gt;         <span class="code-block__comment"># this machine roots the Edge and keeps the private half</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger edge invite                         <span class="code-block__comment"># one roger join line, drawn as a QR too; works once, 15 minutes</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger join roger://join?...               <span class="code-block__comment"># on the device you are adding</span></pre></div>
+            <p>With no invite, the authority can allow a machine by its key and that machine
+              enrolls with the code the allow printed: <code>roger edge authority allow
+              &lt;user key&gt;</code> there (<code>roger account</code> shows a machine's key),
+              then <code>roger edge enroll &lt;name&gt; --authority &lt;address&gt; --code
+              &lt;code&gt;</code> here. <code>roger edge invite --for &lt;device&gt;</code> binds
+              an invite to one device that <code>roger edge nearby</code> listed, and
+              <code>roger edge approve &lt;id&gt;</code> lets a nearby device on when it asks.
+              Bare <code>roger edge authority</code> says who roots this Edge and prints the
+              root fingerprint to pin with <code>--root sha256:&lt;fingerprint&gt;</code>. One
+              Edge, one authority: a second root would split the fleet, so moving an Edge to
+              another authority takes <code>--force</code> there and
+              <code>--replace-root</code> on each member.</p>
+
+            <h3>Read it</h3>
+            <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">edge list [--tag &lt;tag&gt;]</span><span class="man-plate__v">every node, or one tagged group</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">edge describe &lt;node&gt;</span><span class="man-plate__v">one node in full</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">edge name · forget · tag</span><span class="man-plate__v">a name you choose; remove a node; the owner's words for a unit (<code>+tag</code> / <code>-tag</code>, <code>--clear</code>), which a rule can cover</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">edge nearby · approve &lt;id&gt;</span><span class="man-plate__v">devices pinging on this network that are not on your Edge yet, and letting one on</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">edge health [&lt;node&gt;]</span><span class="man-plate__v">the fleet at a glance, or one node in full; <code>edge fleet</code> opens the live map screen</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">edge sessions · bands</span><span class="man-plate__v">the live sessions on this Edge; the models it can serve locally, and who serves each</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">edge events · expect · drift</span><span class="man-plate__v">what happened, newest first; what this Edge should look like (a roger version, a band served, an agent); where it does not match</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">edge prefer [local|market|local-only]</span><span class="man-plate__v">where a turn goes first: this Edge before the market, the market first, or never the market</span></div>
+            </div>
+            <p><code>roger edge help</code> lists every command, and each takes
+              <code>--help</code>.</p>
+
+            <h3>Alerts</h3>
+            <p>Eight rules stand until you change them: <code>cpu_temp &gt; 85</code>,
+              <code>disk &gt; 90</code>, <code>offline &gt; 5</code> (minutes unheard),
+              <code>throttled</code>, <code>battery &lt; 20</code> and
+              <code>battery_critical &lt; 10</code> (not charging), <code>on_battery</code>
+              (a node that lost external power; phones excepted) and <code>low_power</code>.</p>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger edge alert                                <span class="code-block__comment"># the rules, and what is firing</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger edge alert set cpu_temp gt 80             <span class="code-block__comment"># add --scope fleet, a node, or tag:&lt;tag&gt;</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger edge alert off disk                       <span class="code-block__comment"># on · rm · test &lt;sink&gt;</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger edge sink add discord https://...         <span class="code-block__comment"># where an alert goes: webhook, discord or telegram</span></pre></div>
+
+            <h3>In the app and the console</h3>
+            <p><b>[3] EDGE</b> draws your Edge with its units and their health. On a unit:
+              <kbd>o</kbd> the live map, <kbd>h</kbd> its health and the rules,
+              <kbd>i</kbd> an invite only that device can use, <kbd>a</kbd> approve,
+              <kbd>n</kbd> rename, <kbd>f</kbd> forget, <kbd>M</kbd> serve a model there,
+              <kbd>p</kbd> ask its model a question. <kbd>m</kbd> is the windowshade, and
+              <kbd>alt+m</kbd> is the same toggle from anywhere, safe while typing.
+              <code>roger webui</code> carries the same screen on its EDGE tab: the topology,
+              Candidates, Sessions, the Andon and Trouble lists, Events, Expected, Standing,
+              Alarms, Where alerts go, and Grants.</p>
           </section>
 
           <!-- ============== §V VOICES ============== -->
@@ -1626,7 +1802,7 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
           <section class="man-sec" id="s9">
             <span class="man-sec__no">§9 · Command reference</span>
             <h2>Every command, every key</h2>
-            <p>The full surface as of <b data-cli-version>v7.0.0</b>: the top-level CLI
+            <p>The full surface as of <b data-cli-version>v7.1.1</b>: the top-level CLI
               commands with their key flags, then the in-app keys and slash commands grouped
               by context. Commands with flag surfaces document <code>--help</code>; advanced
               flags hide behind <code>--advanced</code>. Run <code>roger</code> with no
@@ -1648,10 +1824,14 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
                 <tbody>
                   <tr><td><code>roger</code></td><td>open the interactive app (browse, tune in, chat); the first launch shows a one-time welcome card</td></tr>
                   <tr><td><code>search</code></td><td>list models, cheapest first (aliases: <code>discover</code>, <code>models</code>)</td></tr>
-                  <tr><td><code>use &lt;model&gt;</code></td><td>open a local OpenAI endpoint for your bots (aliases: <code>connect</code>, <code>tune</code>). Flags: <code>--max-out $</code> (headline cap, skip stations above this $/1M out) · <code>--yes</code> (skip the connect confirm) · <code>--advanced</code> reveals <code>--port</code> (0 = auto-pick) · <code>--max-in</code> · <code>--min-tps</code> · <code>--confidential</code> · <code>--raw</code> (keep raw model output; skip the reasoning-as-answer fallback)</td></tr>
+                  <tr><td><code>use &lt;model&gt;</code></td><td>open a local OpenAI endpoint for your bots (aliases: <code>connect</code>, <code>tune</code>). Flags: <code>--max-out $</code> (headline cap, skip stations above this $/1M out) · <code>--yes</code> (skip the connect confirm) · <code>--advanced</code> reveals <code>--port</code> (0 = auto-pick) · <code>--max-in</code> · <code>--min-tps</code> · <code>--confidential</code> · <code>--raw</code> (keep raw model output; skip the reasoning-as-answer fallback) · <code>--market</code> (use the market even when this machine serves the model, §M)</td></tr>
                   <tr><td><code>balance</code></td><td>wallet balance ($). Topping up is <code>topup [usd]</code>; <code>balance --topup [usd]</code> and <code>balance topup [usd]</code> are retained aliases</td></tr>
                   <tr><td><code>topup [usd]</code></td><td>add funds (opens Stripe Checkout); bare <code>topup</code> is $10, minimum $1, whole cents only</td></tr>
                   <tr><td><code>share</code></td><td>go on air - FREE by default, no login (auto-detects your model). Flags: <code>--model</code> · <code>--price-in</code> / <code>--price-out</code> ($/1M to earn; needs login) · <code>--free-window HH:MM-HH:MM</code> · <code>--schedule &lt;json&gt;</code> (time-of-use) · <code>--advanced</code> reveals <code>--node</code> · <code>--region</code> · <code>--parallel</code> · <code>--upstream</code> / <code>--upstream-key</code> · <code>--ctx</code> · <code>--confidential</code> (real TEE hardware required) · <code>--probe-min &lt;duration&gt;</code> (probe at most this often, capped at 24h; verification lapses between probes). With no local server it runs a guided "no model found" fallback</td></tr>
+                  <tr><td><code>model</code></td><td>serve a model yourself, no other software (§M): <code>list</code> (default) · <code>search &lt;words&gt;</code> · <code>files &lt;owner/repo&gt;</code> · <code>get &lt;name | owner/repo[:QUANT]&gt;</code> · <code>serve [name | owner/repo[:QUANT] | file.gguf]</code> (<code>--adapter</code> · <code>--quant</code> · <code>--ctx</code> · <code>--port</code> · <code>--detach</code> · <code>--add</code> · <code>--hub</code> · <code>--on &lt;node&gt;</code>) · <code>status</code> · <code>stop</code> · <code>rm &lt;name&gt;</code> · <code>nearby</code> · <code>idle</code> · <code>budget</code> · <code>runtime</code>; <code>--yes</code> skips a consent prompt, <code>--verbose</code> prints the full account</td></tr>
+                  <tr><td><code>edge</code></td><td>your own devices (§E); bare <code>edge</code> shows the fleet: <code>list</code> · <code>describe</code> · <code>name</code> · <code>forget</code> · <code>tag</code> · <code>nearby</code> · <code>approve</code> · <code>health</code> · <code>fleet</code> · <code>sessions</code> · <code>bands</code> · <code>events</code> · <code>expect</code> · <code>drift</code> · <code>alert</code> · <code>sink</code> · <code>prefer</code> · <code>setup</code> · <code>authority</code> · <code>invite</code> · <code>enroll</code> · <code>service [install|remove]</code> (start at boot, systemd); <code>edge help</code> lists the rest</td></tr>
+                  <tr><td><code>join &lt;invite | address&gt;</code></td><td>join an Edge or a Tower with the one line its owner printed (<code>roger edge invite</code>, <code>roger tower invite</code>), or ask the Tower at a local address and let the owner approve; <code>[name]</code> names this machine, <code>--station</code> joins as a station (§L, §E)</td></tr>
+                  <tr><td><code>tower &lt;command&gt;</code></td><td>run a self-hosted relay (§T); <code>roger tower help</code> lists every command</td></tr>
                   <tr><td><code>limits</code></td><td>print your per-model spend limits (mirrors the in-app <code>/limits</code>; edit with <code>config set-limit</code>)</td></tr>
                   <tr><td><code>grant</code></td><td>private access keys for your bots/family: <code>create --name &lt;n&gt;</code> · <code>list</code> · <code>show</code> · <code>revoke</code> (aliases <code>new</code> / <code>ls</code> / <code>rm</code>)</td></tr>
                   <tr><td><code>payout</code></td><td>cash out provider earnings (login + KYC gated): <code>status</code> (default) · <code>onboard</code> (Stripe Connect KYC) · <code>request</code> (pays your payable balance) · <code>history</code> (aliases: <code>payouts</code> / <code>cashout</code>; <code>withdraw</code> for <code>request</code>)</td></tr>
@@ -1936,6 +2116,320 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
               support it.</p>
           </section>
 
+          <!-- ============== APPENDIX B3: CUSTOM TUNING ==============
+               The full account behind research-custom-tuning.html (2026-11-14): that page shows
+               a figure and a line per section and links here for the rest. Every number is from
+               RESULTS-MATRIX R.CT1-R.CT10 (2026-11-12/13) on two public stand-in datasets; no
+               customer has used this and nothing here is a customer result or a price. -->
+          <section class="man-sec" id="sTune">
+            <span class="man-sec__no">Appendix B3 · Custom tuning</span>
+            <h2>Train a Wave model on your records</h2>
+            <p class="man-lead">A research prototype. You have records your people wrote and the
+              labels someone gave each one. We train a small add-on so a Wave model gives the same
+              labels. Training runs on our GPUs and takes minutes. You get a report that says how
+              often it was right on records it never saw. If the report is good enough, the model
+              goes on a private band on our cloud that only you can reach, from the app, the
+              command line or the API. Designed in Orange County, California. Our cloud is global.
+              The short version, with the figures, is the
+              <a href="/research-custom-tuning.html">custom tuning page</a>.</p>
+
+            <h3 id="sTune-how">How it works</h3>
+            <p>The jobs this fits: giving a record a code or a category, pulling fields out of it,
+              deciding where it goes, or flagging it yes or no. Small, boring jobs over your own
+              records, where a small model trained on them does well and a big one is not worth
+              the price.</p>
+            <p><b>1. You send examples.</b> A spreadsheet export from your maintenance, ticket or
+              incident system, or a training file you already made for OpenAI or Fireworks. We
+              check it first and tell you, line by line, what to fix.</p>
+            <p><b>2. We train an add-on.</b> It is a small file, 14 MB for Wave Pico and 34 MB for
+              Wave Nano, that plugs into the model without changing it. In our tests a job took
+              2 to 30 minutes on one GPU.</p>
+            <p><b>3. You read the report.</b> How often it got a record right, on records it never
+              saw. The same model untuned, on the same records. How often it handed a question
+              that was not its job to a person. And whether it met the bar you set.</p>
+            <p><b>4. You use it, or you don&rsquo;t.</b> If the report is good enough, the add-on goes
+              on a private band on our cloud: our GPUs, your code, nobody else&rsquo;s listing. If
+              not, we delete your examples and show you the record of it.</p>
+
+            <h3 id="sTune-files">The three files</h3>
+            <p>The examples use the same chat format OpenAI and Fireworks use, so a file made for
+              either runs here unchanged. The rules file is ours, short and optional. The report
+              is what you get back.</p>
+            <p><b>Examples.</b> One per line: what a person wrote, and the answer you want. One
+              command turns a spreadsheet into this file.</p>
+            <p><b>Rules.</b> Which labels are allowed. What to strip before training, such as
+              email addresses and phone numbers. Ten or more questions people might ask that are
+              not the job, so we can check that the model hands them back. And your bar, for
+              example: every field right on at least 70% of records.</p>
+            <p><b>Report.</b> The bar first, met or not met, with a note wherever the result is
+              too close to call. Then the details: each field, the untuned model on the same
+              records, the hand-off tests, and a check that the served copy answers the same way
+              as the one we trained. Most fine-tuning services report a training loss, which says
+              how well the model learned to repeat your file. Ours says how often it got a record
+              right.</p>
+
+            <h3 id="sTune-where">Where it runs</h3>
+            <p>Wave models are not published anywhere. They run on this network, so your trained
+              add-on stays here too, and only you can use it.</p>
+            <p><b>A private band.</b> Your add-on runs on our GPUs, on a band hidden from the public
+              list that answers only to a code you hold. Your app calls it through the same
+              OpenAI-compatible API as any model here; the RogerAI app, the command line and the
+              web console tune to it with the code. It is never listed and never shared. In our
+              test one server held many customers&rsquo; add-ons and picked the right one on 600 of
+              600 requests. See <a href="/private.html">Base Station</a> for how private bands
+              work today.</p>
+            <p><b>The model under it does not move.</b> Your add-on is tied to the exact Wave version
+              it was trained on. We do not swap that version, or its precision, under you. A new
+              Wave version is a new release, and your add-on stays where it is until you decide to
+              move it.</p>
+            <p><b>From anywhere.</b> We design and train in Orange County, California. Our cloud is
+              global, so the band answers your people wherever they work.</p>
+            <p><b>On site, with no network.</b> A plant whose control network does not reach the
+              internet can run the Wave model and the add-on on its own machine. That means handing
+              over weights we do not otherwise publish, so it goes through our sales team, with a
+              licence and the guardrails written down.
+              <a href="/research-custom-tuning.html#talk">Ask us</a>.</p>
+            <p><b>Other open models.</b> If your job wants an open model instead of Wave, we can
+              train the add-on on one pinned open model of a similar size, under the same report,
+              bar and served check. That also goes through sales, so the licence and the version
+              are agreed before anything trains.</p>
+
+            <h3 id="sTune-measured">What we measured</h3>
+            <p>We tested it on two public datasets that look like what a customer would
+              bring. Measured November 12 and 13, 2026; ranges are over
+              training runs.</p>
+            <p><b>Excavator work orders</b> (University of Western Australia, CC BY; 5,485 records,
+              four codes each). Every code right on records the model never saw: Wave Nano 77.9%,
+              Wave Pico 66.4%, the same models untuned 0%.</p>
+            <p><b>Offshore incident reports</b> (US Bureau of Safety and Environmental Enforcement,
+              public domain; 3,617 reports, seven yes or no flags). Every flag right: Wave Nano
+              82.1%, Wave Pico 79.1%. Two flags marked yes on only 2.7% and 4.2% of reports
+              were never learned. The check now warns about rare answers before training starts.</p>
+            <p><b>Handing questions back.</b> Without practice, the add-ons answered every
+              off-topic request as if it were a record. With a small share of practice examples,
+              they handed back 98 to 100% of general off-topic requests, with at most 1 in 369
+              real records handed back by mistake.</p>
+            <p><b>Does it have to be a Wave model?</b> No. We ran the work-order job on two open
+              models of similar size, with the same records, split, rules, recipe and bar, three
+              training runs each for the larger pair. Wave Pico read 66.4 to 66.5% against
+              SmolLM2-360M at 67.3 to 68.6%: level. Wave Nano read 74.2 to 77.9% against
+              Qwen3.5-2B at 77.9 to 81.9%: three to five points behind on this job. Nano got there
+              in 4.1 GB of GPU memory where Qwen3.5-2B needed 14.4 GB, which decides whether it
+              trains on the machine you already have.</p>
+            <p><b>Why Wave is the default.</b> We control when it changes, and it fits the smallest
+              machines. An open model goes through sales. Both open models above passed the
+              same served check on November 13, 2026: switched on per request, the add-on gave the
+              same answer as the training framework on 99.5% of held-out prompts for Qwen3.5-2B and
+              92.7% for SmolLM2-360M (Wave Nano and Pico: 95.6 to 97.3%). No open model is offered
+              before its own check passes.</p>
+            <p><b>How many records.</b> On the same job with Wave Nano, every field right climbed
+              from 0% at 50 records to about half at 1,000 and three quarters at all 4,938. A 70%
+              bar needed about 3,000 records here, with 256 distinct part codes to learn. A few
+              dozen records prove your file works, and nothing more.</p>
+            <p><b>The recipe matters too.</b> Pico missed the 70% bar at our first recipe and
+              cleared it at 72.6% on two runs with a higher learning rate. So a missed bar now gets
+              one automatic retry, and the report shows both runs.</p>
+
+            <h3 id="sTune-data">Your records, and what is not built yet</h3>
+            <p><b>Your data.</b> Your examples are used for one job. When you say forget, we delete
+              them, check that none of your text survives in anything we keep, and write down a
+              fingerprint of what was deleted. That works today. Your files are not yet encrypted
+              separately from other customers&rsquo; files, and we have not written a retention
+              period. Until both exist, strip names and account numbers before you send anything;
+              the rules file removes email addresses, phone numbers and card-like numbers before
+              training and counts what it removed.</p>
+            <p><b>Files from other services.</b> A training file made for OpenAI or Fireworks
+              fine-tuning runs here unchanged, including per-message weights. Lines with tool
+              calls or images are refused, and the check says why.</p>
+            <p><b>Not built.</b> There is no upload page or sign-up yet; the steps above run from
+              our own command line. Jobs do not go through a queue. Putting a finished add-on on a
+              private band of its own is done by hand today, and the service that turns a model
+              name into the right add-on on the shared server is a test, not a product. There is
+              no price yet. Training runs on our GPUs, and the add-on on air is billed like any
+              station, by the rules on the <a href="/pricing.html">pricing page</a>.</p>
+          </section>
+
+          <!-- ============== APPENDIX B4: THE MONEY, IN FULL ==============
+               The long form of pricing.html (2026-11-14): that page shows the figures and one
+               line per rule and links here for the rest. The rules are ours and stable; no
+               price appears here, prices live on the dial. Sources as on the pricing page:
+               tos.html (the split), §6 (wallet and ceilings), §7 (payouts), the Tower broadcast. -->
+          <section class="man-sec" id="sMoney">
+            <span class="man-sec__no">Appendix B4 · The money, in full</span>
+            <h2>What the fee buys, what you pay, what you earn</h2>
+            <p class="man-lead">The <a href="/pricing.html">pricing page</a> says each rule in
+              one line. This is the long form of the same rules, and nothing here is a price:
+              every price is set by the operator and lives on the <a href="/models.html">dial</a>.</p>
+
+            <h3 id="sMoney-fee">What the fee buys</h3>
+            <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">Seen</span><span class="man-plate__v">The upstream sees a station, never a person. Not your name, not your card, not your IP.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Crowd</span><span class="man-plate__v">One callsign, many callers. The upstream cannot tell our consumers apart.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Outbound</span><span class="man-plate__v">Every hop dials out. No open ports, nothing to scan, nothing ever knocks on your door.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Trained</span><span class="man-plate__v">We run the wires, not the weights. Your traffic trains nothing of ours.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Proof</span><span class="man-plate__v">A counter-signed receipt on every request, the split printed on it.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Ceiling</span><span class="man-plate__v">Your maximum price rides every request. A band above it is never dialed.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">TLS</span><span class="man-plate__v">Every leg of the wire is encrypted - your set to the switchboard, the switchboard to the station. Nothing rides in the clear.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Books</span><span class="man-plate__v">Your wallet sits on an append-only ledger that re-derives to the cent. Every debit names the request it paid for.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Routed</span><span class="man-plate__v">The switchboard tunes for you: picks the band, strikes the flaky, retunes around a dropout.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Verified</span><span class="man-plate__v">The &#10003; is earned, not typed. A band answers a canary before it wears the mark.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Supply</span><span class="man-plate__v">Real people&rsquo;s machines. Commercial relays wear the &raquo; mark, never blurred together.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">One URL</span><span class="man-plate__v">OpenAI-compatible, one endpoint. Point your existing tools at it; nothing else changes.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">No seat</span><span class="man-plate__v">No subscription, no seat, no minimum. The balance moves only while an answer streams.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Exit</span><span class="man-plate__v">The router is a program. Run your own Tower, free, forever.</span></div>
+            </div>
+            <p>The limit, plainly: the words themselves still reach the machine that answers.
+              When even that is too much, use a <a href="/confidential.html">confidential
+              station</a> or <a href="/tower.html">your own Tower</a>. And if you push steady
+              volume to one vendor, going direct is cheaper. We&rsquo;d rather you know.</p>
+
+            <h3 id="sMoney-pay">What you pay</h3>
+            <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">Unit</span><span class="man-plate__v">Per token, input and output priced separately, quoted in dollars per million. Voices are billed by the character.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Who sets it</span><span class="man-plate__v">The operator, per model, and they can vary it by time of day. We do not set, subsidize, or floor it. The current number for any band is on the <a href="/models.html">dial</a>.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Subscription</span><span class="man-plate__v">None. No plan, no seat, no monthly minimum, no annual commitment, and nothing to cancel. If you stop sending requests you stop spending.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Wallet</span><span class="man-plate__v">Debited live as tokens settle. The debit is conditional on the broker side, so a wallet cannot go negative - there is no bill at the end of the month and no overage to argue about.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">To start</span><span class="man-plate__v">A $1 starter credit lands on your wallet the first time you log in, one time per account, so you can try a paid station before you ever add money. It is a launch seed and it is capped, so it lasts while it lasts.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Top-ups</span><span class="man-plate__v">Through Stripe Checkout, in whatever amount you choose above the $1 minimum: <code>roger topup 25</code>. Stripe is the payments provider and holds every card detail; we never see one.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">An unusable answer</span><span class="man-plate__v">Costs nothing. A request that returns nothing usable is voided: the pre-authorized hold is released, you pay zero, the operator earns zero and takes a strike. A model that cannot actually answer never appears on your bill.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">The token count</span><span class="man-plate__v">Is the broker&rsquo;s own re-count, not the station&rsquo;s claim, and settlement takes the smaller of the two. Padding the count is not a thing a station can profitably do.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Price safety</span><span class="man-plate__v">Set no limit and the client still caps every connection at $10 / 1M out, even under <code>--yes</code>, so an unattended bot can never quietly bind itself to an expensive band. To accept a station above $20 / 1M out you type the number, not press y. The broker refuses to register a station above $100 / 1M out or $50 / 1M in, base rate and every scheduled window, on every band, public or private: a private band hides a station from the market, it is not a way around the ceiling. Your ceiling rides every request as a header, so a station cannot raise its rate under you mid-session; if a band drifts past your limit you get routed elsewhere, not overcharged.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Custom tuning</span><span class="man-plate__v">A Wave model trained on your own records, on our GPUs, and served from our cloud on a private band only you can reach. Price on request. <a href="#sTune">Appendix B3</a>.</span></div>
+            </div>
+
+            <h3 id="sMoney-earn">What you earn</h3>
+            <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">Your GPU</span><span class="man-plate__v">90% of every token you serve, at a price you set. The 10% platform fee is the whole of our take.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Your contracts</span><span class="man-plate__v">Attach a curated station in front of a provider account you hold and declare its list price. Consumers pay list + 10%; you get the list back whole, plus half the routing fee - the network keeps the other half. Stated as a share of the fee, never of the price, so you cannot be underwater at any markup. One flag: <code>roger share --curated</code>.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">What the 10% is</span><span class="man-plate__v">The same fee on both paths, and the fee is the product. It routes every request so the upstream sees a station, never a person, signs a receipt for each one, fails over mid-request when a machine drops, holds your price cap on every call, and keeps one wallet across people and providers alike.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Through a Tower</span><span class="man-plate__v">When a relay carries the work, the settlement is 90 / 5 / 5: the serving node, the Tower operator, then the platform. <a href="/broadcasts-run-a-tower.html">How that path works</a>.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">You control</span><span class="man-plate__v">Input rate, output rate, free hours, time-of-use windows, concurrency, and which models you carry. Setting a rate of zero is a normal thing to do and costs you nothing.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Minimum payout</span><span class="man-plate__v">$25. Below that the transfer and reporting overhead is worth more than the transfer.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Schedule</span><span class="man-plate__v">You request it; payable balances are released on a monthly batch.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">Identity</span><span class="man-plate__v">Stripe Connect onboarding has to be complete before any payout leaves. Stripe holds the identity documents - we never store them. Earnings still accrue before you onboard; they are simply not transferable yet.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">The life of an earning</span><span class="man-plate__v">Accrued: a served request credits your share the moment it settles. Held: the principal for 30 days; a 10% reserve slice stays back until day 90 to cover the late-chargeback tail. Payable: hold cleared, no open dispute, Connect onboarding done. Paid: you request a payout and Stripe transfers it to your bank.</span></div>
+            </div>
+          </section>
+
+          <!-- ============== APPENDIX B5: THE WAVE FAMILY, IN FULL ==============
+               The long form of research-wave-family.html (founder, 2026-11-24: the family page's tables
+               go to the manual). That page keeps the rail, the slot table, a per-slot count of the jobs
+               and the variations; this appendix holds every job (WaveJobs.svelte, data in
+               #lib/waveJobs.js, the filters by src/js/wave-jobs.js) and the notes on how the family is
+               built, moved verbatim. Status words are the family page's (wave-status.json). -->
+          <section class="man-sec" id="sFamily">
+            <span class="man-sec__no">Appendix B5 · The Wave family, in full</span>
+            <h2>Every job, and how the family is built</h2>
+            <p class="man-lead">The <a href="/research-wave-family.html">Wave family page</a> shows the
+              sizes, one line per slot and how many jobs each slot carries. This is the long form: every
+              job the family is built for, with the smallest slot that can carry it, and the notes on how
+              each tier is built.</p>
+
+            <h3 id="sFamily-jobs">Which slot for which job</h3>
+            <p>The smallest slot that can carry the work. Small slots
+              turn messy reality into structure, larger slots reason over that structure.</p>
+            <WaveJobs />
+
+            <h3 id="sFamily-built">How the family is built</h3>
+            <p>Every tier is a <b>band</b>, not a fixed count. A
+              tier is defined by the work it has to carry and the hardware it has to
+              carry it on; where a given release lands inside that band is a build
+              decision, and successive versions of the family may sit at different
+              points in the same band without changing what the tier is for.</p>
+            <p><b>Specialists first.</b> Wave Pico and Wave Nano are task-native total
+              specialists. By design they score at chance on general benchmarks (MMLU 26.4
+              against a 25 chance line, Pico v4 audit). Reasoning and explanation grow from
+              Wave Micro upward, where every tier must stay competitive on general
+              benchmarks as well as industrial ones.</p>
+            <p><b>Built to read machines.</b> The input side is machine-native: a window of
+              raw telemetry, a log line, a serial dump - the thing a machine emits, not a
+              sentence about it. That is what training from scratch buys. The vocabulary is
+              the plant&rsquo;s rather than the web&rsquo;s, and a tier can read the output
+              of the tier beneath it.</p>
+            <p><b>How the recipes split.</b> There are two ways to get a model. You can
+              start from someone else&rsquo;s finished model and teach it your work &ndash;
+              fast, and it arrives already shaped by the web it was trained on. Or you can
+              start from nothing, an empty network that has never seen a word, and raise it
+              on your own data. That second way is <b>scratch</b>, and it is the harder,
+              slower one: what limits it is the variety of data you can feed it, not the
+              GPUs you can point at it. We have run that path with no sign of it starving
+              through 1.5 billion parameters.</p>
+            <p><b>Where each tier lands.</b> Pico, Nano and Micro are scratch tiers, so the
+              plant&rsquo;s vocabulary is the only one they ever learn. Micro&rsquo;s from-scratch 7B run is training:
+              at 7&ndash;8B it sits well above anything we have measured, and nothing about
+              it is measured yet. Giga and Tera take the other road &ndash; a strong open base, then
+              industrial training on top, plus the mesh &ndash; because at that size a model
+              is expected to hold its own on general questions too. Peta and Exa are carved
+              down from the flagship rather than trained up from anything. Sizes are targets
+              and bands, not final specifications.</p>
+            <p><b>Run it where you like.</b> Every tier is a model you host - on the board
+              beside the machine, on a server in the plant, or on your own GPU at home. A
+              model you run locally can also go on air as a band with
+              <code>roger share</code>, which is how anything on RogerAI is reached
+              remotely. Local or remote is a deployment choice, not a different product.</p>
+            <p><b>One family on one wire.</b> Wave Mesh is the
+              protocol the tiers speak to each other, and every tier ships with it built in
+              &ndash; not an add-on, not a separate service to stand up. The shape is fan-in:
+              a Pico reads one machine&rsquo;s channels, a Nano rolls up many Picos, a Micro
+              reasons across many fleets. When a small model is not sure of a read, it sends
+              that read up rather than guessing, and the tier above can take it directly
+              because both were trained on the same machine vocabulary &ndash; no translation
+              layer, no re-encoding. That is the whole trade: small models everywhere, a
+              bigger one only on the reads that need it. How much climbs is a dial you set,
+              not a fixed property of the chain, and moving it trades accuracy against how
+              much hardware you have to keep upstream.</p>
+          </section>
+
+          <!-- ============== APPENDIX B6: WAVE NANO, IN FULL ==============
+               The long form of research-wave-nano.html (2026-11-24, the founder's pick after the family
+               page): the comparator paragraph, the public small-model table and how the vision module was
+               read, moved verbatim. Every number is a model-cards.json token, read through the Nano page's
+               own content() so the two pages cannot disagree. -->
+          <section class="man-sec" id="sNano">
+            <span class="man-sec__no">Appendix B6 · Wave Nano, in full</span>
+            <h2>The comparison, the public suite, and how vision was read</h2>
+            <p class="man-lead">The <a href="/research-wave-nano.html">Wave Nano page</a> shows what Nano
+              does and its industrial readouts. This is the long form: the general-model comparison, the
+              public small-model table with Nano last on most of it, and how the vision module was read.</p>
+
+            <h3 id="sNano-compare">Against a general model, and on the public suite</h3>
+          <p class="wm-compare"><b>Against Qwen3.5-2B fine-tuned identically:</b>
+             {@html nano.card('nano.cmp-headline')} on fault identification <span class="wm-ref">{@html nano.cardRef('nano.cmp-headline')}</span>,
+             and far better refusal and damage tolerance. The comparator leaks a confident
+             fault on {@html nano.card('nano.cmp-leak')} of out-of-scope input against Nano&rsquo;s
+             {@html nano.card('nano.leak')}, and answers {@html nano.card('nano.cmp-dup')} of duplicated-line frames
+             wrong against Nano&rsquo;s {@html nano.card('nano.dup')}. The comparator was read against the
+             earlier Nano build, under the same protocol.</p>
+
+          <figure class="figure figure--plate wm-standard" aria-labelledby="wm-std-cap">
+            <div class="tier-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr><th scope="col">Public suite, read on the release build</th><th scope="col">Wave Nano</th><th scope="col">Six open 1 to 2B models, same instrument</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Five-task macro (piqa, ARC, WinoGrande, OpenBookQA)</th><td>{@html nano.card('nano.std-macro')}</td><td>{@html nano.card('nano.std-macro-class')}</td></tr>
+                  <tr><th scope="row">HellaSwag</th><td>{@html nano.card('nano.std-hellaswag')}</td><td>{@html nano.card('nano.std-hellaswag-class')}</td></tr>
+                  <tr><th scope="row">MMLU, 5-shot</th><td>{@html nano.card('nano.std-mmlu')}</td><td>{@html nano.card('nano.std-mmlu-class')}</td></tr>
+                  <tr><th scope="row">GSM8K, 5-shot strict</th><td>{@html nano.card('nano.std-gsm8k')}</td><td>{@html nano.card('nano.std-gsm8k-class')} (four measured)</td></tr>
+                  <tr><th scope="row">IFEval, prompt-level strict</th><td>{@html nano.card('nano.std-ifeval')}</td><td>{@html nano.card('nano.std-ifeval-class')} (one measured)</td></tr>
+                  <tr><th scope="row">TruthfulQA MC2</th><td>{@html nano.card('nano.std-truthfulqa')}</td><td>{@html nano.card('nano.std-truthfulqa-class')}</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption class="fig mono" id="wm-std-cap">The public small-model suite, every row read here on one day on one instrument, nothing quoted from a model card. On this suite Wave Nano is last in its size class on every task but TruthfulQA, where it sits inside the class range, and at chance on MMLU and GSM8K; the industrial readouts on the <a href="/research-wave-nano.html#measured">Nano page</a> are where it leads. {@html nano.cardRef('nano.std-macro')}.</figcaption>
+          </figure>
+            <h3 id="sNano-vision">How the vision module was read</h3>
+            <div class="device-contract">
+            <p><b>How it was read.</b> On held-out frames, in float32, the numerics a server
+               computes in. A wide-area frame is read as tiles; one full frame reads
+               {@html nano.card('nano.vl-full')} where its tiles read {@html nano.card('nano.vl-auc')}. Served through
+               our llama.cpp branch, it reads {@html nano.card('nano.vl-served')} on the second network it learned on and
+               a full wide-area frame <span class="wm-ref">{@html nano.cardRef('nano.vl-served')}</span>.</p>
+            <p><b>What it needs.</b> Our llama.cpp branch, until three fixes are upstream.</p>
+            </div>
+          </section>
+
           <!-- ============== APPENDIX C: CHANGELOG ============== -->
           <!--
             HOW TO APPEND (per release): add ONE <div class="man-plate__row"> at the TOP
@@ -1951,6 +2445,9 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
               Newest first. The set self-updates - <code>roger upgrade</code> pulls the
               latest, <code>roger upgrade --check</code> just reports.</p>
             <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">v7.1.1</span><span class="man-plate__v">Tower follow-ups: each kind of health check keeps its own run of failures, so a passing hub check no longer clears canary failures; a Tower with no approval on record starts at the <b>new</b> stage; one outage seen by two broker instances counts once.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">v7.1.0</span><span class="man-plate__v">Tower placement is ranked: Core picks a Tower by distance, health and trust stage instead of first-fit, moves idle Stations between Towers and tells the node where it went in <code>roger share</code>, and ramps a new Tower through <b>new</b>, <b>proving</b> and <b>established</b>. Every Tower admission, approval and retirement is written to a governance record.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">v7.0.1</span><span class="man-plate__v"><code>roger tower status</code> names the id RogerAI assigned, the one to quote when you write in, beside the local one. Certificate renewal is signed with the Tower's identity key, so a joined Tower's lease no longer lapses a day after enrolling.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v7.0.0</span><span class="man-plate__v">The Go module path becomes <code>rogerai.fm/roger/v7</code>, so installing from source is <code>go install rogerai.fm/roger/v7/cmd/rogerai@latest</code> (/v6 and /v5 keep resolving). <code>roger tower</code> replaces the Tower binaries, <code>roger join</code> joins an Edge or a Tower with one line, <code>roger --lan</code> keeps turns on your own network, and phones join the Edge as members.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v6.9.0</span><span class="man-plate__v">The network tells its own story: the homepage carries identity unlinking, both earn paths (your GPU at 90%, your contracts as curated), the tower network, and the honest comparison; why.html joins the nav and footer. Curated stations are verified <b>once, plus a minimal weekly recheck</b> (disclosed - never the adaptive schedule that burned a dollar a day of upstream credit on the first live stations), dial rows wear the bare <b>&raquo;</b> mark with the provider named in the station log, and an undetected context window reads <b>~333k</b> - visibly a sentinel, never a plausible lie.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v6.8.0</span><span class="man-plate__v">Payouts get four times faster: the hold drops from a blanket 120 days to <b>30 days on the principal</b>, with a <b>10% reserve slice riding to day 90</b> to cover the late-chargeback tail. Sized against researched dispute data (most disputes land inside 30-60 days); a payout pays the principal and the reserve follows on its own tail, never stranded, never early.</span></div>

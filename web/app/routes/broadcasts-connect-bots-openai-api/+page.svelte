@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Connect your bots and services to RogerAI (OpenAI-compatible)
   // Ported from web/src/broadcasts-connect-bots-openai-api.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -45,21 +46,14 @@
         <figcaption class="fig mono">FIG. 1 - MANY SERVICES, ONE PATCH INTO THE BAND</figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">THE TWO-LINE CHANGE</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">KEYS</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">TWO BASE URLS</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">FEATURES</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">BEFORE YOU SHIP</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "THE TWO-LINE CHANGE" },
+        { id: "s2", no: "§2", name: "KEYS" },
+        { id: "s3", no: "§3", name: "TWO BASE URLS" },
+        { id: "s4", no: "§4", name: "FEATURES" },
+        { id: "s5", no: "§5", name: "BEFORE YOU SHIP" },
+        { id: "s6", no: "§6", name: "FAQ" },
+      ]} />
 
       <blockquote class="bc-answer" data-reveal>
         <b>Quick answer.</b> RogerAI is OpenAI-compatible, so any OpenAI-SDK bot connects by changing

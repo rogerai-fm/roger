@@ -44,10 +44,13 @@ export const MASTERS = [
 
 export const APP_DIR = path.join(WEB, "src", "assets", "app");
 export const APP_SHOTS = [
-  "iphone-agent-action", "iphone-band", "iphone-connect", "iphone-operator-tools",
-  "iphone-operator-voice", "iphone-tune-routing", "iphone-tunein-free", "iphone-tunein-private",
-  "mac-band", "mac-confidential", "mac-connect", "mac-tunein",
+  "iphone-agent-action", "iphone-band", "iphone-basestation", "iphone-connect", "iphone-edge",
+  "iphone-hub", "iphone-operator-tools", "iphone-operator-voice", "iphone-ping", "iphone-ping-yours",
+  "iphone-tune-routing", "iphone-tunein-free", "iphone-tunein-private", "iphone-weather",
+  "mac-band", "mac-basestation", "mac-confidential", "mac-connect", "mac-edge", "mac-hub",
+  "mac-ping", "mac-tunein", "mac-weather",
   "tui-agent", "tui-band", "tui-help", "tui-share",
+  "watch-answer", "watch-faces", "watch-quick",
   "webui-account", "webui-browse", "webui-settings", "webui-share",
 ];
 // a phone screenshot (under 1000 wide) shows at 130-340 CSS px, a desktop one at 330-960

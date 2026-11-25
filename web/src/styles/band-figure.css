@@ -1,0 +1,133 @@
+/* =====================================================================
+   RogerAI - the band figure (app/lib/ui/BandFigure.svelte), homepage §5.
+
+   The band in the isometric hand (2026-11-23; the SVG comes from
+   computer-scientist/article/fig_band_gen.py, the tones and lines are the
+   .iso__* rules of components.css). One slab: your laptop at the left, one
+   wire on the floor to the relay (RogerAI), a trunk and three branches to the
+   stations at the right, stacked in depth: a console in front, a console behind
+   it, the Tower at the back. The step list (<ol data-scrub data-scrub-auto>) is
+   tuned by scrub.js and the picture reads the tuned step through the figure's data-step (scrub.js):
+   1 the first station's lamp is lit, the request runs route 1 there and back
+   as the comet, the receipt slip lies beside the laptop; 2 it fades (lamp out,
+   the part dimmed, its branch dashed, a cross on its front, no comet, the slip
+   faint); 3 the second station answers on route 2 and the address plate
+   flashes once because nothing on your side changed. data-draw (draw.js,
+   components.css): the figure draws itself in the first time it is seen.
+   Lead class .bf on every rule. Colours are tokens; motion is --d-* and --motion.
+   ===================================================================== */
+.bf { color: var(--ink-700); }
+.bf .bf__stage { padding-bottom: 2.4em; }   /* the two feet sit under the slab's front edge */
+.bf .bf__pic { position: relative; }
+
+/* the parts: every solid at full edge; the ways on the floor always show; a station that fades dims */
+.bf .iso__m { --edge: 1; }
+.bf .bf__way { opacity: .35; transition: opacity var(--d-3); }
+.bf .bf__lamp { transition: fill var(--d-2), stroke var(--d-2); }
+.bf .bf__stop { fill: none; stroke: var(--live); stroke-width: 2; stroke-linecap: round; opacity: 0; transition: opacity var(--d-2); }
+.bf .bf__receipt { transition: opacity var(--d-3); }
+
+/* the words over the stage: the two feet under the laptop and the relay, the wire's word above
+   the wire, a name and a line beside each station (the percents are the generator's) */
+.bf .bf__word { position: absolute; pointer-events: none; }
+.bf .bf__word--you, .bf .bf__word--relay { translate: -50% 0; text-align: center; }
+.bf .bf__word--you { left: 10%; top: 49%; }
+.bf .bf__word--relay { left: 30.5%; top: 65.7%; }
+.bf .bf__onwire {
+  left: 27.4%; top: 37.5%; translate: -50% -100%;
+  font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-500); white-space: nowrap;
+}
+.bf .bf__word--1, .bf .bf__word--2, .bf .bf__word--3 { left: 79.4%; translate: 0 -50%; }
+.bf .bf__word--1 { top: 73.0%; }
+.bf .bf__word--2 { top: 51.7%; }
+.bf .bf__word--3 { top: 28.2%; }
+.bf .bf__lead { transition: stroke-opacity var(--d-2); }
+.bf .bf__who {
+  display: block; white-space: nowrap;
+  font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-900);
+  transition: color var(--d-2);
+}
+.bf .bf__note { display: block; margin-top: 2px; color: var(--ink-400); font-size: var(--t-xs); line-height: 1.35; max-width: 19ch; }
+.bf .bf__word--you .bf__note, .bf .bf__word--relay .bf__note { max-width: none; white-space: nowrap; }
+.bf .bf__addr {
+  display: inline-block; margin-top: 4px; padding: 2px 8px; border: 1px solid var(--ink-900); border-radius: var(--r-sm);
+  font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-900); background: var(--paper);
+  transition: border-color var(--d-2), color var(--d-2);
+}
+
+/* the steps: the scrubbed list, like the custom-tuning figures' */
+.bf .bf__steps {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2);
+  margin: var(--s-5) 0 0; padding: 0; list-style: none; max-width: 760px; margin-inline: auto;
+}
+.bf .bf__steps li { padding: var(--s-2) var(--s-2) var(--s-3); border-radius: var(--r-xl); text-align: center; transition: background-color var(--d-2); }
+.bf .bf__steps b { display: block; color: var(--ink-900); font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; }
+.bf .bf__steps b i { font-style: normal; color: var(--live-text); margin-right: 6px; }
+.bf .bf__steps li.is-tuned { background: var(--paper); }
+.bf .bf__steps li span { display: block; margin-top: 2px; font-size: var(--t-xs); color: var(--ink-400); }
+
+/* ---- the three steps (the still is step 1) ------------------------------- */
+/* 1 and the still: the first station answers; the request runs route 1 there and back */
+.bf .bf__station--1 .bf__lamp { fill: var(--live); stroke: none; }
+.bf.is-drawn .bf__route-1 { opacity: 1; animation: comet calc(var(--motion) * 2.4s) linear infinite; }
+.bf.is-drawn .bf__comet--back { animation-delay: 1.2s; }
+
+/* 2: it fades. Lamp out, its edges dimmed, its branch a dashed ghost, a cross, no request, the slip faint */
+.bf[data-step="2"] .bf__station--1 .bf__lamp { fill: var(--paper); stroke: currentColor; }
+.bf[data-step="2"] .bf__station--1 { --edge: .5; }
+.bf[data-step="2"] .bf__lead--1 { stroke-opacity: .2; }
+.bf[data-step="2"] .bf__station--1 .bf__stop { opacity: 1; }
+.bf[data-step="2"] .bf__way--1 { stroke-dasharray: 3 3; }
+.bf[data-step="2"] .bf__comet { animation: none; opacity: 0; }
+.bf[data-step="2"] .bf__receipt { opacity: .25; }
+.bf[data-step="2"] .bf__word--1 .bf__who { color: var(--ink-400); }
+
+/* 3: re-tuned. The second station answers on route 2; the first stays dark; the address plate flashes once */
+.bf[data-step="3"] .bf__station--1 .bf__lamp { fill: var(--paper); stroke: currentColor; }
+.bf[data-step="3"] .bf__station--1 { --edge: .5; }
+.bf[data-step="3"] .bf__lead--1 { stroke-opacity: .2; }
+.bf[data-step="3"] .bf__way--1 { stroke-dasharray: 3 3; }
+.bf[data-step="3"] .bf__word--1 .bf__who { color: var(--ink-400); }
+.bf[data-step="3"] .bf__station--2 .bf__lamp { fill: var(--live); stroke: none; }
+.bf[data-step="3"] .bf__route-1 { animation: none; opacity: 0; }
+.bf.is-drawn[data-step="3"] .bf__route-2 { opacity: 1; animation: comet calc(var(--motion) * 2.4s) linear infinite; }
+.bf.is-drawn[data-step="3"] .bf__route-2.bf__comet--back { animation-delay: 1.2s; }
+.bf[data-step="3"] .bf__addr { animation: bf-same calc(var(--motion) * 1.6s) ease-out 1; }
+@keyframes bf-same {
+  0% { border-color: var(--live); color: var(--live-text); }
+  60% { border-color: var(--live); color: var(--live-text); }
+  100% { border-color: var(--ink-900); color: var(--ink-900); }
+}
+
+/* the draw-in order: the slab, you, the fan, the relay, the stations, the slip; the words (HTML) fade up after */
+.bf .bf__ground { --draw-delay: 0s; }
+.bf .bf__you { --draw-delay: var(--d-2); }
+.bf .bf__fan { --draw-delay: var(--d-3); }
+.bf .bf__relay { --draw-delay: var(--d-4); }
+.bf .bf__station--1 { --draw-delay: var(--d-5); }
+.bf .bf__station--2 { --draw-delay: calc(var(--d-5) + var(--d-2)); }
+.bf .bf__station--3 { --draw-delay: calc(var(--d-5) + var(--d-3)); }
+.bf .bf__receipt { --draw-delay: calc(var(--d-5) + var(--d-4)); }
+.bf .bf__leads { --draw-delay: calc(var(--d-5) + var(--d-4)); }
+.bf.is-drawing:not(.is-drawn) .bf__word { opacity: 0; }
+.bf.is-drawn:not(.is-settled) .bf__word { opacity: 1; transition: opacity var(--d-4) ease-out var(--d-5); }
+
+/* phones (by the stage's own width): the lines under the names go, the words shrink, the wire's word goes */
+@media (max-width: 560px) { .bf .bf__stage { padding-inline: 0; } }   /* the stage is the container, so its own padding is a media rule */
+/* any stage short of its full width (the query reads the content box: 804px at full width): the notes and
+   the names collide below it (measured: from a 576px stage up to about 750px the plate's note ran off the
+   left edge and into the relay's words, and the right column's notes wrapped into each other), so the
+   names alone stay, placed for the narrower picture; the right column keeps its place, where its leaders end */
+@container (max-width: 790px) {
+  .bf .bf__note, .bf .bf__onwire { display: none; }
+  .bf .bf__word--you { left: 0; translate: 0 0; text-align: left; }           /* the plate is wide: it starts at the slab's left end */
+  .bf .bf__word--relay { left: 34.7%; top: 54.8%; }                          /* under the relay itself, clear of the plate */
+}
+@container (max-width: 560px) {
+  .bf .bf__word--1, .bf .bf__word--2, .bf .bf__word--3 { left: 74%; }        /* the column starts earlier: the names must end inside the view */
+  .bf .bf__who { font-size: 9px; letter-spacing: .06em; }
+  .bf .bf__addr { font-size: 10px; padding: 1px 5px; margin-top: 2px; }
+  .bf .bf__steps { grid-template-columns: minmax(0, 1fr); }
+  .bf .bf__steps li { text-align: left; padding-block: var(--s-1); }
+  .bf .bf__steps li.is-tuned { background: transparent; }
+}

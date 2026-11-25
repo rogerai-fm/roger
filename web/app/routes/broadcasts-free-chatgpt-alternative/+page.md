@@ -25,7 +25,7 @@ faq:
   - q: Are self-hosted models as good as ChatGPT?
     a: "For everyday writing, coding, and Q&A, open models are very close. The top proprietary models still lead on the hardest reasoning tasks, but most day-to-day use no longer needs them."
   - q: Is a self-hosted AI private?
-    a: "Yes - run it locally and your prompts never leave your machine. On RogerAI, prompts are screened for safety but operators are pseudonymous, and you're not feeding a training pipeline."
+    a: "Yes - run it locally and your prompts never leave your machine. On RogerAI, prompts the broker dispatches are screened for safety (traffic through a relay is checked afterwards, on a sample), but operators are pseudonymous, and you're not feeding a training pipeline."
   - q: Do I have to pay for anything?
     a: "No. The models and runtimes are free and open source. You only pay if you choose a paid node on the market, or for the electricity your own GPU uses."
 ---
@@ -97,7 +97,7 @@ Two paths, depending on your hardware:
 
 ## Is a self-hosted alternative private?
 
-Self-hosting is as private as it gets: the model runs on your machine and your prompts never leave it. On a shared network like RogerAI, prompts are screened for safety, but operators are **pseudonymous** (a callsign and a coarse region, nothing more) and you hold **signed receipts** of every call. Either way, you are not feeding your conversations into a company's training pipeline by default.
+Self-hosting is as private as it gets: the model runs on your machine and your prompts never leave it. On a shared network like RogerAI, prompts the broker dispatches are screened for safety (traffic through a relay is checked afterwards, on a sample), but operators are **pseudonymous** (a callsign and a coarse region, nothing more) and you hold **signed receipts** of every call. Either way, you are not feeding your conversations into a company's training pipeline by default.
 
 </section>
 

@@ -1,4 +1,5 @@
 <script>
+  import LoadState from "#lib/ui/LoadState.svelte";
   // Payouts, /payouts.html (legacy: web/src/js/payouts.js): earnings provenance (the held ->
   // payable -> paid split, the hold timeline, the release ladder, the per-model/per-node
   // breakdown, Towers and relay, payout history with its funding receipts, the ledger) plus
@@ -114,23 +115,23 @@
     let r = null;
     try { const res = await api("/connect/onboard", { method: "POST" }); r = res.ok ? await res.json() : null; } catch { r = null; }
     if (r && r.url) location.href = r.url;
-    else payMsg = "could not start onboarding";
+    else payMsg = "Could not start payout setup. Try again.";
   }
   async function request() {
-    payMsg = "requesting...";
+    payMsg = "Requesting your payout…";
     try {
       const r = await api("/payouts/request", { method: "POST" });
       if (r.ok) {
-        try { await r.json(); } catch { payMsg = "payout failed"; return; }   // an answer that is not JSON is not a payout
-        payMsg = "payout requested";
-        location.reload();
-      } else payMsg = await reason(r, "payout failed");
-    } catch { payMsg = "payout failed"; }
+        try { await r.json(); } catch { payMsg = "The payout did not go through. Try again."; return; }   // an answer that is not JSON is not a payout
+        payMsg = "Payout requested. Updating the page…";
+        setTimeout(() => location.reload(), 1800);   // long enough to read the line before the page refreshes
+      } else payMsg = await reason(r, "The payout did not go through. Try again.");
+    } catch { payMsg = "Could not reach RogerAI. Try again."; }
   }
 
   onMount(async () => {
     const res = await bootGet("/account");
-    if (res.status === 401) { location.replace("/login.html"); return; }
+    if (res.status === 401) { location.replace("/login.html?next=" + encodeURIComponent("/payouts.html")); return; }
     if (!res.data) { status = "fault"; return; }
     const a = res.data;
     // A signed-in person with no operator account (a consumer, or a sign-in whose machines
@@ -148,8 +149,9 @@
   });
 </script>
 <div class="authwrap tint-panel">
+<LoadState status={status} what="your payouts" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. Try again shortly.</p>
+  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. <button type="button" class="ghost" onclick={() => location.reload()}>Try again</button></p>
   <h1>Payouts</h1>
   <p class="sub">Exactly what you earned, when it clears, and where it came from.</p>
 
@@ -167,7 +169,7 @@ roger share</pre>
   <section class="panel">
     <h2>Earnings</h2>
 
-    <div class="po-meter" id="splitMeter" role="img" aria-label="Earnings split">
+    <div class="po-meter" id="splitMeter" role="img" aria-label="Earnings: {cr(split.held)} held, {cr(split.payable)} payable, {cr(split.paid)} paid">
       <div class="po-meter__track">
         <div class="po-meter__seg po-meter__seg--held" id="segHeld" style:width="{pct(split.held)}%"></div>
         <div class="po-meter__seg po-meter__seg--payable" id="segPayable" style:width="{pct(split.payable)}%"></div>
@@ -203,8 +205,8 @@ roger share</pre>
     <h2>Hold timeline</h2>
     <p class="fine">Each earning's principal is held for <b id="holdNote">{holdDays !== null ? holdDays + " days" : "30 days"}</b> then becomes payable; a 10% reserve slice stays back until day 90 to cover the dispute tail.</p>
 
-    <ol class="po-timeline" id="timeline" hidden={!(total > 0)}>
-      <li class="po-timeline__step is-done">
+    <ol class="po-timeline" id="timeline">   <!-- shown before the first earning too: it is the path each one takes -->
+      <li class="po-timeline__step{total > 0 ? ' is-done' : ''}">
         <span class="po-timeline__mark" aria-hidden="true"></span>
         <span class="po-timeline__body">
           <b>Earned</b>
@@ -235,7 +237,7 @@ roger share</pre>
         </span>
       </li>
     </ol>
-    <p class="fine" id="timelineEmpty" hidden={status !== "ready" || total > 0}>No earnings yet - the timeline fills in as you serve.</p>
+    <p class="fine" id="timelineEmpty" hidden={status !== "ready" || total > 0}>No earnings yet. This is the path every earning takes once you serve.</p>
 
     <!-- the release ladder: each upcoming clear date with the amount + lot count -->
     <div class="po-ladder" id="ladderWrap" hidden={!ladder.length}>
@@ -306,7 +308,7 @@ roger share</pre>
     <p>Payout status: <b id="connect">{connectStatus}</b></p>
     <button id="onboard" class="ghost" hidden={active} onclick={onboard}>Set up payouts (Stripe)</button>
     <button id="request" class="primary" hidden={!active} onclick={request}>Request payout</button>
-    <p class="fine" id="payMsg">{payMsg}</p>
+    <p class="fine" id="payMsg" role="status">{payMsg}</p>
   </section>
 
   <!-- ============ LINEAGE: the receipts behind the money ============ -->

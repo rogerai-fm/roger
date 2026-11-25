@@ -28,23 +28,23 @@
             <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           </button>
           <div class="nav__panel" id="navModelsPanel" hidden>
-            <a href="/models.html"><b>Models on air</b><span>The live directory: every model the network is carrying, and the stations carrying it.</span></a>
+            <a href="/models.html"><b>Models</b><span>Every model on the network right now, and the machines serving it.</span></a>
             <span class="nav__deckrow">
-              <a href="/playbox.html" aria-current={cur("playbox")}><b>Playbox</b><span>Three decks: talk to a model, inspect the mesh, or build a factory.</span></a>
+              <a href="/playbox.html" aria-current={cur("playbox")}><b>Playbox</b><span>Three demos. Only the Console talks to a live model.</span></a>
               <button class="nav__more nav__more--sub" type="button" id="navDecksBtn"
                       aria-expanded="false" aria-controls="navDecksPanel"
-                      aria-label="Show the three Playbox decks">
+                      aria-label="Show the three Playbox decks" data-show="Show the three Playbox decks" data-hide="Hide the three Playbox decks">
                 <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
               </button>
             </span>
             <div class="nav__decks" id="navDecksPanel" hidden>
-              <a class="nav__sub" href="/playbox.html#console"><b>Console</b><span>Load a model like a cassette: chat, voice, image, tools, embeds.</span></a>
-              <a class="nav__sub" href="/playbox.html#mesh"><b>Wave Mesh</b><span>Sensors, wire formats, and the Wave models that read them.</span></a>
-              <a class="nav__sub" href="/playbox.html#factory"><b>Factory</b><span>Build machines, ship crates, fix holds, and expand the line.</span></a>
+              <a class="nav__sub" href="/playbox.html#console"><b>Console</b><span>Chat with a live model on the network: text, voice, image, tools, embeds.</span></a>
+              <a class="nav__sub" href="/playbox.html#mesh"><b>Wave Mesh</b><span>Replay recorded sensor data through Wave models.</span></a>
+              <a class="nav__sub" href="/playbox.html#factory"><b>Factory</b><span>A game: keep three machines running, then automate them.</span></a>
             </div>
             <a href="/voices.html" aria-current={cur("voices")}><b>Voices</b><span>On-air text-to-speech voices, each one an operator&rsquo;s station.</span></a>
-            <a href="/tower.html" aria-current={cur("tower")}><b>Tower</b><span>The relay you can run: 5% of what you carry on the public band, or a free standalone network of your own.</span></a>
-            <a href="/pricing.html" aria-current={cur("pricing")}><b>Pricing</b><span>What the fee buys, who sets the number, what a wallet is charged, and what an operator keeps.</span></a>
+            <a href="/tower.html" aria-current={cur("tower")}><b>Tower</b><span>The relay you can run: it carries requests for 5% of what passes through, or runs a free private network of your own.</span></a>
+            <a href="/pricing.html" aria-current={cur("pricing")}><b>Pricing</b><span>Who sets the price, what is free, what you can be charged, and what a machine owner keeps.</span></a>
             <a href="/integrations.html" aria-current={cur("integrations")}><b>Integrations</b><span>The local servers it finds by itself, and the agent CLIs it wires for you.</span></a>
           </div>
         </span>
@@ -59,12 +59,22 @@
           <div class="nav__panel" id="navResearchPanel" hidden>
             <a href="/research.html"><b>Labs</b><span>Programs, proof, and how the work gets published.</span></a>
             <a href="/research-wave-family.html"><b>The Wave family</b><span>The Spectrum, pico to exa: a chip beside one machine up to an exascale-class flagship.</span></a>
-            <a href="/research-models.html"><b>Models and status</b><span>Every model, its program status, lineage and evidence.</span></a>
-            <a href="/research-wave-pico.html"><b>Wave Pico</b><span>The 293M sensor reader that escalates what it cannot read.</span></a>
-            <a href="/research-wave-nano.html"><b>Wave Nano</b><span>1.45B: telemetry, a fleet, a fire site, and conversation.</span></a>
+            <span class="nav__deckrow">
+              <a href="/research-models.html"><b>Models and status</b><span>Every model, its program status, lineage and evidence.</span></a>
+              <button class="nav__more nav__more--sub" type="button" id="navModelPagesBtn"
+                      aria-expanded="false" aria-controls="navModelPagesPanel"
+                      aria-label="Show the model pages" data-show="Show the model pages" data-hide="Hide the model pages">
+                <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </button>
+            </span>
+            <div class="nav__decks" id="navModelPagesPanel" hidden>
+              <a class="nav__sub" href="/research-wave-pico.html"><b>Wave Pico</b><span>The 293M sensor reader that escalates what it cannot read.</span></a>
+              <a class="nav__sub" href="/research-wave-nano.html"><b>Wave Nano</b><span>1.45B: telemetry, a fleet, a fire site, and conversation.</span></a>
+            </div>
             <a href="/research-hardware.html"><b>Hardware</b><span>ESP32 to DGX Spark: which board carries which tier, and the honest stage of each.</span></a>
             <a href="/research-industry.html"><b>Industrial deployment</b><span>Where the box sits in a plant network, and what it never touches.</span></a>
-            <a href="/broadcasts.html"><b>Open Air Waves</b><span>Build stories and measurements, negative results included.</span></a>
+            <a href="/research-custom-tuning.html"><b>Custom tuning</b><span>A Wave model trained on your records, served privately to you, with a report you can check.</span></a>
+            <a href="/broadcasts.html"><b>Broadcasts</b><span>What we shipped, what we measured, what did not work.</span></a>
           </div>
         </span>
 
@@ -78,10 +88,10 @@
           <div class="nav__panel" id="navCompanyPanel" hidden>
             <a href="/company.html"><b>About RogerAI</b><span>What the company is, where it is, and how it operates.</span></a>
             <a href="/careers.html"><b>Careers</b><span>Open roles in research, engineering and industrial deployment.</span></a>
-            <a href="/faq.html" aria-current={cur("faq")}><b>Questions</b><span>The answers people actually write in for, money and privacy first.</span></a>
+            <a href="/faq.html" aria-current={cur("faq")}><b>FAQ</b><span>The questions people write in with, money and privacy first.</span></a>
             <a data-lets-talk aria-expanded="false"
                href="mailto:labs@rogerai.fm?subject=Hello%20from%20the%20website"><b>Let&rsquo;s talk</b><span>A few lines is plenty. It lands in a real mailbox and a person answers.</span></a>
-            <a href="/broadcasts.html"><b>Broadcasts</b><span>The transmission log: what we shipped, what we measured, what did not work.</span></a>
+            <a href="/broadcasts.html"><b>Broadcasts</b><span>What we shipped, what we measured, what did not work.</span></a>
           </div>
         </span>
       </div>

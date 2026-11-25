@@ -47,5 +47,6 @@
   "/stations": " class=\"auth\"",
   "/tower": " data-onair=\"idle\"",
   "/usage": " class=\"auth\"",
-  "/voices": " data-onair=\"idle\""
+  "/voices": " data-onair=\"idle\"",
+  "/research-custom-tuning": " data-onair=\"idle\""
 }

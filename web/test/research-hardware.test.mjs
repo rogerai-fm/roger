@@ -204,7 +204,7 @@ test("hardware: the band scrolls on a narrow screen instead of shrinking to noth
     "the band sits in its own scroll container (the shared diagram scroll box)");
   assert.match(src("styles/components.css"), /\.scroll-box\s*\{[^}]*overflow-x:\s*auto/,
     "that container scrolls horizontally");
-  assert.match(css, /\.hw-ladder\s*\{[^}]*--diagram-min:\s*\d+px/,
+  assert.match(css, /\.hw-(?:ladder|stage)\s*\{[^}]*--diagram-min:\s*\d+px/,
     "and the band keeps a legible minimum width rather than scaling down");
   assert.doesNotMatch(css, /\.hw-figure\s*\{[^}]*overflow-x/,
     "the figure itself must not scroll, or the caption leaves with the band");
@@ -216,9 +216,11 @@ test("hardware: the page indicates that the photographs were altered", () => {
   // The credits SECTION is gone - every picture carries its own author, licence and source.
   // What a list is still needed for is the CC BY requirement to say changes were made, and
   // the Blackwell/Ada substitution. Both live in one notice under the grid.
-  const page = compact(read(PAGE));
-  assert.match(page, /resized, cropped and colour-graded/i,
-    "the page says the photographs were altered, as CC BY asks");
+  // founder 2026-11-24: the notice under the grid is gone; each credit says "edited" instead,
+  // which is the change indication CC BY and CC BY-SA ask for, next to the picture it is about.
+  const credits = [...read(PAGE).matchAll(/class="photo-credit">([\s\S]*?)<\/figcaption>/g)].map((m) => m[1]);
+  assert.ok(credits.length >= 10, `every photograph has a credit (${credits.length})`);
+  for (const c of credits) assert.match(c, /(?:&middot;|·) edited$/, `a credit says the picture was edited: ${c.slice(-60)}`);
   // (the generation sentence went with the caption wording - see the note above the
   //  alt-text guard below. CC BY's change-indication is what this test still enforces.)
 });
@@ -282,12 +284,12 @@ test("hardware: the spectrum's headline claims are true of the stops it draws", 
   // stops) had become a hundred-thousandfold. Prose about data drifts the moment the data
   // moves, so the data is on the page and the prose is checked against it.
   const page = read(PAGE);
-  const stops = [...page.matchAll(/<g class="hw-stop"[^>]*data-params="([0-9.e+]+)"[^>]*data-watts="([0-9.]+)"/g)]
+  const stops = [...page.matchAll(/<g class="hw-stop[^"]*"[^>]*data-params="([0-9.e+]+)"[^>]*data-watts="([0-9.]+)"/g)]
     .map((m) => ({ params: Number(m[1]), watts: Number(m[2]) }));
   assert.ok(stops.length >= 5, `the stops carry their own numbers (found ${stops.length})`);
 
   // every stop drawn must be one of these - no stop without a value behind it
-  const drawn = [...page.matchAll(/<g class="hw-stop"/g)].length;
+  const drawn = [...page.matchAll(/<g class="hw-stop[^"]*"/g)].length;
   assert.equal(stops.length, drawn, "every stop states its parameters and watts");
 
   const heading = page.match(/<h2>One band, ([a-z]+) stops, ([a-z]+) orders of magnitude\.<\/h2>/);

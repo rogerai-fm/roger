@@ -106,7 +106,7 @@ test("how-llms: every figure has a caption and a text alternative", () => {
 test("how-llms: the diagrams carry no SVG text (their words are page text, so they reflow on a phone)", () => {
   const figs = (mainOf(read(PAGE)).match(/<figure\b[\s\S]*?<\/figure>/g) || []).join("");
   const svgs = figs.match(/<svg\b[\s\S]*?<\/svg>/g) || [];
-  assert.equal(svgs.length, 8, "the arcs, five training waves, the error curves and the trace");
+  assert.equal(svgs.length, 9, "the arcs, five training waves, the error curves, the trace, and the stack (isometric since 2026-11-22)");
   for (const svg of svgs) {
     assert.doesNotMatch(svg, /<text\b/);
     assert.match(svg, /aria-hidden="true"/, "every drawing is decoration under a described figure");
@@ -162,8 +162,9 @@ test("how-llms: every Wave claim says what wave-status.json says, and no more", 
   assert.equal(pico.stage, "on-air"); assert.equal(nano.stage, "on-air");   // founder 2026-11-21: Nano's fire models on air, chat off
   assert.match(body, /Wave Pico is on air, which means/, "the page states Pico's stage");
   assert.ok(body.includes(ledger.stages["on-air"]), "and quotes the ledger's definition of that stage, verbatim");
-  assert.match(body, /Wave Nano['’]s fire controller and fire vision are on air too, as specialized models, not chat models\. Nano chat stays off the market until it passes the release gate\./,
-    "the page states Nano's state: two specialized fire models on air, chat off (founder 2026-11-21)");
+  assert.match(body, /Wave Nano['’]s fire controller and fire vision are on air too, as specialized models\./,
+    "the page states Nano's state: two specialized fire models on air");
+  assert.doesNotMatch(body, /\bchat (is |stays )?on (air|the market)\b|\bchat: on air|Nano chat is (live|available)/i, "founder 2026-11-24: the chat-off wording is removed everywhere; a page still never says Nano chat is on");
   assert.doesNotMatch(body, /Wave Nano is on air/, "Nano is never stated on air as a whole: its chat is off");
   assert.ok(!body.includes(ledger.stages.gated), "the page quotes no tier with the gated definition");
   assert.ok(html.includes(`<span>${pico.onAirBand}</span>`), "the sign-off names the ledger's band");

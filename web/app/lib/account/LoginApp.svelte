@@ -64,7 +64,7 @@
 <div class="authwrap tint-panel">
 <main class="card">
   <h1>Sign in</h1>
-  <p class="sub">You only need an account to <b>get paid</b> for a GPU. Using models needs no sign in. Signing in unlocks your usage dashboard: spend, history, and earnings.</p>
+  <p class="sub">You need an account to <b>pay for paid models</b> or to <b>get paid</b> for sharing a GPU. Free models need no sign in. Signing in unlocks your usage dashboard: spend, history, and earnings.</p>
   <form id="email-form" class="emailform" novalidate onsubmit={submit}>
     <div id="email-step" hidden={step !== "email"}>
       <label class="lbl" for="email-input">Email</label>

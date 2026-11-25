@@ -116,7 +116,7 @@
   <!-- Range selector (shared by both views): re-fetches /metrics/series and redraws. -->
   <div class="mx-range" role="group" aria-label="Time range">
     <span class="mx-range__k">Range</span>
-    {#each ["7", "30", "90"] as v}<button type="button" class="mx-range__opt{days === v ? ' is-active' : ''}" data-days={v} onclick={() => pick(v)}>{v}d</button>{/each}
+    {#each ["7", "30", "90"] as v}<button type="button" class="mx-range__opt{days === v ? ' is-active' : ''}" aria-pressed={days === v ? 'true' : 'false'} data-days={v} onclick={() => pick(v)}>{v}d</button>{/each}
   </div>
 
   <!-- ============ PROVIDER METRICS (what you host / earn) ============ -->

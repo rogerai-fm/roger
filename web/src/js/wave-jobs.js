@@ -1,4 +1,4 @@
-/* wave-jobs.js - the job finder in §4 of the Wave family field guide.
+/* wave-jobs.js - the job finder (the manual's Appendix B5 since 2026-11-24; §4 of the Wave family field guide before).
  *
  * PROGRESSIVE ENHANCEMENT, and the order matters. The served page is a whole,
  * grouped, readable table; the toolbar ships `hidden` and nothing here is

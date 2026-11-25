@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // How to share your GPU for AI and earn
   // Ported from web/src/broadcasts-share-gpu-earn.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -22,7 +23,7 @@
       {"q":"Do I need a GPU to share?","a":"You need a machine running a local OpenAI-compatible model server (Ollama, LM Studio, llama.cpp, vLLM, and others). A GPU is what makes it fast and worth sharing; the model server is the actual requirement."},
       {"q":"Is sharing my GPU free, or do I earn?","a":"Your choice. The default is free and needs no login. Set a price (dollars per million tokens, input and output) to earn instead - you keep 90%."},
       {"q":"How much can I earn sharing my GPU?","a":"You set the price, so it depends on your rate, how in-demand your model is, and your uptime. The earn wizard suggests $0.20 in / $0.30 out per million tokens to start, and you keep 90% of what your node bills."},
-      {"q":"Is it safe to let strangers use my GPU?","a":"Yes. The connection is outbound-only - no inbound ports, no shell, no file access - and exposes only your model's port. Every prompt is moderated by the broker before it reaches you, your API key never leaves your machine, and your callsign is anonymous."},
+      {"q":"Is it safe to let strangers use my GPU?","a":"Yes. The connection is outbound-only - no inbound ports, no shell, no file access - and exposes only your model's port. A prompt the broker dispatches is checked against a moderation model before it reaches you; traffic that goes through a relay (a Tower) is not pre-screened, and is checked afterwards on a sample. Your API key never leaves your machine, and your callsign is anonymous."},
       {"q":"When do I get paid?","a":"Payouts run on Stripe Connect with a $25 minimum, a 30-day hold (a 10% slice stays reserved to day 90), and monthly release. Earning requires a one-time roger login, approved on rogerai.fm with GitHub, Apple, or an emailed code, plus Stripe identity verification; earnings accrue in the meantime.","aHtml":"Payouts run on Stripe Connect with a $25 minimum, a 30-day hold (a 10% slice stays reserved to day 90), and monthly release. Earning requires a one-time <code>roger login</code> - approved on rogerai.fm with GitHub, Apple, or an emailed code - and Stripe identity verification; earnings accrue in the meantime."},
       {"q":"Can I stop sharing anytime?","a":"Yes - just stop roger share. If you restart, your node comes back under the same anonymous callsign, and shares survive broker restarts automatically.","aHtml":"Yes - just stop <code>roger share</code>. If you restart, your node comes back under the same anonymous callsign, and shares survive broker restarts automatically."},
     ],
@@ -41,28 +42,22 @@
         <figcaption class="fig mono">FIG. 1 - PUT YOUR STATION ON THE AIR</figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">GOING ON AIR</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">THE SIGNAL PATH</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">EARNING</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">SAFETY</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">PAYOUTS</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">FREE OR EARN</span></a></li>
-          <li><a class="toc-tuner__st" href="#s7"><b>§7</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "GOING ON AIR" },
+        { id: "s2", no: "§2", name: "THE SIGNAL PATH" },
+        { id: "s3", no: "§3", name: "EARNING" },
+        { id: "s4", no: "§4", name: "SAFETY" },
+        { id: "s5", no: "§5", name: "PAYOUTS" },
+        { id: "s6", no: "§6", name: "FREE OR EARN" },
+        { id: "s7", no: "§7", name: "FAQ" },
+      ]} />
 
       <blockquote class="bc-answer" data-reveal>
         <b>Quick answer.</b> Run <code>roger share</code> and your machine's local model goes on the
         air as an AI node. It's free with no login by default; set a price (dollars per million
         tokens) to earn instead - you keep <b>90%</b>, paid out through Stripe. The connection is
-        outbound-only, and every prompt is moderated before it ever reaches you.
+        outbound-only. A prompt the broker dispatches is screened before it reaches you; traffic
+        through a relay (a Tower) is not pre-screened (see &sect;4).
       </blockquote>
 
       <div class="bc-post__body">
@@ -96,13 +91,15 @@
           <h2>How does sharing actually work?</h2>
           <p>
             Your machine <b>dials out</b> to the broker - "the band" - and waits for work. It never
-            opens an inbound port. The broker screens each prompt, matches it to a listener, and
-            hands it to your model; you answer locally and return a signed receipt.
+            opens an inbound port. On the broker path the broker screens each prompt, matches it to a
+            listener, and hands it to your model; you answer locally and return a signed receipt.
+            Through a relay (a Tower) the prompt travels around the broker, sealed to your node, and
+            is not pre-screened.
           </p>
           <figure class="figure figure--plate figure--chart" data-reveal>
             <div class="scroll-box scroll-box--diagram">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 250" role="img"
-                 aria-label="Flow diagram: 1) roger share puts your local model on the band; 2) the broker screens every prompt and routes it to your node; 3) you serve it, sign the receipt, and keep 90 percent, cashed out via Stripe.">
+                 aria-label="Flow diagram: 1) roger share puts your local model on the band; 2) on the broker path the broker screens each prompt and routes it to your node (traffic through a relay is not pre-screened); 3) you serve it, sign the receipt, and keep 90 percent, cashed out via Stripe.">
               {@html `<style>
                 .d-box{fill:currentColor;opacity:.04}.d-stroke{stroke:currentColor;fill:none;opacity:.32}
                 .d-arrow{stroke:currentColor;opacity:.5;fill:none}.d-live{fill:var(--live-text)}
@@ -128,7 +125,7 @@
               <rect x="295" y="78" width="220" height="120" rx="10" class="d-box"/><rect x="295" y="78" width="220" height="120" rx="10" class="d-stroke"/>
               <text x="313" y="109" class="d-no">2 &#183; THE BAND ROUTES</text>
               <text x="313" y="134" class="d-h">broker</text>
-              <text x="313" y="154" class="d-b">screens every prompt,</text>
+              <text x="313" y="154" class="d-b">screens prompts it sends,</text>
               <text x="313" y="170" class="d-b">routes a listener to you</text>
               <!-- arrow 2->3 -->
               <path d="M515 138 H553" class="d-arrow"/><path d="M547 132 L555 138 L547 144" class="d-arrow"/>
@@ -141,7 +138,7 @@
               <text x="24" y="234" class="d-b d-dim">Outbound only: no inbound ports, no shell, no files. The bridge exposes just your model's port.</text>
             </svg>
             </div>
-            <figcaption class="fig mono">FIG. 2 - One command on air, screened by the band, paid on a signed receipt.</figcaption>
+            <figcaption class="fig mono">FIG. 2 - One command on air, screened on the broker path, paid on a signed receipt.</figcaption>
           </figure>
         </section>
 
@@ -170,9 +167,17 @@
             Yes, by design. The connection is <b>outbound-only</b>: no inbound ports, no public URL,
             no shell, no file access, no context - the bridge exposes only your model's port. Your
             upstream API key never leaves the machine (it's stripped from anything relayed back).
-            Every request is <b>moderated by the broker before it reaches you</b>, so illegal content
-            is blocked upstream and never touches your GPU. Your node signs every receipt with a
-            local key, and your callsign is anonymous - your hostname and location stay private.
+            A request the broker dispatches is <b>checked against a moderation model before it
+            reaches you</b>, so content we do not allow on the network is refused before dispatch; it
+            is a real layer, not an absolute guarantee. <b>Traffic that goes through a relay is not
+            pre-screened.</b> A request can also travel from the consumer to your node through a relay
+            (a Tower), sealed end to end, so there is nothing for the safety screen to read; policy
+            enforcement on that path happens afterwards, on a sample, from the signed transcripts
+            your node keeps. Any signed-in share can serve that way. In short: a prompt is
+            pre-screened when it is dispatched by the broker, and not when it is relayed around it.
+            The <a href="/privacy.html#prompt-content-safety">privacy policy</a> states both paths.
+            Your node signs every receipt with a local key, and your callsign is anonymous - your
+            hostname and location stay private.
           </p>
         </section>
 

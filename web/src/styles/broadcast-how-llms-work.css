@@ -1,4 +1,4 @@
-/* Broadcast 016 - how an LLM works, in pictures. Scoped under .llm-post.
+/* Broadcast 016 - how an LLM works, in pictures. Its classes are llm-*.
    Every diagram is complete as drawn: the base rules ARE the finished figure (no-JS, reduced
    motion, print and browsers without the newer features all get it). Two kinds of motion sit
    on top. The shared scrubber (scrub.js, [data-scrub]) tunes one stop of a list; where a
@@ -7,8 +7,12 @@
    opener's parts assemble as it scrolls in; the reader's scroll drives it, nothing loops.
    Mono + one red: red marks the one thing each figure is about. */
 
-/* ---- the figure ground: the shared plate; each diagram sits on it ---- */
-.llm-post .llm-fig { view-timeline: --llm-fig block; }
+/* ---- the figure ground: the shared plate; each diagram sits on it ----
+   (unscoped since 2026-11-22: the page has been article.bc-post since every broadcast moved to the
+   one post layout, so the old .llm-post scope matched nothing, no figure had its view timeline, and
+   Chromium held every scroll-driven part at its first keyframe: the FIG. 2 strip, the FIG. 8 rows and
+   the FIG. 15 bars were invisible. .llm-fig is this page's own class, so it needs no scope.) */
+.llm-fig { view-timeline: --llm-fig block; }
 
 /* ---- a token chip: one piece of text ---- */
 .llm-tok {
@@ -265,30 +269,54 @@
   .llm-attn__row.llm-stops > li > b { letter-spacing: -0.05em; }
 }
 
-/* ---- FIG. 8: the stack. Four plates, the signal rising up the left rail ---- */
+/* ---- FIG. 8: the stack. Four plates in the isometric hand, the signal climbing the rail ----
+   Drawn by computer-scientist/article/fig_llm_stack_gen.py in the shared hand (components.css
+   .iso__*): four identical plates with a gap, painted bottom to top, a rail at the front-left
+   corner with a tap into each plate's port; the top plate sits a little higher with the sharper
+   edge and the red lamp. The signal is a packet on CSS offset-path along the rail (the path
+   printed by the generator); where the browser ties animation to the reader's scroll it climbs
+   as the figure scrolls in, otherwise it rests at the top. The words are the list beside the
+   stack, each row at its plate's height; under 760px the list sits under the picture. */
+.llm-stack__stage { padding-bottom: var(--s-3); }
+.llm-stack__pic { position: relative; width: 48%; }
+.llm-stack__slab--4 { --edge: 1.25; }
+.llm-stack__rail, .llm-stack__tap { stroke-opacity: .55; }
+.llm-stack__pkt { fill: var(--live); offset-distance: 100%; offset-path: path("M-30 22.3 L-30 -26.5 L-24.3 -25.5"); }
 .llm-stack {
-  counter-reset: layer 5; position: relative; list-style: none; margin: 0; padding: 0 0 0 var(--s-8);
-  display: grid; gap: var(--s-2);
-}
-.llm-stack::before {
-  content: ""; position: absolute; left: 9px; top: 0; bottom: 0; width: 2px;
-  background: var(--live); transform-origin: bottom center;
+  counter-reset: layer 5; position: absolute; left: 50%; right: var(--s-2); top: var(--s-3); bottom: var(--s-3);
+  list-style: none; margin: 0; padding: 0;
 }
 .llm-stack > li {
-  counter-increment: layer -1; position: relative;
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-1) var(--s-3);
-  padding: var(--s-3) var(--s-4); background: var(--paper); border: 1px solid var(--hairline-2); border-radius: var(--r-md);
+  counter-increment: layer -1; position: absolute; left: 0; right: 0; translate: 0 -50%;
+  display: grid; grid-template-columns: 20px minmax(0, 1fr); column-gap: var(--s-2); align-items: baseline;
 }
+.llm-stack > li > small { grid-column: 2; line-height: 1.35; }
 .llm-stack > li::before {
-  content: counter(layer); position: absolute; left: calc(-1 * var(--s-8)); top: 50%; translate: 0 -50%;
+  content: counter(layer); flex: none;
   width: 20px; height: 20px; line-height: 18px; text-align: center; box-sizing: border-box;
   font-family: var(--font-mono); font-size: var(--t-micro); color: var(--ink-500);
   background: var(--paper-2); border: 1px solid var(--hairline-2); border-radius: 50%;
 }
 .llm-stack > li:first-child::before { color: var(--live-text); border-color: var(--live); }
-.llm-stack > li > b { color: var(--ink-900); font-size: var(--t-sm); font-weight: var(--weight-semi); }
+.llm-stack > li > b { color: var(--ink-900); font-size: var(--t-sm); font-weight: var(--weight-semi); line-height: 1.2; }
 .llm-stack > li > small { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-500); }
-.llm-stack > li:first-child { border-color: var(--live); }
+.llm-stack > li:nth-child(1) { top: 50.2%; }
+.llm-stack > li:nth-child(2) { top: 65.1%; }
+.llm-stack > li:nth-child(3) { top: 77.8%; }
+.llm-stack > li:nth-child(4) { top: 90.4%; }
+/* a narrow column (under 760px) sets the list under the picture: at a plate pitch of a few
+   tens of px two-line rows beside the stack would touch */
+@media (max-width: 760px) {
+  .llm-stack__stage { padding-top: var(--s-3); }   /* no tag line on this stage */
+  .llm-stack__pic { width: 100%; }
+  .llm-stack { position: static; display: grid; gap: var(--s-2); margin-top: var(--s-4); }
+  .llm-stack > li {
+    position: static; translate: none;
+    display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-2);
+    padding: var(--s-2) var(--s-3); background: var(--paper); border: 1px solid var(--hairline-2); border-radius: var(--r-md);
+  }
+  .llm-stack > li:first-child { border-color: var(--live); }
+}
 
 /* ---- FIG. 10: training. The stops carry the ticker (guess vs answer, a mini wave each);
    the chart after them carries two error curves and a marker per stop ---- */
@@ -466,7 +494,7 @@ html:not(.js) .llm-js { display: none; }
 /* ---- the motion: only where the browser can tie it to the reader's scroll ---- */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .llm-flow__steps > li, .llm-flow__loop, .llm-stack::before, .llm-stack > li,
+    .llm-flow__steps > li, .llm-flow__loop, .llm-stack__slab, .llm-stack__pkt, .llm-stack > li,
     .llm-loss__curve, .llm-dist__bars > li {
       animation-duration: 1ms; animation-timing-function: linear; animation-fill-mode: both;
       animation-timeline: --llm-fig;
@@ -480,13 +508,14 @@ html:not(.js) .llm-js { display: none; }
     .llm-flow__steps > li:nth-child(5) { animation-range: entry 70% cover 30%; }
     .llm-flow__steps > li:nth-child(6) { animation-range: entry 80% cover 35%; }
     .llm-flow__loop { animation-name: llm-fade; animation-range: cover 30% cover 42%; }
-    /* FIG. 8: the signal climbs the rail, the plates light from the bottom up */
-    .llm-stack::before { animation-name: llm-rise; animation-range: entry 30% cover 45%; }
+    /* FIG. 8: the plates arrive from the bottom up with their words, the packet climbs the rail */
+    .llm-stack__pkt { animation-name: llm-climb; animation-range: entry 30% cover 45%; }
+    .llm-stack__slab { animation-name: llm-stack-arrive; }
     .llm-stack > li { animation-name: llm-arrive; }
-    .llm-stack > li:nth-child(4) { animation-range: entry 30% entry 60%; }
-    .llm-stack > li:nth-child(3) { animation-range: entry 45% entry 80%; }
-    .llm-stack > li:nth-child(2) { animation-range: entry 60% cover 25%; }
-    .llm-stack > li:nth-child(1) { animation-range: entry 75% cover 40%; }
+    .llm-stack__slab--1, .llm-stack > li:nth-child(4) { animation-range: entry 30% entry 60%; }
+    .llm-stack__slab--2, .llm-stack > li:nth-child(3) { animation-range: entry 45% entry 80%; }
+    .llm-stack__slab--3, .llm-stack > li:nth-child(2) { animation-range: entry 60% cover 25%; }
+    .llm-stack__slab--4, .llm-stack > li:nth-child(1) { animation-range: entry 75% cover 40%; }
     /* FIG. 10: the curves draw as the reader arrives */
     .llm-loss__curve { stroke-dasharray: 1; animation-name: llm-draw; animation-range: entry 40% cover 45%; }
     /* FIG. 15: the bets grow from the baseline */
@@ -495,6 +524,7 @@ html:not(.js) .llm-js { display: none; }
 }
 @keyframes llm-arrive { from { opacity: 0; transform: translateY(6px) scale(0.92); } }
 @keyframes llm-fade { from { opacity: 0; } }
-@keyframes llm-rise { from { transform: scaleY(0); } }
+@keyframes llm-climb { from { offset-distance: 0%; } }
+@keyframes llm-stack-arrive { from { opacity: 0; translate: 0 4px; } }
 @keyframes llm-draw { from { stroke-dashoffset: 1; } }
 @keyframes llm-grow-y { from { transform: scaleY(0); } }

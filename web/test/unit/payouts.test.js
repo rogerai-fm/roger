@@ -50,7 +50,7 @@ describe("states", () => {
   });
   it("a logged-out visitor (401) goes to login", async () => {
     const p = mount({ "/account": [401, {}] });
-    await waitFor(() => expect(p.navs).toEqual(["/login.html"]));
+    await waitFor(() => expect(p.navs).toEqual(["/login.html?next=%2Fpayouts.html"]));
     expect(el("card").hidden).toBe(true);
   });
   for (const status of [500, 503]) {
@@ -99,7 +99,8 @@ describe("the split and the hold timeline", () => {
     await ready();
     expect(text("held")).toBe("$0.00");
     expect(el("segHeld").style.width).toBe("0%");
-    expect(visible("timeline")).toBe(false);
+    expect(visible("timeline")).toBe(true);   // the path, shown before the first earning, nothing marked done
+    expect(el("timeline").querySelector(".is-done")).toBe(null);
     expect(visible("timelineEmpty")).toBe(true);
     expect(visible("reservedNote")).toBe(false);
   });
@@ -166,25 +167,25 @@ describe("Stripe Connect status and the policy facts", () => {
     p.calls.length = 0;
     globalThis.fetch = async () => ({ ok: false, status: 500, json: async () => ({}) });
     await fireEvent.click(el("onboard"));
-    await waitFor(() => expect(text("payMsg")).toBe("could not start onboarding"));
+    await waitFor(() => expect(text("payMsg")).toBe("Could not start payout setup. Try again."));
   });
-  it("a payout request: says requested and reloads; a refusal shows the broker's reason; unreachable says failed", async () => {
+  it("a payout request: says requested and reloads after a beat; a refusal shows the broker's reason; unreachable says so", async () => {
     const p = mount({ "/account": operator({ payable: 30 }), ...FEEDS_OK, "/connect/status": [200, { status: "active" }], "/payouts/request": [200, { ok: true }] });
     await ready();
     await waitFor(() => expect(visible("request")).toBe(true));
     await fireEvent.click(el("request"));
-    await waitFor(() => expect(text("payMsg")).toBe("payout requested"));
-    expect(p.navs).toEqual(["<reload>"]);
+    await waitFor(() => expect(text("payMsg")).toBe("Payout requested. Updating the page…"));
+    await waitFor(() => expect(p.navs).toEqual(["<reload>"]), { timeout: 3000 });   // the reload waits so the line can be read
     expect(p.calls.at(-1)).toMatchObject({ path: "/payouts/request", opts: { method: "POST" } });
     globalThis.fetch = async () => ({ ok: false, status: 400, json: async () => ({ error: { message: "payable balance is under the $25.00 minimum" } }) });
     await fireEvent.click(el("request"));
     await waitFor(() => expect(text("payMsg")).toBe("payable balance is under the $25.00 minimum"));
     globalThis.fetch = async () => { throw new Error("offline"); };
     await fireEvent.click(el("request"));
-    await waitFor(() => expect(text("payMsg")).toBe("payout failed"));
+    await waitFor(() => expect(text("payMsg")).toBe("Could not reach RogerAI. Try again."));
     globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => { throw new Error("not json"); } });
     await fireEvent.click(el("request"));
-    await waitFor(() => expect(text("payMsg")).toBe("payout failed"));   // a 2xx that is not JSON is not a payout
+    await waitFor(() => expect(text("payMsg")).toBe("The payout did not go through. Try again."));   // a 2xx that is not JSON is not a payout
     expect(p.navs.filter((n) => n === "<reload>").length).toBe(1);
   });
 });

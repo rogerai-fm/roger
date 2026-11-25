@@ -20,11 +20,13 @@ const visible = (s) => s.replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]+>/g, " "
 
 before(() => execFileSync("node", ["build.mjs"], { cwd: WEB }));
 
-// The §4 JOBS table, by its section rather than by position.
+// The JOBS table, by its section rather than by position. MOVED 2026-11-24 (founder: the family page's
+// tables go to the manual): the finder is the manual's Appendix B5 (#sFamily), rendered by WaveJobs.svelte
+// from #lib/waveJobs.js; the family page's §3 keeps a per-slot count from the same data. Same guarantees.
+const jobsSectionOf = () => read("manual.html").match(/<section[^>]*id="sFamily"[\s\S]*?<\/section>/)?.[0];
 const jobsTable = () => {
-  const page = read("research-wave-family.html");
-  const section = page.match(/<section[^>]*id="jobs"[\s\S]*?<\/section>/)?.[0];
-  assert.ok(section, "the family page has a §4 JOBS section");
+  const section = jobsSectionOf();
+  assert.ok(section, "the manual has Appendix B5, the Wave family in full");
   return section.match(/<table class="[^"]*\btier-matrix\b[^"]*"[\s\S]*?<\/table>/)?.[0] || "";
 };
 /* AMENDED 2026-08-17: this matched a BARE <tr> only. §4 now carries two row forms -
@@ -58,7 +60,7 @@ test("the jobs table covers the plant broadly, not as a token gesture", () => {
      is served in the markup (asserted above, which reads dist/ HTML, not a rendered
      DOM), and the toolbar ships hidden so nothing is filtered away by a script that may
      never run. If a future edit moves rows into JavaScript, this fails. */
-  const section = read("research-wave-family.html").match(/<section[^>]*id="jobs"[\s\S]*?<\/section>/)[0];
+  const section = jobsSectionOf();
   assert.doesNotMatch(section, /<script/i, "no inline script builds the table");
   assert.match(section, /<div class="wj__bar"[^>]*\bhidden\b/,
     "the toolbar is served hidden, so a reader without JS sees the whole table");
@@ -122,11 +124,17 @@ const purdue = () => {
 test("the diagram places Roger Edge down at the instrument, not beside the L3 box", () => {
   const fig = purdue();
   assert.match(fig, /ROGER EDGE/i, "Roger Edge appears on the figure");
-  // Its box must sit at the L0/L1 band (y >= 194 in the 300-unit viewBox), NOT at L3.
-  const edge = fig.match(/<g class="purdue__edge"[\s\S]*?<\/g>/)?.[0];
-  assert.ok(edge, "Roger Edge is its own group on the figure");
-  const y = Number(edge.match(/<rect[^>]*\by="(\d+)"/)[1]);
-  assert.ok(y >= 194, `Roger Edge sits at the sensing levels, got y=${y}`);
+  // Since 2026-11-22 the figure is a building cut open in the isometric hand: the Edge node is its own
+  // group standing on the ground floor, and its HTML name sits lower on the stage than the L3 console's
+  // (research.css places both; a larger top is lower).
+  assert.match(fig, /<g class="purdue__edge[ "]/, "Roger Edge is its own group on the figure");
+  const css = readFileSync(path.join(DIST, "..", "src/styles/research.css"), "utf8");
+  const top = (cls) => Number(css.match(new RegExp(`\\.${cls} \\{[^}]*top: ([\\d.]+)%`))[1]);
+  assert.ok(top("purdue__name--edge") > top("purdue__name--us") + 10,
+    `Roger Edge's name sits at the sensing floor, below the console's: ${top("purdue__name--edge")}% vs ${top("purdue__name--us")}%`);
+  const ground = fig.indexOf('class="purdue__plate purdue__plate--l0"'), edge = fig.indexOf('class="purdue__edge');
+  const l1 = fig.indexOf('class="purdue__plate purdue__plate--l1"');
+  assert.ok(ground < edge && edge < l1, "and it is painted on the L0 floor, before the L1 plate covers it");
 });
 
 test("the figure says Roger Edge detects rather than reasons", () => {

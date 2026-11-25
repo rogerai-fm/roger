@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Integrations - RogerAI
   // Ported from web/src/integrations.html (2026-10-29); the copy is the legacy copy.
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -55,19 +56,13 @@
 
     <!-- The page's contents as the homepage's tuning scale (components.css .toc-tuner).
          Each station reads its section's own label. Never pinned. -->
-    <nav class="toc-tuner" data-tuner aria-label="Sections">
-      <div class="wrap toc-tuner__band">
-      <div class="toc-tuner__readout" aria-hidden="true"></div>
-      <ol class="toc-tuner__scale">
-        <li><a class="toc-tuner__st" href="#oneline"><b>&sect;0</b><span class="toc-tuner__name">THE WHOLE MIGRATION</span></a></li>
-        <li><a class="toc-tuner__st" href="#serve"><b>&sect;1</b><span class="toc-tuner__name">THE SERVE SIDE</span></a></li>
-        <li><a class="toc-tuner__st" href="#desk"><b>&sect;2</b><span class="toc-tuner__name">THE DESK</span></a></li>
-        <li><a class="toc-tuner__st" href="#anything"><b>&sect;3</b><span class="toc-tuner__name">EVERYTHING ELSE</span></a></li>
-        <li><a class="toc-tuner__st" href="#ask"><b>&sect;4</b><span class="toc-tuner__name">SOMETHING MISSING</span></a></li>
-      </ol>
-      <span class="toc-tuner__needle" aria-hidden="true"></span>
-      </div>
-    </nav>
+    <TocTuner sections={[
+      { id: "oneline", no: "§0", name: "THE WHOLE MIGRATION" },
+      { id: "serve", no: "§1", name: "THE SERVE SIDE" },
+      { id: "desk", no: "§2", name: "THE DESK" },
+      { id: "anything", no: "§3", name: "EVERYTHING ELSE" },
+      { id: "ask", no: "§4", name: "SOMETHING MISSING" },
+    ]} />
 
     <!-- INK PANEL: the page's moment, the one line that changes (components.css .tone-zone). -->
     <div class="tone-zone" data-tone="ink">

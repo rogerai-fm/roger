@@ -81,8 +81,18 @@ export function pageSourcePath(page) {
 // markup a page shows is the markup of all of them. The chrome in lib/ui (nav, footer, the
 // account sub-nav) stays what a partial was, read with component().
 const resolveSvelte = (spec, from) => (spec.startsWith("#lib/") ? path.join(APP, "lib", spec.slice(5)) : path.resolve(path.dirname(from), spec));
+// A <TocTuner sections={[...]} /> tag (app/lib/ui/TocTuner.svelte, 2026-11-24) reads as the nav it renders,
+// so a test that reads a page's tuner from its source sees the stations, not the data.
+const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+export function expandTocTuner(src) {
+  return src.replace(/<TocTuner sections=\{\[([\s\S]*?)\]\} \/>/g, (_, body) => {
+    const st = [...body.matchAll(/\{ id: ("(?:[^"\\]|\\.)*"), no: ("(?:[^"\\]|\\.)*"), name: ("(?:[^"\\]|\\.)*") \}/g)]
+      .map(([, id, no, name]) => `<li><a class="toc-tuner__st" href="#${JSON.parse(id)}"><b>${esc(JSON.parse(no))}</b><span class="toc-tuner__name">${esc(JSON.parse(name))}</span></a></li>`);
+    return `<nav class="toc-tuner" data-tuner aria-label="Sections">\n<div class="wrap toc-tuner__band">\n<div class="toc-tuner__readout" aria-hidden="true"></div>\n<ol class="toc-tuner__scale">\n${st.join("\n")}\n</ol>\n<span class="toc-tuner__needle" aria-hidden="true"></span>\n</div>\n</nav>`;
+  });
+}
 export function pageSource(page) {
-  const route = readFileSync(pageSourcePath(page), "utf8");
+  const route = expandTocTuner(readFileSync(pageSourcePath(page), "utf8"));
   const parts = [route];
   const seen = new Set();
   const add = (file) => {

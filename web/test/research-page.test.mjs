@@ -232,7 +232,7 @@ test("only released artifacts present download controls", () => {
     /16K saliency calibration/,
     /On air as wave-pico-293m/,
     /Architecture and data design/,
-    /Fire controller and fire vision on air as specialized models (?:&middot;|·) chat off the market/,   // Nano, founder 2026-11-21
+    /Fire controller and fire vision on air as specialized models(?! (?:&middot;|·) chat)/,   // Nano, founder 2026-11-21; chat wording removed 2026-11-24
   ]) assert.match(page, stage);
   assert.doesNotMatch(page, /href="[^"]*(?:placeholder|coming-soon)[^"]*"/i);
 });
@@ -619,9 +619,9 @@ test("the scope offers both axes and defaults to the capability one", () => {
   }
 });
 
-test("each slot's job arc matches the family page's jobs table", () => {
-  const jobsSection = read("research-wave-family.html")
-    .match(/<section[^>]*id="jobs"[\s\S]*?<\/section>/)[0];
+test("each slot's job arc matches the family's jobs table (the manual's Appendix B5 since 2026-11-24)", () => {
+  const jobsSection = read("manual.html")
+    .match(/<section[^>]*id="sFamily"[\s\S]*?<\/section>/)[0];
   const SLOTS = ["Pico", "Nano", "Micro", "Giga"];
   const expand = (cell) => {
     if (/\bto\b/i.test(cell)) {

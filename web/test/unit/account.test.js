@@ -16,7 +16,7 @@ describe("boot (the login-loop rule)", () => {
     broker({ "/account": [401, {}] });
     const navs = fakeLocation({ pathname: "/account.html" });
     render(AccountApp);
-    await waitFor(() => expect(navs).toEqual(["/login.html"]));
+    await waitFor(() => expect(navs).toEqual(["/login.html?next=%2Faccount.html"]));
   });
   for (const status of [500, 503]) {
     it(`a ${status} shows an error and keeps the card with a working sign-out, no redirect`, async () => {

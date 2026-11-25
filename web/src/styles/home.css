@@ -65,6 +65,14 @@
   font-size: var(--t-lead); color: var(--ink-500); line-height: 1.6;
 }
 .hero__sub-lead { color: var(--ink-900); font-weight: var(--weight-medium); }
+.hero__specs {                                   /* the product promise as three labels (2026-11-14) */
+  list-style: none; margin: var(--s-5) 0 0; padding: 0; max-width: 50ch;
+  display: grid; gap: var(--s-2);
+  font-size: var(--t-micro); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-500);
+}
+.hero__specs li { padding-left: 1.4em; text-indent: -1.4em; }
+.hero__specs li::before { content: "+"; display: inline-block; width: 1.4em; text-indent: 0; color: var(--live-text); }
+.hero__specs a { color: inherit; }
 .hero__sub b { color: var(--ink-900); font-weight: var(--weight-semi); }
 .hero__proof {
   display: flex;
@@ -630,6 +638,87 @@
 .term__video[hidden] { display: none; }
 .term__video-gif { display: block; width: 100%; height: auto; }
 
+/* the console's two films (2026-11-23; the SVG comes from computer-scientist/article/fig_film_gen.py, the
+   tones and lines are components.css .iso__*): using RogerAI and hosting on it, each one scene the player
+   advances in steps (classes s1, s2, ... on .term__film, cumulative) between intertitle cards. Parts that
+   arrive by step start clear and sunk; a step shows, lights or moves a part and runs a comet. The comets keep
+   their own stroke scale (pathLength 100), the solids carry vector-effect. The console sits in the ink tone
+   zone, so the hand's paper and ink are already the console's. Lead class .term__film. */
+.term__film { position: relative; min-height: 420px; padding: 14px 20px 16px; display: grid; align-content: start; }
+.term__film[hidden], .term__film-stage[hidden] { display: none; }
+.term__film .fm__stage { color: var(--ink-700); width: 100%; max-width: 680px; justify-self: center; padding: 0; }   /* a grid item: width and justify-self, or the stage sits left */
+.term__film .fm__pic { position: relative; }
+.fm__svg { width: 100%; height: auto; display: block; overflow: visible; }
+.fm__svg :is(.iso__face, .iso__ln, .iso__lamp) { vector-effect: non-scaling-stroke; }
+.term__film .iso__m { --edge: 1; transition: opacity var(--d-5) var(--ease-out-quint), transform var(--d-5) var(--ease-out-quint); }
+.term__film .fm__way { opacity: 0; transition: opacity var(--d-4); }
+.term__film :is(.fm__lamp, .fm__air) { transition: fill var(--d-2), stroke var(--d-2); }
+.term__film .fm__stop { fill: none; stroke: var(--live); stroke-width: 2; stroke-linecap: round; opacity: 0; transition: opacity var(--d-2); }
+.term__film .fm__comet { fill: none; stroke: var(--live); stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 12 88; opacity: 0; }
+@keyframes fm-run { to { stroke-dashoffset: -100; } }
+.term__film :is(.fm__prog, .fm__slip, .fm__wallet, .fm__relay, .fm__station) { opacity: 0; transform: translate(0, 6px); }
+/* the caption under the stage and the intertitle card over it */
+.term__film-cap { margin: var(--s-3) 0 0; max-width: 62ch; font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-500); line-height: 1.5; min-height: 2.8em; }
+.term__film-card {
+  position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: var(--s-6);
+  background: var(--white); opacity: 0; pointer-events: none; transition: opacity var(--d-4);
+}
+.term__film.is-card .term__film-card { opacity: 1; }
+.term__film-title { display: block; margin-top: var(--s-2); font-size: var(--t-h3); font-weight: var(--weight-semi); color: var(--ink-900); letter-spacing: -.01em; line-height: 1.1; }   /* the step line above it is the shared .fig label */
+.term__film-line { display: block; margin-top: var(--s-2); font-size: var(--t-sm); color: var(--ink-500); }
+
+/* ---- using: 1 the laptop; 2 the program; 3 the relay and the band; 4 station 1 lit; 5 the request and the slip;
+   6 the wallet; 7 station 1 fades, station 2 answers; 8 the end state ---- */
+.term__film[data-tape="using"].fm-s2 .fm__prog { opacity: 1; transform: none; }
+.term__film[data-tape="using"].fm-s3 :is(.fm__relay, .fm__station) { opacity: 1; transform: none; }
+.term__film[data-tape="using"].fm-s3 .fm__station--2 { transition-delay: var(--d-2); }
+.term__film[data-tape="using"].fm-s3 .fm__station--3 { transition-delay: var(--d-3); }
+.term__film[data-tape="using"].fm-s3 :is(.fm__way--wire, .fm__way--trunk) { opacity: .35; }
+.term__film[data-tape="using"].fm-s4 .fm__way--1 { opacity: .35; }
+.term__film[data-tape="using"].fm-s4 .fm__station--1 .fm__lamp { fill: var(--live); stroke: var(--live); }
+.term__film[data-tape="using"].fm-s5 .fm__route-1 { opacity: 1; animation: fm-run calc(var(--motion) * 2.4s) linear infinite; }
+.term__film[data-tape="using"].fm-s5 .fm__comet--back { animation-delay: calc(var(--motion) * 1.2s); }
+.term__film[data-tape="using"].fm-s5 .fm__slip { opacity: 1; transform: none; transition-delay: calc(var(--motion) * 1.8s); }
+.term__film[data-tape="using"].fm-s6 .fm__wallet { opacity: 1; transform: none; }
+.term__film[data-tape="using"].fm-s7 .fm__station--1 .fm__lamp { fill: var(--paper); stroke: currentColor; }
+.term__film[data-tape="using"].fm-s7 .fm__station--1 { --edge: .5; }
+.term__film[data-tape="using"].fm-s7 .fm__station--1 .fm__stop { opacity: 1; }
+.term__film[data-tape="using"].fm-s7 .fm__way--1 { stroke-dasharray: 3 3; }
+.term__film[data-tape="using"].fm-s7 .fm__way--2 { opacity: .35; }
+.term__film[data-tape="using"].fm-s7 .fm__route-1 { animation: none; opacity: 0; }
+.term__film[data-tape="using"].fm-s7 .fm__station--2 .fm__lamp { fill: var(--live); stroke: var(--live); }
+.term__film[data-tape="using"].fm-s7 .fm__route-2 { opacity: 1; animation: fm-run calc(var(--motion) * 2.4s) linear infinite; }
+.term__film[data-tape="using"].fm-s7 .fm__route-2.fm__comet--back { animation-delay: calc(var(--motion) * 1.2s); }
+
+/* ---- hosting: 1 the machine and the model on the floor; 2 the program lands, the model slides into the slot;
+   3 the dial turns; 4 on air (the aerial lamp, the relay, the way); 5 requests, the cells fill (the aerial lamp stays the one red);
+   6 the slips and the wallet; 7 off hours; 8 the end state ---- */
+.term__film[data-tape="hosting"].fm-s2 .fm__prog { opacity: 1; transform: none; }
+.term__film[data-tape="hosting"].fm-s2 .fm__model { transition-delay: var(--d-4); transform: translate(-42.8px, -12.9px); }   /* the floor to the slot: the generator's translate */
+.term__film[data-tape="hosting"] .fm__needle { transform-box: fill-box; transform-origin: 0% 100%; transition: transform var(--d-5) var(--ease-out-quint); }
+.term__film[data-tape="hosting"].fm-s3 .fm__needle { transform: rotate(64deg); }
+.term__film[data-tape="hosting"].fm-s4 .fm__air { fill: var(--live); stroke: var(--live); }
+.term__film[data-tape="hosting"].fm-s4 .fm__relay { opacity: 1; transform: none; }
+.term__film[data-tape="hosting"].fm-s4 .fm__way--1 { opacity: .35; }
+.term__film[data-tape="hosting"].fm-s5 .fm__route-1 { opacity: 1; animation: fm-run calc(var(--motion) * 2s) linear infinite; }
+.term__film[data-tape="hosting"].fm-s5 .fm__comet--back { animation-delay: calc(var(--motion) * 1s); }
+.term__film[data-tape="hosting"] .fm__cell .iso__face { transition: fill var(--d-3); }
+.term__film[data-tape="hosting"].fm-s5 :is(.fm__cell--1, .fm__cell--2, .fm__cell--3, .fm__cell--4, .fm__cell--5) .iso__face { fill: var(--ink-700); }
+.term__film[data-tape="hosting"].fm-s5 .fm__cell--2 .iso__face { transition-delay: var(--d-3); }
+.term__film[data-tape="hosting"].fm-s5 .fm__cell--3 .iso__face { transition-delay: var(--d-4); }
+.term__film[data-tape="hosting"].fm-s5 .fm__cell--4 .iso__face { transition-delay: var(--d-5); }
+.term__film[data-tape="hosting"].fm-s5 .fm__cell--5 .iso__face { transition-delay: calc(var(--d-5) + var(--d-3)); }
+.term__film[data-tape="hosting"].fm-s6 :is(.fm__slip, .fm__wallet) { opacity: 1; transform: none; }
+.term__film[data-tape="hosting"].fm-s6 .fm__slip--2 { transition-delay: var(--d-3); }
+.term__film[data-tape="hosting"].fm-s6 .fm__slip--3 { transition-delay: var(--d-4); }
+.term__film[data-tape="hosting"].fm-s6 .fm__wallet { transition-delay: var(--d-5); }
+.term__film[data-tape="hosting"].fm-s7 :is(.fm__air, .fm__lamp) { fill: var(--paper); stroke: currentColor; }
+.term__film[data-tape="hosting"].fm-s7 .fm__cell .iso__face { fill: var(--paper); }
+.term__film[data-tape="hosting"].fm-s7 .fm__route-1 { animation: none; opacity: 0; }
+.term__film[data-tape="hosting"].fm-s7 .fm__way--1 { stroke-dasharray: 3 3; }
+@media (prefers-reduced-motion: reduce) { .term__film .fm__comet { display: none; } .term__film * { transition: none !important; } }
+
+
 /* transport: tape-deck play / pause / replay + a tuning-bar progress readout */
 .term__transport {
   display: flex; align-items: center; gap: 10px;
@@ -671,8 +760,12 @@
 @media (prefers-reduced-motion: reduce) { .term__bar-fill { transform: scaleX(1); } }
 
 @media (max-width: 560px) {
-  .term__screen { font-size: 11px; padding: 14px; min-height: 320px; }
-  .term__media { padding: 14px; min-height: 320px; }
+  /* the replay wraps on a phone (the boot line ran off the screen behind a sideways scroll) and
+     the well starts shallower, since it is mostly dark at first paint (homepage review, 2026-11-23) */
+  .term__screen { font-size: 11px; padding: 14px; min-height: 260px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .term__media { padding: 14px; min-height: 260px; }
+  .term__film { padding: 12px 14px 14px; min-height: 260px; }
+  .term__film-cap { font-size: 11px; }
   .term__presets { padding: 7px 10px; gap: 5px; }
   .term__preset { padding: 4px 9px; }
 }
@@ -711,16 +804,18 @@
   display: block; margin-top: var(--s-5); padding: 11px 14px;
   background: var(--paper-2); border: 0; border-left: 2px solid var(--live);
   font-family: var(--font-mono);
-  font-size: var(--t-sm); color: var(--ink-900); overflow-x: auto;
+  font-size: var(--t-sm); color: var(--ink-900); overflow-wrap: anywhere;   /* a command longer than its plate wraps instead of scrolling sideways (2026-11-23) */
 }
 .twoway__cmd::before { content: "$ "; color: var(--ink-300); }
 @media (max-width: 560px) {
   .twoway__cmd { font-size: 0.72rem; }   /* short commands stay on one line */
 }
 .twoway__link { display: grid; place-items: center; width: 80px; }
+/* the beam spans the whole gap and is drawn in ink at low opacity: on the band's ground the old
+   70px hairline vanished and its dot read as a stray mark (homepage review, 2026-11-23) */
 .twoway__beam {
-  width: 70px; height: 1px;
-  background: var(--hairline-2);
+  width: calc(100% + 2 * var(--s-6)); margin-inline: calc(-1 * var(--s-6)); height: 1px;   /* across the grid's gaps too, so it touches both plates */
+  background: var(--ink-500); opacity: .5;
   position: relative; overflow: visible;
 }
 .twoway__beam::after {
@@ -1186,7 +1281,7 @@ html.js .mkt-quiet--nojs { display: none; }
    ===================================================================== */
 
 /* the small homepage entry into /models (single, non-disruptive link) */
-.market__tune { margin-top: var(--s-3); font-size: var(--t-xs); }
+.market__tune { margin: 0; padding: 0 18px 12px; text-align: center; font-size: var(--t-xs); }   /* the foot's inset and centre: on phones the link ran to the panel's edge (homepage review, 2026-11-23) */
 .market__tune a { color: var(--ink-500); border-bottom: 1px solid transparent; }
 .market__tune a:hover { color: var(--live-text); border-bottom-color: var(--live); }
 
@@ -1604,3 +1699,92 @@ html.js .mkt-quiet--nojs { display: none; }
 }
 .sensor__dial { margin-top: var(--s-6); }
 #sensor .scrub { margin-top: var(--s-6); }
+
+/* ---- the animation pass (2026-11-20; draw.js, components.css [data-draw]) ----
+   §9 the six operator icons draw themselves in, a beat apart, the red mark last.
+   §5 the two commands type themselves in once the plates are on screen. */
+.pcards article:nth-child(1) { --draw-delay: 0s; }
+.pcards article:nth-child(2) { --draw-delay: var(--d-1); }
+.pcards article:nth-child(3) { --draw-delay: var(--d-2); }
+.pcards article:nth-child(4) { --draw-delay: var(--d-3); }
+.pcards article:nth-child(5) { --draw-delay: var(--d-4); }
+.pcards article:nth-child(6) { --draw-delay: var(--d-5); }
+.pcards .pc-red { --draw-delay: calc(var(--d-5) + var(--d-4)); }
+.twoway.is-drawing:not(.is-drawn) .twoway__cmd { clip-path: inset(0 100% 0 0); }
+.twoway.is-drawn:not(.is-settled) .twoway__cmd { animation: twoway-type calc(var(--motion) * 1.4s) steps(28, end) both; }
+.twoway.is-drawn:not(.is-settled) .twoway__side:last-child .twoway__cmd { animation-delay: .5s; }
+@keyframes twoway-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+/* "Why industrial" (2026-11-21): a second ruled row under the three doors. One mono
+   label on the left, four reasons on a four-column grid, each an index mark, a term and
+   one line. Same hairline as the doors, no chrome. The row is a [data-reveal] block, so
+   the shared scroll lift raises it, and each reason rises a little after the one
+   before, on the scroll position alone (view() timeline). Reduced motion and no JS get the still. */
+.institution-strip__why {
+  display: grid;
+  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+  column-gap: var(--s-8);
+  padding-top: var(--s-6);
+}
+.institution-strip__why-label {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-900);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--hairline-2);
+}
+.institution-strip__reasons {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--s-6);
+  counter-reset: reason;
+}
+.institution-strip__reasons li {
+  counter-increment: reason;
+  display: grid;
+  gap: var(--s-1);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--hairline-2);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--ink-500);
+}
+.institution-strip__reasons li::before {
+  content: "0" counter(reason);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: 0.08em;
+  color: var(--live-text);
+}
+.institution-strip__reasons b {
+  font-weight: var(--weight-semi);
+  color: var(--ink-900);
+}
+/* a rise only: a scroll-linked frame never dims text (tone-zones guard) */
+@keyframes why-rise {
+  from { transform: translateY(14px); }
+  to   { transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* each reason rises as the row enters, one a little after the other, by the
+       scroll position alone (no JS class, like the rest of the lift) */
+    .institution-strip__reasons li {
+      animation: why-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 18vh;
+    }
+    .institution-strip__reasons li:nth-child(2) { animation-range: entry 4vh entry 22vh; }
+    .institution-strip__reasons li:nth-child(3) { animation-range: entry 8vh entry 26vh; }
+    .institution-strip__reasons li:nth-child(4) { animation-range: entry 12vh entry 30vh; }
+  }
+}
+@media (max-width: 720px) {
+  .institution-strip__why { grid-template-columns: 1fr; row-gap: var(--s-3); padding-top: var(--s-5); }
+  .institution-strip__reasons { grid-template-columns: 1fr; row-gap: var(--s-2); }
+}

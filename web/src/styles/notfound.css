@@ -17,7 +17,7 @@
 /* the dropped pose holds still - no carrier, nothing transmits */
 .ping--dropped { width: 76px; height: 86px; overflow: visible; }
 .ping--dropped .ping__body { color: var(--ink-300); }
-.ping__eye-hollow { stroke: var(--ink-400); }
+.ping__eye-hollow { fill: none; stroke: var(--ink-400); stroke-width: 2.5; }
 .lost__title {
   font-size: var(--t-h1); letter-spacing: var(--tracking-h1); color: var(--ink-900);
   font-weight: var(--weight-bold); line-height: var(--lh-snug);

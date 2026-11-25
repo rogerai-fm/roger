@@ -21,55 +21,61 @@ section[id] { scroll-margin-top: 72px; }
   font-family: var(--font-mono); font-size: var(--t-micro);
   letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-500);
 }
-.tower__svg { display: block; width: 100%; max-width: 100%; height: auto; padding: var(--s-5); }
-/* both drawings sit in the diagram scroll box: on a narrow column they keep a width where
-   the 8.5-9px labels read at 11px, and scroll (the patch's floor adds its 2 x 20px padding) */
-.tower__patch { --diagram-min: 880px; }
-.tower__patch .scroll-box--diagram { --edge-ground: var(--paper-2); }
+/* the signal path keeps the diagram scroll box: on a narrow column it holds a width where its words
+   read, and scrolls */
 .signal { --diagram-min: 880px; }
 
-.tower__frame rect { fill: none; stroke: var(--hairline-2); stroke-width: 1; }
-.tower__label {
-  fill: var(--ink-900); font-family: var(--font-mono); font-size: 11px;
-  font-weight: var(--weight-semi); letter-spacing: .12em; text-anchor: middle;
-}
-.tower__label--v { writing-mode: vertical-rl; letter-spacing: .3em; }
-.tower__sub {
-  fill: var(--ink-400); font-family: var(--font-mono); font-size: 8.5px;
-  letter-spacing: .05em; text-anchor: middle;
-}
-.tower__feed { fill: none; stroke: var(--ink-400); stroke-width: 1.5; }
-
-.tower__station rect:first-of-type { fill: none; stroke: var(--hairline-2); stroke-width: 1; }
-.tower__st {
-  fill: var(--ink-900); font-family: var(--font-mono); font-size: 10.5px;
-  font-weight: var(--weight-semi); letter-spacing: .1em;
-}
-.tower__meta { fill: var(--ink-400); font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .05em; }
-/* Load is drawn, because "divided by how loaded it already is" is the part of the score
-   a reader will not take on trust. */
-.tower__gauge { fill: var(--hairline-2); }
-.tower__fill { fill: var(--ink-700); }
-/* Probationary is marked by the word AND a dashed frame, never by colour alone. */
-.tower__station[data-tier="b"] rect:first-of-type { stroke-dasharray: 4 3; }
-.tower__station[data-tier="b"] .tower__st,
-.tower__station[data-tier="b"] .tower__meta { fill: var(--ink-400); }
-.tower__station[data-tier="b"] .tower__fill { fill: var(--ink-300); }
-
-.tower__cord { fill: none; stroke: var(--live); stroke-width: 2; }
-.tower__jack { fill: var(--live); }
-/* The handover: B carries the call, drops, A picks it up. Both cords exist either way, so
-   the static frame shows both routes rather than hiding one. */
-.tower__cord--a { opacity: 0; }
-.tower__cord--b { opacity: 1; }
-.tower__patch .tower__cord--b { animation: tower-hand-b 7s ease-in-out infinite; }
-.tower__patch .tower__cord--a { animation: tower-hand-a 7s ease-in-out infinite; }
+/* ---------- the patch panel (since 2026-11-23 in the isometric hand; the SVG comes from
+   computer-scientist/article/fig_patch_gen.py, the tones and lines are the .iso__* rules of
+   components.css). The same place as the homepage band: your laptop at the left, one wire along the
+   slab into the Tower's port, three jacks on the Tower's end, the three stations at the right stacked
+   in depth, each with its load on its lid as eight cells. Two cords lie from the jacks to A and B; at
+   rest B carries the call (cord full, lamp lit) and the 7 s loop hands it to A. C is probationary: a
+   capped jack, a dashed way, dim edges, the word. Words are HTML over the stage (percents printed by
+   the generator's --css). */
+.tower__patch .tp__stage { padding-bottom: 2.4em; }   /* the feet, the note and station A's line sit under the slab's front edge */
+.tower__patch .tp__pic { position: relative; }      /* the words' percents are the picture's, not the padded stage's */
+.tower__patch .iso__m { --edge: 1; }
+.tower__patch .tp__station--c { --edge: .5; }
+.tower__patch .tp__feed { stroke-opacity: .55; }
+.tower__patch .tp__way { opacity: .35; stroke-dasharray: 3 3; }
+/* Load is drawn, because "divided by how loaded it already is" is the part of the score a reader will
+   not take on trust: a cell in ink is a request in flight. */
+.tower__patch .tp__cell--busy .iso__face { fill: var(--ink-700); }
+.tower__patch .tp__cord { fill: none; stroke: var(--live); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.tower__patch .tp__lamp { transition: none; }
+/* The handover: B carries the call, drops, A picks it up. Both cords exist either way, so the still
+   shows both routes rather than hiding one; the lamp follows its cord. */
+.tower__patch .tp__cord--b { animation: tower-hand-b calc(var(--motion) * 7s) ease-in-out infinite; }
+.tower__patch .tp__cord--a { opacity: .12; animation: tower-hand-a calc(var(--motion) * 7s) ease-in-out infinite; }
+.tower__patch .tp__station--b .tp__lamp { fill: var(--live); stroke: var(--live); animation: tower-lamp-b calc(var(--motion) * 7s) ease-in-out infinite; }
+.tower__patch .tp__station--a .tp__lamp { animation: tower-lamp-a calc(var(--motion) * 7s) ease-in-out infinite; }
 @keyframes tower-hand-b { 0%, 42% { opacity: 1; } 50%, 100% { opacity: .12; } }
 @keyframes tower-hand-a { 0%, 42% { opacity: .12; } 50%, 100% { opacity: 1; } }
-.tower__note {
-  fill: var(--ink-400); font-family: var(--font-mono); font-size: 8.5px;
-  letter-spacing: .05em; text-anchor: end;
+@keyframes tower-lamp-b { 0%, 42% { fill: var(--live); stroke: var(--live); } 50%, 100% { fill: var(--paper); stroke: currentColor; } }
+@keyframes tower-lamp-a { 0%, 42% { fill: var(--paper); stroke: currentColor; } 50%, 100% { fill: var(--live); stroke: var(--live); } }
+
+/* the words over the stage: the two feet under the laptop and the Tower, a name and a line beside each
+   station in a column at the right, the note under the slab's front edge at the right */
+.tower__patch .tp__word { position: absolute; pointer-events: none; }
+.tower__patch .tp__word--you, .tower__patch .tp__word--tower { translate: -50% 0; text-align: center; }
+.tower__patch .tp__word--you { left: 10%; top: 49%; }
+.tower__patch .tp__word--tower { left: 28.1%; top: 63.8%; }
+.tower__patch .tp__word--a, .tower__patch .tp__word--b, .tower__patch .tp__word--c { left: 79.4%; translate: 0 -50%; }
+.tower__patch .tp__word--a { top: 92.3%; }
+.tower__patch .tp__word--b { top: 71.1%; }
+.tower__patch .tp__word--c { top: 49.8%; }
+.tower__patch .tp__word--note { left: 63.9%; top: 92.9%; translate: -100% 0; text-align: right; }
+.tower__patch .tp__who {
+  display: block; white-space: nowrap;
+  font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-900);
 }
+.tower__patch .tp__note { display: block; margin-top: 2px; color: var(--ink-500); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1.35; }
+.tower__patch .tp__word--a .tp__note, .tower__patch .tp__word--b .tp__note, .tower__patch .tp__word--c .tp__note { font-size: 10px; max-width: 27ch; }   /* "healthy · 3 of 8 in flight" on one line in the column at the stage's full width; it wraps below */
+.tower__patch .tp__word--you .tp__note { white-space: nowrap; }
+.tower__patch .tp__word--note { width: 63%; }   /* one line at the stage's full width; two, right-aligned at the slab's corner, on a narrower one */
+/* Probationary is marked by the word, the dashed way and the capped jack, never by colour alone. */
+.tower__patch .tp__word--c .tp__who { color: var(--ink-500); }
 
 /* The tape reads as a printed roll: one line per settled request. */
 .tape { list-style: none; margin: 0; padding: var(--s-4) var(--s-5); }
@@ -103,60 +109,77 @@ section[id] { scroll-margin-top: 72px; }
 @media (prefers-reduced-motion: reduce) {
   /* Nothing is carried by the handover, so stopping it loses nothing. Both cords settle
      visible, which reads as "either route is available" - the honest still frame. */
-  .tower__patch .tower__cord--a,
-  .tower__patch .tower__cord--b { animation: none; opacity: 1; }
+  .tower__patch .tp__cord--a,
+  .tower__patch .tp__cord--b { animation: none; opacity: 1; }
+  .tower__patch .tp__lamp { animation: none; }
+}
+/* phones (by the stage's own width): the lines under the names go, the words shrink, the note wraps */
+/* a narrower stage (tablets): the station lines shrink and wrap under their names */
+@container (max-width: 800px) {
+  .tower__patch .tp__word--a .tp__note, .tower__patch .tp__word--b .tp__note, .tower__patch .tp__word--c .tp__note { font-size: 9px; max-width: 18ch; line-height: 1.3; }
+}
+@media (max-width: 560px) {
+  .tower__patch .tp__stage { padding: var(--s-3) 0 2.6em; }   /* the stage is the container, so its own padding is a media rule: no tag wraps above it, the note takes two lines under the slab */
+}
+@container (max-width: 560px) {
+  .tower__patch .tp__word--a .tp__note, .tower__patch .tp__word--b .tp__note, .tower__patch .tp__word--c .tp__note, .tower__patch .tp__word--you .tp__note { display: none; }
+  .tower__patch .tp__word--you { left: 4px; translate: 0 0; text-align: left; }   /* the plate is wide: it starts at the slab's left end */
+  .tower__patch .tp__who { font-size: 9px; letter-spacing: .06em; }
+  .tower__patch .tp__note { font-size: 10px; }
+  .tower__patch .tp__word--note { left: 4px; width: auto; translate: 0 0; text-align: left; }
+  .tower__patch .tp__word--note .tp__note { max-width: 34ch; }
 }
 @media (max-width: 640px) {
   .tape__hash { margin-left: 0; }
 }
 
-/* ---------- the signal path (was FIG.3 on the homepage) -------------------------------------------
-   Packets ride CSS offset-path, not SMIL: there is no animation timeline to pause,
-   and prefers-reduced-motion is one media query instead of a script that has to
-   remember to check it. The diagram is fully legible frozen, which is the test -
-   if it only reads while animating, the animation is carrying meaning it should not. */
+/* ---------- the signal path (was FIG.3 on the homepage; a place in the isometric hand since 2026-11-22)
+   Drawn by computer-scientist/article/fig_tower_signal_gen.py in the shared hand (components.css
+   .iso__*): a laptop, the tower with its aerial and the one red lamp, the station as a GPU box
+   whose own cable leaves its end, runs along the back of the slab and enters the tower from
+   behind. That cable is the claim: the station dials out and has no inbound port. Packets ride
+   CSS offset-path on the projected wires (paths printed by the generator's --css), not SMIL:
+   there is no animation timeline to pause, and prefers-reduced-motion is one media query. The
+   diagram is fully legible frozen, which is the test; the words are HTML over the stage. */
 .signal { margin: 0 0 var(--s-8); }
-.signal__svg { display: block; width: 100%; height: auto; }
-
-.signal__wire path { fill: none; stroke: var(--hairline-2); stroke-width: 1.5; }
-
-.signal__node rect { fill: var(--paper); stroke: var(--ink-900); stroke-width: 1.5; }
-.signal__node--mid rect { stroke: var(--live); }
-.signal__name {
-  fill: var(--ink-900); font-family: var(--font-mono); font-size: 13px;
-  font-weight: var(--weight-semi); letter-spacing: .1em; text-anchor: middle;
-}
-.signal__sub {
-  fill: var(--ink-500); font-family: var(--font-mono); font-size: 10px;
-  letter-spacing: .04em; text-anchor: middle;
-}
-.signal__labels text {
-  fill: var(--ink-400); font-family: var(--font-mono); font-size: 10px;
-  letter-spacing: .08em; text-transform: uppercase; text-anchor: middle;
-}
-.signal__labels .signal__note { fill: var(--ink-400); font-size: 9px; }
+.signal .scroll-box--diagram > .signal__stage { min-width: var(--diagram-min, 34rem); max-width: none; }
+.signal__wire, .signal__cable { stroke-opacity: .55; }
+.signal__name { color: var(--ink-900); width: 16%; text-align: center; }
+.signal__sub { width: 18%; text-align: center; }
+.signal__note { text-transform: none; letter-spacing: .04em; width: 22%; text-align: center; white-space: normal; }
+.signal__name--app { left: 6%; top: 52%; }
+.signal__sub--app { left: 5%; top: 60%; }
+.signal__name--tower { left: 27%; top: 5%; }
+.signal__sub--tower { left: 25%; top: 12%; }
+.signal__name--station { left: 72%; top: 8%; }
+.signal__sub--station { left: 71%; top: 15%; }
+.signal__note { left: 69%; top: 24%; }
+.signal__label--request { left: 27%; top: 46%; }
+.signal__label--routed { left: 59%; top: 29%; }
+.signal__label--tokens { left: 37%; top: 74%; }   /* clear of the slab's edge */
+.signal__app, .signal__station { --edge: 1; }
+.signal__app .iso__halo--part, .signal__station .iso__halo--part { opacity: .07; }
 
 /* The two directions are told apart by SHAPE of travel and position, not colour
-   alone: the ask runs left-to-right along the top, the return runs right-to-left
-   underneath. Colour is a second, redundant channel. */
+   alone: the ask runs along the front of the slab into the tower, the routed request
+   leaves from behind the tower along the station's cable, the return rides both back.
+   Colour is a second, redundant channel. */
 .signal__pkt { fill: var(--ink-900); }
 .signal__pkt--tok { fill: var(--live); }
 
-/* One packet per LEG, each with a single-subpath offset-path. A first pass gave the
-   outbound packet a two-subpath path ("…H280 M440…"); offset-path is undefined across
-   subpaths and the packet surfaced in the wrong place entirely. The staggered delays
-   make the three legs read as one request hopping the chain. */
+/* One packet per LEG, each with a single-subpath offset-path in the drawing's own units. The
+   staggered delays make the three legs read as one request hopping the chain. */
 .signal__pkt--leg1 {
-  offset-path: path("M175 118 H285");
-  animation: signal-run 4.2s cubic-bezier(.45, 0, .55, 1) infinite;
+  offset-path: path("M7.5 34 L6.5 34.8 L68.9 52.8 L76.9 45.9 L76.9 38.6");
+  animation: signal-run calc(var(--motion) * 4.2s) cubic-bezier(.45, 0, .55, 1) infinite;
 }
 .signal__pkt--leg2 {
-  offset-path: path("M440 118 H545");
-  animation: signal-run 4.2s cubic-bezier(.45, 0, .55, 1) infinite .55s;
+  offset-path: path("M85.9 38.1 L95.9 29.5 L185.1 55.2 L180.1 59.5 L180.1 54.9 L173.1 52.9");
+  animation: signal-run calc(var(--motion) * 4.2s) cubic-bezier(.45, 0, .55, 1) infinite calc(var(--motion) * .55s);
 }
 .signal__pkt--tok {
-  offset-path: path("M620 148 V196 H100 V148");
-  animation: signal-run 4.2s cubic-bezier(.35, 0, .65, 1) infinite 1.35s;
+  offset-path: path("M173.1 52.9 L180.1 54.9 L180.1 59.5 L185.1 55.2 L95.9 29.5 L85.9 38.1 L76.9 38.6 L76.9 45.9 L68.9 52.8 L6.5 34.8 L7.5 34");
+  animation: signal-run calc(var(--motion) * 4.2s) cubic-bezier(.35, 0, .65, 1) infinite calc(var(--motion) * 1.35s);
 }
 @keyframes signal-run {
   0% { offset-distance: 0%; opacity: 0; }
@@ -165,14 +188,13 @@ section[id] { scroll-margin-top: 72px; }
   32%, 100% { offset-distance: 100%; opacity: 0; }
 }
 
-/* Frozen is a first-class state, not a fallback: the packets park on the wire so
-   the path still reads as a path. */
+/* Frozen is a first-class state, not a fallback: the packets park on their wires, each on a
+   stretch that is in plain view, so the path still reads as a path. */
 @media (prefers-reduced-motion: reduce) {
-  .signal__pkt { animation: none !important; opacity: 1; offset-distance: 55%; }
-}
-@media (max-width: 640px) {
-  .signal__sub { font-size: 9px; }
-  .signal__labels text { font-size: 9px; }
+  .signal__pkt { animation: none !important; opacity: 1; }
+  .signal__pkt--leg1 { offset-distance: 55%; }
+  .signal__pkt--leg2 { offset-distance: 40%; }
+  .signal__pkt--tok { offset-distance: 82%; }
 }
 
 /* ---- §4 RUN ONE ------------------------------------------------------------

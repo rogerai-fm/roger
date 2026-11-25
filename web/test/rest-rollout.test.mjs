@@ -65,7 +65,7 @@ test("(b) the manual's contents are a tuner of every section, in order, and noth
   const st = stations(t);
   const ids = [...html.matchAll(/<section class="man-sec" id="([^"]+)"/g)].map((m) => m[1]);
   // features/lan/trust_and_honesty.feature (the manual's LAN section, run by TestLANDocsBDD) adds §L.
-  assert.equal(ids.length, 20, "the manual has its 20 sections (§L LAN mode joined 2026-10-07)");
+  assert.equal(ids.length, 26, "the manual has its 26 sections (§L LAN mode joined 2026-10-07; B3 Custom tuning and B4 The money joined 2026-11-14; §M Local models and §E Edge joined 2026-11-21; B5 The Wave family and B6 Wave Nano joined 2026-11-24)");
   assert.deepEqual(st.map((s) => s.id), ids, "one station per section, in page order");
   assert.doesNotMatch(html, /class="man-toc/, "the old sticky rail is gone");
   assert.doesNotMatch(stripCss(src("styles/manual.css")), /position:\s*sticky/, "nothing on the manual is sticky");
@@ -86,13 +86,32 @@ test("(b) the app page tunes across its numbered sections with the shared tuner,
   assert.doesNotMatch(src("styles/app.css"), /app-dialrule/, "and their styles went with them");
 });
 
-test("(b) the tuner component takes up to 20 stations and turns into a list on phones past 12", () => {
+test("(b) the tuner component counts every station a page gives it, and turns into a list on phones past 12", () => {
   const css = stripCss(src("styles/components.css"));
-  for (let n = 13; n <= 20; n++) {
+  // the count the sheet reaches: the highest n with a --tuner-n rule
+  const counted = [...css.matchAll(/\.toc-tuner:has\(li:nth-child\((\d+)\):last-child\)\s*\{\s*--tuner-n:/g)].map((m) => Number(m[1]));
+  const max = Math.max(...counted);
+  for (let n = 2; n <= max; n++) {
     assert.match(css, new RegExp(`\\.toc-tuner:has\\(li:nth-child\\(${n}\\):last-child\\)\\s*\\{\\s*--tuner-n:\\s*${n};`), `counts ${n} stations`);
+  }
+  for (let n = 1; n <= max; n++) {
     assert.match(css, new RegExp(`\\.toc-tuner:has\\(li:nth-child\\(${n}\\) a:is\\(:hover, :focus-visible\\)\\)\\s*\\{\\s*--at:\\s*${n - 1};`), `points at station ${n}`);
+    assert.match(css, new RegExp(`\\.toc-tuner:has\\(li:nth-child\\(${n}\\) a:is\\(:hover, :focus-visible\\)\\) li:nth-child\\(${n}\\) \\.toc-tuner__name`), `names station ${n}`);
   }
   assert.match(css, /\.toc-tuner:has\(li:nth-child\(13\)\)/, "a many-station tuner has a list form");
+  // every tuner on the site fits the count: past it, the scale falls to the 9-column default and wraps
+  // (the manual reached 24 on 2026-11-21 while the sheet counted 20; caught by eye on 2026-11-23)
+  const built = path.join(WEB, "dist");
+  let seen = 0;
+  for (const f of readdirSync(built).filter((x) => x.endsWith(".html"))) {
+    const html = readFileSync(path.join(built, f), "utf8");
+    for (const m of html.matchAll(/<ol class="toc-tuner__scale">([\s\S]*?)<\/ol>/g)) {
+      const n = (m[1].match(/<li\b/g) || []).length;
+      seen++;
+      assert.ok(n >= 2 && n <= max, `${f}: its tuner has ${n} stations; components.css counts 2 to ${max}`);
+    }
+  }
+  assert.ok(seen > 5, "the guard found the site's tuners");
 });
 
 /* ---- panels and scroll ------------------------------------------------------------- */

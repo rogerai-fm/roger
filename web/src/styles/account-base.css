@@ -56,6 +56,13 @@ body.auth {
   padding: var(--s-10) clamp(var(--s-6), 4vw, var(--s-10));
 }
 
+/* Phones (2026-11-24, UX review): three insets (the panel margin, its padding, the card's) left about
+   48px each side at 390px. Under 560px the plate runs edge to edge with the site's 16px gutter. */
+@media (max-width: 560px) {
+  .authwrap { margin-inline: 0; padding: var(--s-4) 0; border-radius: 0; }
+  .card { padding: var(--s-6) var(--s-4); border-radius: 0; }
+}
+
 /* Plate heading - the document title, set in the grotesk faceplate voice. */
 .card h1 {
   font-size: var(--t-h2);
@@ -93,7 +100,7 @@ body.auth {
   content: "";
   width: 18px;
   height: 2px;
-  background: var(--live);
+  background: var(--ink-300);   /* a rule, not a signal: red stays for focus, on air and payable */
   display: inline-block;
   flex: none;
 }
@@ -472,3 +479,15 @@ body.auth {
 @media (pointer: coarse) {
   .acctsubnav > a { padding-block: calc((var(--hit) - 1lh) / 2); }
 }
+
+/* ---- going on air, in three steps (GoOnAir.svelte): a small Ping beside the shared .steps path ---- */
+.onair-steps { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--s-5); align-items: start; margin: var(--s-4) 0; }
+.onair-steps__ping { width: 56px; height: auto; color: var(--ink-900); overflow: visible; }
+.onair-steps__list { grid-auto-flow: row; gap: 0; }
+.onair-steps__list > li { padding: var(--s-3) 0 var(--s-4) var(--s-10); border-top: 0; border-left: 1px solid var(--hairline-2); }
+.onair-steps__list > li::before { top: calc(var(--s-3) + 3px); left: var(--s-3); }
+.onair-steps__list > li::after { top: var(--s-3); left: -6px; width: 11px; height: 1px; }
+.onair-steps__list > li:first-child::after { height: 2px; width: 11px; }
+.onair-steps__list .copy-code { margin-top: var(--s-2); max-width: 100%; }
+.onair-steps__list .copy-code code { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .onair-steps { grid-template-columns: minmax(0, 1fr); } .onair-steps__ping { width: 44px; } }

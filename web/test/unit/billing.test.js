@@ -30,7 +30,7 @@ const checkout = (routes = {}) => mount({ ...OK, "/billing": [200, { ...BILLING,
 describe("boot (the login-loop rule)", () => {
   it("a 401 on the first feed goes to login; nothing else is read", async () => {
     const p = mount({ "/billing": [401, {}] });
-    await waitFor(() => expect(p.navs).toEqual(["/login.html"]));
+    await waitFor(() => expect(p.navs).toEqual(["/login.html?next=%2Fbilling.html"]));
     expect(p.fetched()).toEqual(["/billing"]);
   });
   for (const status of [500, 503]) {

@@ -5,8 +5,12 @@
    [ agent ] [ share ] [ payouts ] [ using ] [ hosting ] [ ping ] ) with the current
    preset lit red. The first six are animated terminal replays that follow the roger arc
    - borrow -> integrate -> automate -> lend -> get paid - and mirror the real TUI preset
-   bank you get from a bare `roger` ( [0] AGENT  [1] TUNE IN  [2] SHARE ). The last three
-   are MEDIA tapes (using, hosting, ping): muted/looping inline <video>s. Transport
+   bank you get from a bare `roger` ( [0] AGENT  [1] TUNE IN  [2] SHARE ). `using` and
+   `hosting` are FILM tapes (2026-11-23): one scene each, drawn in the site's isometric
+   hand (an inline SVG in the page), played by the same frame engine as the ASCII tapes;
+   a frame is an intertitle card or a step of the scene with a caption, and the step
+   classes (fm-s1, fm-s2, ... cumulative) on the film layer drive the sheet (home.css
+   .term__film). `ping` is a MEDIA tape: a muted/looping inline <video>. Transport
    controls (play / pause / replay) and a tuning-bar progress readout, all radio/tape-deck
    styled. tune in, your tools and agent are deliberately distinct: tune in OPENS and
    HOLDS the channel; your tools points YOUR existing OpenAI clients at it; agent is
@@ -32,6 +36,12 @@
      payouts  - GET PAID: the on-air earnings hint -> `roger payout status` (KYC +
                 payable vs held + the 30-day-hold/$25/monthly policy) -> `roger payout
                 request` -> sent to the bank via Stripe Connect.
+     using    - the film: your laptop, the program lands, the band rises, the strongest
+                station answers your unchanged tools, the receipt and the wallet, a station
+                fades and the next answers at the same address.
+     hosting  - the film: your machine with a model, the program lands and the model
+                slides in, the dial sets the terms, on air, requests arrive and the load
+                fills, the slips and the wallet, off hours.
 
    Engine: each demo compiles to a flat list of "frames" (a screen of lines +
    a hold duration); typing a command expands to one frame per character. The
@@ -199,6 +209,18 @@
   // bandHeadTUI is the TUI band-browse header (no typed command): the brand
   // lockup + the lit [1] TUNE IN preset + the live band range, then a rule. The
   // stations render under it via stationRow.
+  /* a film compiles to the same flat frame list: a card (step, title, line) or a step of the
+     scene (its number, cumulative, and a caption), each with a hold */
+  var CARD_HOLD = 2200;
+  function filmCompile(builder) {
+    var frames = [];
+    builder({
+      card: function (step, title, line, hold) { frames.push({ film: true, card: [step, title, line], hold: hold == null ? CARD_HOLD : hold }); },
+      scene: function (k, cap, hold) { frames.push({ film: true, scene: k, cap: cap, hold: hold == null ? STEP * 4 : hold }); }
+    });
+    return frames;
+  }
+
   function bandHeadTUI() {
     return [
       "  " + BRAND + "   " + span("t-sel", " •[1] TUNE IN ") + dim("   reading the band"), "",
@@ -663,17 +685,50 @@
       }
     },
 
-    // `using` - the animated STORY tape (ComfyUI): borrow a friend's qwen-coder-next
-    // through opencode, use Hermes from anywhere, serve your local LLM to your bots.
-    // A MEDIA tape (muted/looping mp4 + gif), not an ASCII replay - so it carries
-    // `media:true` + the <video> id instead of a frame builder.
-    using: { label: "using", title: "roger - using it", media: true, el: "termUsing" },
+    // `using` - the FILM: how someone uses RogerAI, in the site's hand. One scene (the
+    // homepage band's place) advanced in eight steps between intertitle cards; the words
+    // are here, as every tape's are. `film:true` + the stage id instead of a screen.
+    using: {
+      label: "using", title: "roger - using it", film: true, el: "termFilmUsing",
+      build: function () {
+        return filmCompile(function (c) {
+          c.card("the console · using", "Using RogerAI", "one address, every model on air", 2600);
+          c.scene(1, "Your laptop, with your tools on it. No GPU.", 3000);
+          c.scene(2, "Install roger. Your tools get one local address and a key.", 3400);
+          c.card("step 01 · tune in", "The band", "machines other people put on air");
+          c.scene(3, "On the band: machines other people put on air, each at a price its owner set.", 3600);
+          c.scene(4, "roger use locks the strongest station inside your margins: a max price, a min speed.", 3600);
+          c.card("step 02 · your tools", "Unchanged", "the local address is an ordinary endpoint");
+          c.scene(5, "Your editor, your agent, your app call the local address, unchanged. The answer comes back with a signed receipt.", 4600);
+          c.scene(6, "You pay per token, to the machine's owner. A free station costs nothing.", 3600);
+          c.card("step 03 · it re-tunes", "Same address, same key", "when a station fades");
+          c.scene(7, "When a station fades, the next one answers at the same address. Nothing in your code changes.", 4600);
+          c.scene(8, "That is using RogerAI: one address, every model on air.", 3000);
+        });
+      }
+    },
 
-    // `hosting` - the animated STORY tape (ComfyUI): the companion to the `share` tape,
-    // told in the house cartoon voice - run your own model locally (Ollama / LM Studio),
-    // expose it OpenAI-compatibly (even as a TTS voice), and put it on the air to be
-    // discovered, served, metered and earning. Also a media tape.
-    hosting: { label: "hosting", title: "roger - hosting", media: true, el: "termHosting" },
+    // `hosting` - the FILM: how one goes on air with a model. The companion to `share`,
+    // drawn: your machine with a model, the terms, the switch, the requests, the pay.
+    hosting: {
+      label: "hosting", title: "roger - hosting", film: true, el: "termFilmHosting",
+      build: function () {
+        return filmCompile(function (c) {
+          c.card("the console · hosting", "Hosting on RogerAI", "your machine, on the air", 2600);
+          c.scene(1, "A machine that already runs a model: Ollama, llama.cpp, vLLM, LM Studio.", 3400);
+          c.scene(2, "Install roger. It finds the backend and its models by itself. Pick the one to share.", 3800);
+          c.card("step 01 · the terms", "Your price, your hours", "from free, on your schedule");
+          c.scene(3, "Set a rate, from free, and the hours you are on. The price is yours.", 3400);
+          c.card("step 02 · on air", "The switch", "the broker verifies the station");
+          c.scene(4, "Flip the switch. The broker verifies the station and puts it on the band.", 3600);
+          c.scene(5, "Requests arrive sealed through the relay. Only the model port is reachable: no shell, no files, no context.", 4600);
+          c.card("step 03 · get paid", "Metered, co-signed", "every answer carries a receipt");
+          c.scene(6, "Every answer is metered and co-signed. You keep 90% of what your station earns.", 3800);
+          c.scene(7, "Off hours, off air. The machine stays yours.", 3200);
+          c.scene(8, "That is hosting on RogerAI: your machine, on the air at your price.", 3000);
+        });
+      }
+    },
 
     // `ping` - the live Ping World screensaver (the real `roger --ping`), captured
     // straight from internal/tui. Also a media tape.
@@ -685,7 +740,7 @@
   // it - the roger arc: roger -> tune in -> your tools -> agent -> share -> payouts ->
   // back to roger. `your tools` follows `tune in` because it is what you do with the
   // channel the moment it opens.
-  var ORDER = ["roger", "tunein", "yourtools", "agent", "share", "payouts"];
+  var ORDER = ["roger", "tunein", "yourtools", "agent", "share", "payouts", "using", "hosting"];
   var NEXT_HOLD = 1500;         // ms to show the "NEXT:" indicator before switching
   function nextOf(name) {
     var i = ORDER.indexOf(name);
@@ -717,13 +772,14 @@
 
   function showFrame(i) {
     idx = i;
-    flush(frames[i].lines);
+    if (frames[i].film) filmShow(frames[i]); else flush(frames[i].lines);
     frameStart = now();
   }
   function renderFinal() {
     if (DEMOS[current] && DEMOS[current].media) { setBar(1); return; } // poster shows; no frames
     if (!frames.length) buildFrames(current);
-    flush(frames[frames.length - 1].lines);
+    var last = frames[frames.length - 1];
+    if (last.film) filmShow(last); else flush(last.lines);
     idx = frames.length - 1; elapsed = total; setBar(1);
   }
 
@@ -734,11 +790,15 @@
       // next preset and play it (a continuous playlist). Pausing halts this.
       elapsed = total; setBar(1);
       var nxt = nextOf(current);
-      flush(frames[frames.length - 1].lines.concat([
-        "",
-        dim("  ▸ ") + live("NEXT") + dim("  ") + head(DEMOS[nxt].label) +
-          dim("  ·  " + (nxt === "roger" ? "looping the dial…" : "auto-advancing…"))
-      ]));
+      if (frames[frames.length - 1].film) {
+        if (filmCap) filmCap.textContent = frames[frames.length - 1].cap + "  ▸ NEXT " + DEMOS[nxt].label;
+      } else {
+        flush(frames[frames.length - 1].lines.concat([
+          "",
+          dim("  ▸ ") + live("NEXT") + dim("  ") + head(DEMOS[nxt].label) +
+            dim("  ·  " + (nxt === "roger" ? "looping the dial…" : "auto-advancing…"))
+        ]));
+      }
       timer = setTimeout(function () { if (playing) select(nxt, "auto"); }, NEXT_HOLD);
       return;
     }
@@ -786,7 +846,7 @@
     if (titleEl) titleEl.textContent = DEMOS[name].title;
     highlightPreset(name);
     if (DEMOS[name].media) { selectMedia(name, mode); return; } // a video tape
-    showAscii();
+    if (DEMOS[name].film) showFilm(name); else showAscii();
     buildFrames(name);
     if (REDUCED) { renderFinal(); return; }
     if (mode === "force") {
@@ -839,7 +899,46 @@
     for (var i = 0; i < vs.length; i++) { vs[i].pause(); vs[i].hidden = true; }
     media = null;
     if (mediaWrap) mediaWrap.hidden = true;
+    if (filmWrap) filmWrap.hidden = true;
     if (screen) screen.hidden = false;
+  }
+  /* ---- film tapes (using / hosting): one drawn scene each in the same slot, advanced by the
+     frame engine. The layer carries data-tape and the step classes; a card frame lays the
+     intertitle over the scene (which holds its last step); a scene frame sets the steps
+     s1..sk and the caption. Reduced motion renders the last frame, as the ASCII tapes do. */
+  var filmWrap = document.getElementById("termFilm");
+  var filmCap = document.getElementById("termFilmCap");
+  var filmCard = { step: document.getElementById("termFilmStep"), title: document.getElementById("termFilmTitle"), line: document.getElementById("termFilmLine") };
+  var FILM_STEPS = 8;
+  function showFilm(name) {
+    var vs = videos();
+    for (var i = 0; i < vs.length; i++) { vs[i].pause(); vs[i].hidden = true; }
+    media = null;
+    if (mediaWrap) mediaWrap.hidden = true;
+    if (screen) screen.hidden = true;
+    if (!filmWrap) return;
+    filmWrap.hidden = false;
+    filmWrap.setAttribute("data-tape", name);
+    var stages = filmWrap.querySelectorAll(".term__film-stage");
+    for (var j = 0; j < stages.length; j++) stages[j].hidden = stages[j].id !== DEMOS[name].el;
+    filmSteps(0); filmWrap.classList.remove("is-card");
+    if (filmCap) filmCap.textContent = "";
+  }
+  function filmSteps(k) {
+    for (var i = 1; i <= FILM_STEPS; i++) filmWrap.classList.toggle("fm-s" + i, i <= k);
+  }
+  function filmShow(fr) {
+    if (!filmWrap) return;
+    if (fr.card) {
+      filmWrap.classList.add("is-card");
+      if (filmCard.step) filmCard.step.textContent = fr.card[0];
+      if (filmCard.title) filmCard.title.textContent = fr.card[1];
+      if (filmCard.line) filmCard.line.textContent = fr.card[2] || "";
+    } else {
+      filmWrap.classList.remove("is-card");
+      filmSteps(fr.scene);
+      if (filmCap) filmCap.textContent = fr.cap;
+    }
   }
 
   function selectMedia(name, mode) {
@@ -847,6 +946,7 @@
     hydratePosters();                          // ensure the deferred poster gif is set before showing
     if (screen) screen.hidden = true;
     if (mediaWrap) mediaWrap.hidden = false;
+    if (filmWrap) filmWrap.hidden = true;
     var target = document.getElementById(DEMOS[name].el);
     var vs = videos();
     for (var i = 0; i < vs.length; i++) {

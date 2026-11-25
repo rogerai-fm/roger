@@ -42,6 +42,15 @@
   --live-glow:    rgba(224, 35, 28, 0.26);
   --live-wash:    rgba(224, 35, 28, 0.10);
 
+  /* Ping's eyes, the iOS palette (PingStyle.swift): company.css .pg only */
+  --ping-orange:  #F26B1D;
+  --ping-amber:   #F2A20C;
+  --ping-green:   #2FA84F;
+  --ping-teal:    #14A89A;
+  --ping-blue:    #2F7BF5;
+  --ping-violet:  #8B5CF6;
+  --ping-pink:    #EC4899;
+
   /* ---- LEGACY ACCENT ALIASES -> collapse into mono + one red. ----
      Kept so the other pages render acceptably with no body edits. */
   --volt:         var(--ink-900); /* brand/primary -> ink (outline buttons) */
@@ -161,6 +170,7 @@
   --d-3: 320ms;
   --d-4: 560ms;
   --d-5: 820ms;
+  --motion: 1;                 /* multiplies figure animations; 0 under reduced motion (TuningFigure) */
 
   /* ---- FOCUS: the one keyboard ring (base.css applies it to every control) ---- */
   --focus-ring:   2px solid var(--live);
@@ -285,6 +295,7 @@
 @media (prefers-reduced-motion: reduce) {
   :root {
     --d-1: 0ms; --d-2: 0ms; --d-3: 0ms; --d-4: 0ms; --d-5: 0ms;
+    --motion: 0;
   }
 }
 

@@ -191,17 +191,18 @@ html.js [data-reveal].is-revealed { opacity: 1; transform: none; }
   height: auto;
   color: var(--ink-900);
 }
+/* the mascot's parts (PingMark.svelte, prefix ping-mark__): the waves, glow and eye are the one red */
 .ping-mark { animation: ping-bob 3.6s ease-in-out infinite; transform-origin: 32px 64px; }
 @keyframes ping-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
-.ping-mark__glow { animation: ping-pulse 2s ease-in-out infinite; transform-origin: 32px 17px; }
+.ping-mark__glow { fill: var(--live); opacity: .3; animation: ping-pulse 2s ease-in-out infinite; transform-origin: 32px 17px; }
 @keyframes ping-pulse { 0%, 100% { opacity: .25; transform: scale(1); } 50% { opacity: .6; transform: scale(1.18); } }
-.ping-mark__eye { animation: ping-blink 5s steps(1, end) infinite; transform-origin: 32px 17px; }
+.ping-mark__eye { fill: var(--live); animation: ping-blink 5s steps(1, end) infinite; transform-origin: 32px 17px; }
 /* ping-eye.js turns the eye toward the pointer (the `translate` property,
    separate from the blink and pulse transforms); a click blinks it */
 .ping-mark__eye, .ping-mark__glow { translate: var(--eye-x, 0) var(--eye-y, 0); transition: translate var(--d-2) var(--ease-out-quint); }
 .tube-ping__mark.is-blink .ping-mark__eye { scale: 1 0.15; }
 @keyframes ping-blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.12); } 98% { transform: scaleY(1); } }
-.ping-mark__wave { transform-origin: 32px 6px; animation: ping-wave 2.4s ease-out infinite; }
+.ping-mark__wave { fill: none; stroke: var(--live); stroke-width: 2; stroke-linecap: round; opacity: 0; transform-origin: 32px 6px; animation: ping-wave 2.4s ease-out infinite; }
 .ping-mark__wave--b { animation-delay: 1.2s; }
 @keyframes ping-wave {
   0% { opacity: 0; transform: scale(.65); }
@@ -591,41 +592,19 @@ html.promo-early .promo[hidden] { display: block; }
 .hero__callsign { color: var(--ink-900); }
 .hero__sep { color: var(--ink-300); }
 
-/* the Ping mascot: shape + carrier animations (shared: home / 404) */
+/* the Ping mascot's 404 pose (PingMark.svelte, shape dropped): its size and idle bob */
 .ping { width: 64px; height: 72px; overflow: visible; }
 .ping__body { color: inherit; }
 /* idle bob: a slow, gentle lift. A 2x-carrier multiple keeps it phase-coherent
    with the page's heartbeat without feeling like a metronome. */
 .ping { animation: pingBob var(--carrier-2x) var(--ease-in-out) infinite; transform-origin: 28px 60px; }
 @keyframes pingBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
-/* on-air eye glow breathes ON the carrier - the same beat as the brand beacon,
-   the hero red period and the ((•)) dot. */
-.ping__glow { transform-box: fill-box; transform-origin: center;
-  animation: pingGlow var(--carrier) var(--ease-in-out) infinite; }
-@keyframes pingGlow { 0%,100% { opacity: .22; transform: scale(1); } 50% { opacity: .55; transform: scale(1.16); } }
-/* the faceted eye dims on the carrier too, echoing brandPulse */
-.ping__eye { transform-box: fill-box; transform-origin: center;
-  filter: drop-shadow(0 0 3px var(--live-glow));
-  animation: pingEye var(--carrier) var(--ease-in-out) infinite; }
-@keyframes pingEye { 0%,100% { opacity: 1; } 50% { opacity: .7; } }
-/* a single transmit arc leaves the antennae on every carrier beat (the same
-   "transmit" motif as the on-air ripple and blip-map rings) */
-.ping__wave { transform-box: view-box; transform-origin: 32px 16px; }
-.ping__wave--a { animation: pingWave var(--carrier) var(--ease-out-quint) infinite; }
-.ping__wave--b { animation: pingWave var(--carrier) var(--ease-out-quint) infinite calc(var(--carrier) / 2); }
-@keyframes pingWave {
-  0%   { opacity: 0;  transform: scale(.7); }
-  30%  { opacity: .5; }
-  100% { opacity: 0;  transform: scale(1.5); }
-}
 .hero__ping-tag {
   font-size: var(--t-micro); letter-spacing: var(--tracking-label); text-transform: uppercase;
   color: var(--ink-300);
 }
 @media (prefers-reduced-motion: reduce) {
-  .ping, .ping__glow, .ping__eye, .ping__wave { animation: none; }
-  .ping__glow { opacity: .3; }
-  .ping__wave { opacity: .3; }
+  .ping { animation: none; }
 }
 
 /* the market refresh control + foot (shared: home market / models dial) */
@@ -738,11 +717,11 @@ html.promo-early .promo[hidden] { display: block; }
    is SVG radial gradients; CSS gives it a slow juicy bob + a gloss shimmer, a hover grow, and
    a press-to-squeeze - all CSS-only (CSP-safe, no JS) and reduced-motion aware. */
 .orange3d { display: inline-block; width: 1.35em; height: 1.35em; vertical-align: -0.34em; line-height: 0; cursor: pointer; }
-.orange3d svg {
-  width: 100%; height: 100%; overflow: visible; transform-origin: 50% 62%;
-  filter: drop-shadow(0 0.04em 0.07em rgba(120, 50, 0, 0.5));
-  animation: o3d-bob 5.5s ease-in-out infinite;
-}
+.orange3d svg { width: 100%; height: 100%; overflow: visible; transform-origin: 50% 62%; }
+/* the fruit bobs over a flat halo on the ground (the figure hand's rule: a shape, never a live filter;
+   the drop-shadow went 2026-11-23); the hover grow and the press squeeze take the whole mark */
+.orange3d__fruit { transform-origin: 24px 30px; transform-box: view-box; animation: o3d-bob 5.5s ease-in-out infinite; }
+.orange3d__halo { fill: currentColor; opacity: .16; }
 .orange3d__leaf { transform-origin: 38px 9px; animation: o3d-leaf 5.5s ease-in-out infinite; }
 .orange3d__gloss { animation: o3d-shine 5.5s ease-in-out infinite; }
 .orange3d:hover svg { animation: none; transform: scale(1.16) rotate(3deg); }
@@ -751,7 +730,7 @@ html.promo-early .promo[hidden] { display: block; }
 @keyframes o3d-leaf  { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(4deg); } }
 @keyframes o3d-shine { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.4; } }
 @media (prefers-reduced-motion: reduce) {
-  .orange3d svg, .orange3d__leaf, .orange3d__gloss { animation: none; }
+  .orange3d svg, .orange3d__fruit, .orange3d__leaf, .orange3d__gloss { animation: none; }
 }
 
 /* the ((.)) market status beacon (shared: home market / models dial) */

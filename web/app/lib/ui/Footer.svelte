@@ -19,6 +19,7 @@
         <a href="/app.html">App</a>
         <a href="/tower.html">Tower</a>
         <a href="/voices.html">Voices</a>
+        <a href="/private.html">Base Station</a>
         <a href="{anchors}#spec">Spec</a>
         <a href="{anchors}#monetize">Monetize</a>
       </div>
@@ -31,6 +32,7 @@
         <a href="/research-wave-family.html">Wave family</a>
         <a href="/research-hardware.html">Hardware</a>
         <a href="/research-industry.html">Industrial</a>
+        <a href="/research-custom-tuning.html">Custom tuning</a>
       </div>
       <div class="footer__group">
         <small class="footer__heading">Account</small>
@@ -38,6 +40,10 @@
         <a href="/dashboard.html">Dashboard</a>
         <a href="/console.html">Console</a>
         <a href="/keys.html">API keys</a>
+        <a href="/billing.html">Billing</a>
+        <a href="/payouts.html">Payouts</a>
+        <a href="/stations.html">Stations</a>
+        <a href="/usage.html">Metrics</a>
         <a href="/account.html">Account</a>
       </div>
       <div class="footer__group">
@@ -94,7 +100,7 @@
     </div>
   </div>
 
-  <p class="wrap footer__colophon mono">SET rogerai - REV 2026.06 - OpenAI-compatible - PolyForm Perimeter 1.0.0</p>
+  <p class="wrap footer__colophon mono">SET rogerai - REV 2026.11 - OpenAI-compatible - PolyForm Perimeter 1.0.0</p>
   <p class="wrap footer__colophon mono">◉ broadcasting live from Orange County, California <Orange3d id="oc" /></p>
 
   <div class="wrap footer__bar">

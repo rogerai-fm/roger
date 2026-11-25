@@ -1,4 +1,5 @@
 <script>
+  import PingMark from "#lib/ui/PingMark.svelte";
   // ...static - RogerAI
   // Ported from web/src/404.html (2026-10-29); the copy is the legacy copy.
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -33,18 +34,8 @@
            hollow (a dim ring, no live-red fill). Holds still - the signal is
            gone, so nothing transmits. -->
       <span class="lost__ping" aria-hidden="true">
-        <svg class="ping ping--dropped" viewBox="0 0 64 72" fill="currentColor" focusable="false"
-             role="img" aria-label="Ping, off the air">
-          <g class="ping__body">
-            <!-- arms sag down and outward -->
-            <path d="M10 10 h9 v4.5 H14.5 v9 H19 V28 H10 Z"/>
-            <path d="M54 10 h-9 v4.5 H49.5 v9 H45 V28 h9 Z"/>
-            <path d="M22 30 h20 v18 a4 4 0 0 1 -4 4 h-12 a4 4 0 0 1 -4 -4 Z"/>
-            <rect x="25" y="64" width="5" height="5" rx="1"/>
-            <rect x="34" y="64" width="5" height="5" rx="1"/>
-          </g>
-          <!-- hollow eye: a dim grey ring, no live-red -->
-          <circle class="ping__eye-hollow" cx="32" cy="22" r="6" fill="none" stroke-width="2.5"/>
+        <svg class="ping ping--dropped" viewBox="0 0 64 72" fill="currentColor" focusable="false">
+          <PingMark prefix="ping__" shape="dropped" eyeY={22} glow={false} eye="hollow" />
         </svg>
       </span>
 

@@ -35,7 +35,7 @@ describe("console boot", () => {
   it("logged out: /account fails -> login, nothing else fetched", async () => {
     const calls = broker({ "/account": [401, {}] });
     render(Console);
-    await waitFor(() => expect(replaced).toEqual(["/login.html"]));
+    await waitFor(() => expect(replaced).toEqual(["/login.html?next=%2Fconsole.html"]));
     expect(calls.map((c) => c.path)).toEqual(["/account"]);
     expect(calls[0].opts.credentials).toBe("include");
   });

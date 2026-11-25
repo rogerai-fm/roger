@@ -1,4 +1,5 @@
 <script>
+  import LoadState from "#lib/ui/LoadState.svelte";
   // The account hub, /account.html (legacy: web/src/js/account.js): who you are signed in as,
   // the wallet, the contact email, adding an email sign-in to a GitHub/Apple account
   // (features/auth/email_link.feature), export, delete, sign out. Thin reads over the broker
@@ -32,7 +33,7 @@
 
   onMount(async () => {
     const res = await bootGet("/account");
-    if (res.status === 401) { location.replace("/login.html"); return; }
+    if (res.status === 401) { location.replace("/login.html?next=" + encodeURIComponent("/account.html")); return; }
     if (!res.data) { status = "fault"; return; }
     a = res.data;
     email = a.email || "";
@@ -45,8 +46,8 @@
     // the refusal can say WHY (the broker's own message), not a bare failure
     try {
       const r = await api("/account", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
-      saveMsg = r.ok ? " saved" : " " + (await reason(r, "could not save"));
-    } catch { saveMsg = " could not reach RogerAI"; }
+      saveMsg = r.ok ? "Saved." : await reason(r, "Could not save. Try again.");
+    } catch { saveMsg = "Could not reach RogerAI. Try again."; }
   }
   async function linkSend() {
     addr = linkEmail.trim();
@@ -87,12 +88,13 @@
     if (!window.confirm("Delete your account? Identity is anonymized; financial records are retained de-identified.")) return;
     const r = await api("/account/delete", { method: "POST" });
     if (r.ok) { location.replace("/login.html"); return; }
-    delMsg = " " + (await reason(r, "could not delete"));
+    delMsg = await reason(r, "Could not delete the account. Try again.");
   }
 </script>
 <div class="authwrap tint-panel">
+<LoadState status={status} what="your account" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. Try again shortly.</p>
+  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. <button type="button" class="ghost" onclick={() => location.reload()}>Try again</button></p>
   <h1>Account</h1>
   <p class="sub">Signed in as <b id="who">{a ? RogerFmt.who(a) : "-"}</b></p>
 
@@ -127,7 +129,7 @@
       <span class="ac-field__hint">Used only for payout and account notices. Never shared.</span>
       <div class="ac-field__act">
         <button id="saveEmail" class="ghost" hidden={emailLocked} onclick={saveEmail}>Save email</button>
-        <span class="fine" id="saveMsg">{saveMsg}</span>
+        <span class="fine" id="saveMsg" role="status">{saveMsg}</span>
       </div>
     </div>
   </section>
@@ -185,7 +187,7 @@
       Financial records are retained, de-identified, for the legal retention window.
       Deletion is blocked while you hold a balance, unpaid earnings, or open disputes.</p>
     <button id="del" class="ghost danger" onclick={del}>Delete my account</button>
-    <span class="fine" id="delMsg">{delMsg}</span>
+    <span class="fine" id="delMsg" role="status">{delMsg}</span>
   </section>
 
   <AccountNav current="account" />

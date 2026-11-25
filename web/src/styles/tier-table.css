@@ -1,0 +1,159 @@
+/* =====================================================================
+   tier-table.css : the Wave family's tables (2026-11-24)
+   .tier-matrix and .tier-scroll (the slot and variation tables on research-wave-family.html) and the
+   job finder .wj (WaveJobs.svelte, the manual's Appendix B5; src/js/wave-jobs.js drives it). Loaded
+   by both pages, so the finder and the tables are one hand wherever they appear. Moved here from
+   research.css (the table base) and wave-family.css (the finder and the card form) when the finder
+   went to the manual.
+   ===================================================================== */
+.tier-matrix { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
+.tier-matrix caption { color: var(--ink-500); font-size: var(--t-sm); text-align: left; padding-bottom: var(--s-4); }
+.tier-matrix th, .tier-matrix td { padding: var(--s-3) var(--s-4); text-align: left; vertical-align: top; border-bottom: 1px solid var(--hairline); }
+.tier-matrix tbody tr:last-child th, .tier-matrix tbody tr:last-child td { border-bottom: 0; }
+.tier-matrix tbody th { color: var(--ink-900); font-weight: 500; }
+.tier-matrix td { color: var(--ink-500); }
+.tier-matrix .tier-cell { color: var(--ink-900); font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .04em; white-space: nowrap; }
+.tier-scroll { overflow-x: auto; border: 1px solid var(--hairline); border-radius: var(--panel-r); background: var(--paper); }
+.tier-scroll table { min-width: 640px; }
+
+/* ---------- the job finder ----------------------------------------------------------------
+   A table of 39 jobs is a wall if you print it and a filing cabinet if you frame
+   it. The frame: a toolbar that only exists once the script can drive it, groups
+   with their own headings, and a bounded panel so the section is one screen tall
+   however many jobs land here later. Every constraint is added by script
+   (.is-live) - the served page is the whole table, scrolling with the document. */
+.wj { position: relative; border: 1px solid var(--hairline); border-radius: var(--panel-r); background: var(--paper); }
+/* display:grid would beat the UA's [hidden] rule, and the toolbar ships hidden -
+   without this the filters appear, inert, on a page whose script never ran. */
+.wj__bar[hidden] { display: none; }
+/* ONE wrapping line, not four rows (founder 2026-08-17). The setting chips take
+   the room they need and the slot control and the live count ride along at the
+   end of the flow, so the bar costs one or two bands instead of four. */
+.wj__bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-5);
+  padding: var(--s-3) var(--s-5); border-bottom: 1px solid var(--hairline);
+  background: var(--paper-2);
+}
+.wj__set {
+  flex: 1 1 34rem; min-width: 0;
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2);
+}
+.wj__pick { flex: 0 0 auto; display: flex; align-items: center; gap: var(--s-2); margin: 0; }
+.wj__legend {
+  flex: 0 0 auto;
+  color: var(--ink-500); font-family: var(--font-mono); font-size: var(--t-micro);
+  letter-spacing: var(--tracking-label); text-transform: uppercase;
+}
+.wj__chip {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 4px 9px; border: 1px solid var(--hairline-2); border-radius: var(--r-sm);
+  background: var(--paper); color: var(--ink-700);
+  font-family: inherit; font-size: var(--t-xs); line-height: 1.35;
+  cursor: pointer;
+}
+/* The slot filter, as a native control: keyboard reachable with no code, and
+   every option carries its slot's name and its live count. */
+.wj__select {
+  padding: 4px 9px; border: 1px solid var(--hairline-2); border-radius: var(--r-sm);
+  background: var(--paper); color: var(--ink-900);
+  font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1.35;
+  letter-spacing: .04em; cursor: pointer;
+}
+.wj__select:hover, .wj__select:focus-visible { border-color: var(--ink-900); }
+.wj__chip:hover { border-color: var(--ink-900); color: var(--ink-900); }
+.wj__chip[aria-pressed="true"] {
+  border-color: var(--ink-900); background: var(--ink-900); color: var(--paper);
+}
+.wj__chip[disabled] { opacity: .4; cursor: default; }
+.wj__chip[disabled]:hover { border-color: var(--hairline-2); color: var(--ink-700); }
+.wj__n {
+  color: var(--ink-500); font-family: var(--font-mono); font-size: var(--t-micro);
+  font-variant-numeric: tabular-nums;
+}
+.wj__chip[aria-pressed="true"] .wj__n { color: var(--paper); opacity: .7; }
+.wj__count {
+  flex: 0 0 auto; margin: 0 0 0 auto;
+  color: var(--ink-500); font-family: var(--font-mono);
+  font-size: var(--t-micro); letter-spacing: .06em; text-transform: uppercase;
+}
+.wj__scroll { overflow: auto; }
+/* Bounded ONLY when the filters exist to shorten it. */
+.wj.is-live .wj__scroll { max-height: min(64vh, 620px); }
+.wj.is-live .wj__scroll:focus-visible { outline: 2px solid var(--live); outline-offset: -2px; }
+.wj table { min-width: 0; }
+.wj table thead th { position: sticky; top: 0; z-index: 2; background: var(--paper); }
+/* The group heading is a row, so it can stay with its rows while they scroll. */
+.wj__group th {
+  position: sticky; top: var(--wj-head, 30px); z-index: 1;
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--hairline-2); background: var(--paper-2);
+  font-weight: 400;
+}
+.wj__group b {
+  color: var(--ink-900); font-family: var(--font-mono); font-size: var(--t-xs);
+  font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+}
+.wj__group span { color: var(--ink-500); font-size: var(--t-xs); }
+.wj__tally {
+  float: right; color: var(--ink-500); font-family: var(--font-mono);
+  font-size: var(--t-micro); font-variant-numeric: tabular-nums;
+}
+.wj table tbody[hidden], .wj table tr[hidden] { display: none; }
+.wj__nobody td {
+  padding: var(--s-6) var(--s-5); color: var(--ink-500); font-size: var(--t-sm);
+}
+/* The panel fades at its bottom edge when it is bounded, so a reader can see
+   there is more table under the fold rather than guessing. */
+.wj.is-live.has-more::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--paper));
+  pointer-events: none;
+}
+/* ---------- narrow: every matrix becomes cards ------------------------------------------
+   The tables are 4-5 columns wide and .tier-scroll's 640px minimum turned each of them into a
+   sideways scroll on a phone. Under 760px a row becomes a card and the column headings become
+   labels on the fields. The finder labels from data-label (it grows); the family page's slot and
+   variation tables label by column position (wave-family.css), so their rows need no attributes. */
+@media (max-width: 760px) {
+  .tier-matrix, .tier-matrix tbody, .tier-matrix tr, .tier-matrix th, .tier-matrix td {
+    display: block;
+  }
+  .tier-matrix thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+  }
+  .tier-scroll { overflow-x: visible; }
+  .tier-scroll table { min-width: 0; }
+  .tier-matrix tbody tr {
+    padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--hairline);
+  }
+  .tier-matrix tbody tr:last-child { border-bottom: 0; }
+  .tier-matrix tbody th, .tier-matrix tbody td {
+    padding: 0; border: 0;
+  }
+  .tier-matrix tbody tr > th[scope="row"] {
+    color: var(--ink-900); font-size: var(--t-body); font-weight: 500;
+  }
+  .tier-matrix .tier-cell { white-space: normal; }
+  /* One label style, however the label is sourced. */
+  .tier-matrix td::before, .tier-matrix .tier-cell::before {
+    display: block; margin-top: var(--s-3);
+    color: var(--ink-500); font-family: var(--font-mono); font-size: var(--t-micro);
+    letter-spacing: var(--tracking-label); text-transform: uppercase;
+  }
+  .wj .tier-matrix .tier-cell::before { content: "Smallest slot"; margin-top: var(--s-2); }
+  .wj .tier-matrix td[data-label]::before { content: attr(data-label); }
+  /* In card mode the heading row is a block, so it can be a flex line: name, what the group is, and the tally pushed to the end instead of floated into
+     the wrapped sub-label. */
+  .wj__group th {
+    position: static; padding: var(--s-3) var(--s-5);
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2);
+  }
+  /* In card mode the heading is a flex line and the sub-label can consume the
+     whole width, which leaves auto margin nothing to give - the count ended up
+     welded to the last word ("manufacturing18"). Pad it off explicitly. */
+  .wj__tally { float: none; margin-left: auto; padding-left: var(--s-3); }
+  .wj .tier-matrix tbody tr.wj__group { padding: 0; border-bottom: 0; }
+  .wj__bar { padding: var(--s-3) var(--s-4); }
+  .wj__set { align-items: flex-start; flex-basis: 100%; }
+  .wj__count { margin-left: 0; }
+}

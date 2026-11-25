@@ -112,3 +112,5 @@
   .co-pair, .co-split { grid-template-columns: 1fr; }
   .co-split { gap: var(--s-6); }
 }
+
+.co-crew { margin-top: var(--s-8); }

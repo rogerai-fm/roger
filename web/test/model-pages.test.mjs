@@ -188,11 +188,12 @@ test("pages: both model pages build as research pages with their own title, desc
 
 test("pages: the mesh explainer and the wildfire watch are shared partials, written once", () => {
   for (const p of Object.values(PAGES)) {
-    assert.match(src(p), /<WaveMesh /, `${p} includes the mesh explainer (the shared component)`);
     assert.match(src(p), /<WaveFirewatch /, `${p} includes the wildfire watch (the shared component)`);
     assert.doesNotMatch(noComments(src(p)), /T13/, `${p} does not carry its own copy of the mesh questions`);
-    assert.match(sectionHtml(p, "mesh"), /T13/, `${p} renders the mesh questions`);
+    assert.match(main(p), /href="\/research-models\.html#mesh"/, `${p} links to the mesh on the models page`);
   }
+  // founder 2026-11-24: the mesh lives on the family's parent page, once
+  assert.match(sectionHtml("research-models.html", "mesh"), /T13/, "the models page renders the mesh questions");
 });
 
 test("pages: every number a reader sees on a model page is in the data file", () => {
@@ -318,7 +319,7 @@ test("served: what a page says is served is exactly what the status file says", 
   const nanoBands = [nano.onAirBand, ...(nano.alsoOnAir || [])].filter(Boolean);
   assert.deepEqual(nanoBands, ["wave-nano-fire-controller", "wave-nano-fire-vision"], "exactly the two fire bands");
   for (const b of nanoBands) assert.ok(nanoText.includes(b), `the Nano page names the band ${b}`);
-  assert.match(nanoText, /Nano chat stays off the market until it passes the release gate/i, "Nano chat is off the market");
+  assert.doesNotMatch(nanoText, /\bchat (is |stays )?on (air|the market)\b|\bchat: on air|Nano chat is (live|available)/i, "founder 2026-11-24: the chat-off wording is removed everywhere; a page still never says Nano chat is on");
   assert.doesNotMatch(nanoText, /roger use wave-nano/i, "and the page offers no roger use command for a Nano band");
   // No version number is claimed as served.
   for (const p of Object.values(PAGES)) assert.doesNotMatch(visible(main(p)), /\bv\d+[a-z]?\b/, `${p}: no build version named`);
@@ -375,7 +376,9 @@ test("nano: the release parts are described by role, with no served name but the
   const bands = [t.onAirBand, ...(t.alsoOnAir || [])].filter(Boolean);
   for (const n of new Set(text.match(/wave-nano-[a-z0-9.-]*[a-z0-9]/g) || [])) assert.ok(bands.includes(n), `${n} is not a band in the status file`);
   for (const b of bands) assert.ok(parts.includes(b), `the parts list names the band ${b}`);
-  assert.match(text, /On 2026-11-20 at 20:27 PT, Wave Nano['’]s fire controller and fire vision module went on the RogerAI market behind market guards, as specialized models, not chat models\./, "founder 2026-11-21");
+  // founder 2026-11-24: the sentence names no date or time
+  assert.match(text, /Wave Nano['’]s fire controller and fire vision module are on the RogerAI market behind market guards, as specialized models\./, "founder 2026-11-21, undated 2026-11-24, chat wording removed 2026-11-24");
+  assert.doesNotMatch(text, /20:27 PT/, "founder 2026-11-24: no time of going on air");
   assert.doesNotMatch(text, /\bchat (is |stays )?on (air|the market)\b|\bchat: on air|free band/i, "no on-air wording for Nano chat");
   // what follows "off the market" names no date or time: the only condition is the release gate
   for (const m of text.matchAll(/off the market[^.;]{0,80}/gi)) {
@@ -452,7 +455,6 @@ test("figures: the escalation gate, the mesh, the readouts, the ladder and the r
   for (const p of Object.values(PAGES)) {
     const html = main(p);
     assert.match(html, /class="[^"]*\bwm-gate\b/, `${p} draws the escalation gate`);
-    assert.match(html, /class="[^"]*\bwm-mesh\b/, `${p} draws the mesh`);
     assert.match(html, /class="wm-readouts"/, `${p} draws the measured readouts`);
     assert.match(html, /<ol class="steps wm-ladder"/, `${p} draws the ladder on the shared step path`);
     assert.match(html, /class="wm-runs"/, `${p} draws the runs-on row`);
@@ -521,10 +523,11 @@ test("nano: the fire-decision copy is current with the lab record (R.460, R.473)
   for (const l of nano.limits) assert.notEqual(l.ref, "R.459", "no limit rests on the failed retrain");
   // TruthfulQA 41.2 sits inside the class range 36.6 to 52.2 (R.462): "last on every task" is not true.
   assert.doesNotMatch(text, /last in its size class on every task(?! but TruthfulQA)/, "the TruthfulQA exception is stated");
-  assert.match(visible(main(PAGES.nano).match(/<figcaption[^>]*id="wm-std-cap"[\s\S]*?<\/figcaption>/)[0]), /every task but TruthfulQA/);
+  // the public table moved to the manual, Appendix B6 (2026-11-24); its caption keeps the exception
+  assert.match(visible(main("manual.html").match(/<figcaption[^>]*id="wm-std-cap"[\s\S]*?<\/figcaption>/)[0]), /every task but TruthfulQA/);
 });
 
 test("nano: the GSM8K class cell says four of the six were measured, as the IFEval cell does", () => {
-  const row = main(PAGES.nano).match(/<tr><th scope="row">GSM8K[\s\S]*?<\/tr>/)?.[0] || "";
+  const row = main("manual.html").match(/<tr><th scope="row">GSM8K[\s\S]*?<\/tr>/)?.[0] || "";
   assert.match(visible(row), /\(four measured\)/);
 });

@@ -67,7 +67,7 @@ test("(a) the headline keeps a word boundary where each <br> used to be", () => 
   const h1 = heroSection().match(/<h1 class="hero__title"[\s\S]*?<\/h1>/)?.[0] || "";
   assert.doesNotMatch(h1, /<br\s*\/?>/, "lines are spans, not <br>");
   assert.match(decodeText(h1.replace(/<[^>]+>/g, "")), /world’s\s+decentralized/);
-  assert.match(h1.replace(/<[^>]+>/g, ""), /Models\.\s+In under 30 seconds\./);
+  assert.match(h1.replace(/<[^>]+>/g, ""), /Models\.\s+Sovereign inference that runs on your hardware or someone else’s through a privatized network\./);   // copy change 2026-11-21 (founder line)
 });
 
 test("(b) the lift's keyframes exist and are only ever used under no-preference", () => {
@@ -160,7 +160,7 @@ test("home.css carries no rules for classes the homepage never uses", () => {
   const dir = (d) => readdirSync(path.join(WEB, d)).map((f) => readFileSync(path.join(WEB, d, f), "utf8")).join("\n");
   const used = source("index.html") + dir("src/js") + dir("app/lib/ui");
   // classes built by string concatenation in JS ("pingdeck__line--" + who)
-  const dynamic = [/^pingdeck__line--/];
+  const dynamic = [/^pingdeck__line--/, /^fm-s[1-8]$/];   // the console films' steps, set by terminal.js ("fm-s" + i)
   const classes = [...new Set([...css.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]))];
   const dead = classes.filter((c) => !used.includes(c) && !dynamic.some((re) => re.test(c)));
   assert.deepEqual(dead, [], `dead selectors in home.css: ${dead.join(", ")}`);

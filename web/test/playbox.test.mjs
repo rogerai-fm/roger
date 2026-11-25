@@ -526,8 +526,8 @@ test("deck: the brain is named honestly and no benchmark figures leak", () => {
     "Wave Nano's locked tier band must be stated");
   // founder 2026-11-21: Nano's fire controller and fire vision are on the market as specialized
   // models; Nano chat stays off until it passes the release gate. Its size is stated, never guessed
-  assert.ok(htmlFlat.includes("1.45B scratch build has two fire models on air, the fire controller and fire vision, as specialized models, not chat models. Nano chat stays off the market until it passes the release gate."),
-    "Nano's state is stated: fire models on air, chat off, no return date");
+  assert.ok(htmlFlat.includes("1.45B scratch build has two fire models on air, the fire controller and fire vision, as specialized models."),
+    "Nano's state is stated: fire models on air (chat wording removed, founder 2026-11-24)");
   assert.ok(htmlFlat.includes("edge tier that runs on a Pi"),
     "Wave Pico must be named as the Pi-class edge tier");
   assert.ok(!/MCU-class edge tier/.test(htmlFlat),

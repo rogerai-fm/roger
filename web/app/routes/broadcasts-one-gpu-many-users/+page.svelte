@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // How many people can one GPU serve? (local LLM concurrency)
   // Ported from web/src/broadcasts-one-gpu-many-users.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -36,22 +37,15 @@
      (the page's doc comment, from the legacy file; its sheets are the css: list above) -->
 
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">WHY IS THE SINGLE-STREAM BENCHMARK MISLEADING?</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">WHAT HAPPENS WHEN YOU SERVE MORE THAN ONE PERSON?</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">WHY DOES TOTAL THROUGHPUT GO UP WHILE EACH USER SLOWS DOWN?</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">IS A SINGLE-USER HOME RIG WASTEFUL, THEN?</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">WHEN DOES THE BATCHING TRADE MAKE SENSE?</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">HOW DO YOU GET MORE REQUESTS THAN ONE PERSON CAN GENERATE?</span></a></li>
-          <li><a class="toc-tuner__st" href="#s7"><b>§7</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "WHY IS THE SINGLE-STREAM BENCHMARK MISLEADING?" },
+        { id: "s2", no: "§2", name: "WHAT HAPPENS WHEN YOU SERVE MORE THAN ONE PERSON?" },
+        { id: "s3", no: "§3", name: "WHY DOES TOTAL THROUGHPUT GO UP WHILE EACH USER SLOWS DOWN?" },
+        { id: "s4", no: "§4", name: "IS A SINGLE-USER HOME RIG WASTEFUL, THEN?" },
+        { id: "s5", no: "§5", name: "WHEN DOES THE BATCHING TRADE MAKE SENSE?" },
+        { id: "s6", no: "§6", name: "HOW DO YOU GET MORE REQUESTS THAN ONE PERSON CAN GENERATE?" },
+        { id: "s7", no: "§7", name: "FAQ" },
+      ]} />
 
       <blockquote class="bc-answer" data-reveal>
         Quick answer: on our bench, one GPU running gpt-oss-120b went from ~160 tokens/sec at a

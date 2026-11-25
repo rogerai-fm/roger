@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // What a million tokens costs, and what you can sell it for
   // Ported from web/src/broadcasts-what-a-million-tokens-costs.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -40,21 +41,14 @@
      (the page's doc comment, from the legacy file; its sheets are the css: list above) -->
 
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">THE SPREAD</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">THE LEVER</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">WHICH BANDS PAY</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">OR SKIP THE RENT</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">RUNNING ONE</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">QUESTIONS</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "THE SPREAD" },
+        { id: "s2", no: "§2", name: "THE LEVER" },
+        { id: "s3", no: "§3", name: "WHICH BANDS PAY" },
+        { id: "s4", no: "§4", name: "OR SKIP THE RENT" },
+        { id: "s5", no: "§5", name: "RUNNING ONE" },
+        { id: "s6", no: "§6", name: "QUESTIONS" },
+      ]} />
 
       <div class="bc-post__body">
 

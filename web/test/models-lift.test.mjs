@@ -16,7 +16,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { source, squashText } from "./_html.mjs";
+import { source, squashText, decodeText } from "./_html.mjs";
 import { runtimeScripts, RUNTIME_TAG } from "./_html.mjs";
 
 const WEB = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -69,7 +69,7 @@ function tunerOf(page) {
     assert.ok(at > last, `${page}: stations run in page order (#${s.id})`);
     last = at;
     const label = html.slice(at).match(/<span class="sectionno">([^<]*)<\/span>/)?.[1] || "";
-    assert.equal(label, `${s.num} / ${s.name}`, `${page}: station #${s.id} reads the section's own label`);
+    assert.equal(decodeText(label), decodeText(`${s.num} / ${s.name}`), `${page}: station #${s.id} reads the section's own label`);   // &sect; or §, either spelling
   }
   return st;
 }
@@ -121,7 +121,8 @@ test("pricing: labels that must be read are AA on paper (--ink-500, never --ink-
 
 test("pricing: the payout lifecycle is a scrubbable scale over its four stages", () => {
   const earn = sectionOf(src("pricing.html"), "earn");
-  const ol = earn.match(/<ol class="lifecycle" data-scrub aria-label="[^"]+">([\s\S]*?)<\/ol>/)?.[1];
+  // data-scrub-auto (2026-11-21): the list plays itself inside the hold figure until the reader touches it
+  const ol = earn.match(/<ol class="lifecycle" data-scrub(?: data-scrub-auto)? aria-label="[^"]+">([\s\S]*?)<\/ol>/)?.[1];
   assert.ok(ol, "the lifecycle is an <ol data-scrub> with a name");
   assert.deepEqual([...ol.matchAll(/<li><b>([^<]+)<\/b>/g)].map((m) => m[1]), ["Accrued", "Held", "Payable", "Paid"]);
 });

@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // 1,200 agents broke their sandbox. Within five days, they were signing their messages.
   // Ported from web/src/broadcasts-agent-governance-identity.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -60,21 +61,14 @@
         <figcaption class="fig mono">FIG. 1 &middot; A GOVERNOR REGULATES BY FEEDBACK. AN IDENTITY IS THE TAG THAT SAYS WHOSE.</figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">WHAT ACTUALLY HAPPENED</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">THE DETAIL THAT MATTERS MOST</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">THE GAP THIS EXPOSES</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">WHAT WE ARE BUILDING TOWARD</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">WHAT WE ARE COMMITTING TO</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "WHAT ACTUALLY HAPPENED" },
+        { id: "s2", no: "§2", name: "THE DETAIL THAT MATTERS MOST" },
+        { id: "s3", no: "§3", name: "THE GAP THIS EXPOSES" },
+        { id: "s4", no: "§4", name: "WHAT WE ARE BUILDING TOWARD" },
+        { id: "s5", no: "§5", name: "WHAT WE ARE COMMITTING TO" },
+        { id: "s6", no: "§6", name: "FAQ" },
+      ]} />
 
       <div class="bc-post__body">
 

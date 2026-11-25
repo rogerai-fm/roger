@@ -301,7 +301,8 @@ test("topup bounds: every user-facing minimum is the current minimum", () => {
   // between pages, so pricing.html could lose its only statement while the manual gained
   // one. A page not listed must state it zero times, which is what makes a new page
   // stating the floor fail rather than pass unnoticed.
-  const EXPECTED = { "pricing.html": 1, "manual.html": 3 };
+  // manual.html: 4 since 2026-11-14, when Appendix B4 (the money, in full) took the pricing page's long form.
+  const EXPECTED = { "pricing.html": 1, "manual.html": 4 };
   // _partials included: a minimum stated in a partial appears on every built page and
   // would be checked on none.
   const pages = [

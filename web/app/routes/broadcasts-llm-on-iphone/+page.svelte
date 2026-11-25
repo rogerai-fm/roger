@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Run an LLM on your iPhone - and put it on the air
   // Ported from web/src/broadcasts-llm-on-iphone.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -42,22 +43,15 @@
         <figcaption class="fig mono">FIG. 1 - PUT YOUR DEVICE ON THE AIR</figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">ON-DEVICE</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">THE TRANSMITTER</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">THE HIDDEN FREQUENCY</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">THE DESK SET</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">ROUTING, ON YOUR TERMS</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">THE BILL</span></a></li>
-          <li><a class="toc-tuner__st" href="#s7"><b>§7</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "ON-DEVICE" },
+        { id: "s2", no: "§2", name: "THE TRANSMITTER" },
+        { id: "s3", no: "§3", name: "THE HIDDEN FREQUENCY" },
+        { id: "s4", no: "§4", name: "THE DESK SET" },
+        { id: "s5", no: "§5", name: "ROUTING, ON YOUR TERMS" },
+        { id: "s6", no: "§6", name: "THE BILL" },
+        { id: "s7", no: "§7", name: "FAQ" },
+      ]} />
 
       <blockquote class="bc-answer" data-reveal>
         <b>Quick answer.</b> Yes - the free <a href="/app.html">RogerAI app</a> downloads a

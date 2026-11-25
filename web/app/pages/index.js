@@ -5,3 +5,4 @@ import "../../src/js/edge-story.js";
 import "../../src/js/terminal.js";
 import "../../src/js/market.js";
 import "../../src/js/ping-chat.js";
+import "../../src/js/draw.js";   // the money figure draws itself in (2026-11-15)

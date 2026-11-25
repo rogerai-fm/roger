@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // RogerAI models - what we ship and its status
   // Ported from web/src/research-models.html (2026-10-29); the copy is the legacy copy.
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -7,13 +8,14 @@
   import Nav from "#lib/ui/Nav.svelte";
   import OnAir from "#lib/ui/OnAir.svelte";
   import Rail from "#lib/ui/Rail.svelte";
+  import WaveMesh from "#lib/ui/WaveMesh.svelte";
   const facts = content('research-models.html');
   const head = siteHead({
     title: 'RogerAI models - what we ship and its status',
     desc: 'Every RogerAI-designed Wave model and every upstream model we optimize, each with its program status, lineage, license, and evidence contract.',
     og: { type: 'website', title: 'RogerAI models: what we ship and its honest status', desc: 'Wave models and Open Builds, each with program status, lineage, license, and the evidence contract behind any claim.', url: 'https://rogerai.fm/research-models.html', image: 'https://rogerai.fm/og-research.png' },
-    css: [...CSS_SHARED, 'research.css'],
-    scripts: [{ runtime: true }],
+    css: [...CSS_SHARED, 'research.css', 'wave-mesh.css'],
+    scripts: [{ runtime: true }, { page: 'research-models' }],
   });
 </script>
 <svelte:head>{@html head}</svelte:head>
@@ -37,11 +39,18 @@
           <OnAir />
           <span class="hero__callsign">MODELS &middot; STATUS AND EVIDENCE</span>
         </span>
-        <h1>Models and status.</h1>
+        <!-- Plain first paragraph (SITE-SIMPLIFICATION-AUDIT-2026-11-13, fixes 6 and 9): the
+             status of every model in three words, live / in testing / planned, before the
+             rows. The per-row stage lines below are the status file's own words. -->
+        <h1>Every RogerAI model, and where it stands.</h1>
         <p class="research-hero__lead">
-          Every model carries its own program status. Wave Pico and Wave Nano each have a
-          page of their own: what the model is for, how to run it, what it scores and where
-          it stops.
+          Wave comes in seven sizes. One is live today: Wave Pico, free on the network.
+          One is in testing: Wave Nano, built and checked but not on the network yet.
+          Wave Micro is training. Everything larger is planned, and each row below says
+          exactly where it stands. Below the Wave list: two large open models we optimized,
+          and Roger Edge, a tiny classifier for sensor boards. No Wave weights are
+          downloadable; you use a Wave model through the network. Wave Pico and Wave Nano
+          each have a page of their own.
         </p>
         <!-- FOUNDER 2026-10-20: the Wave models are served free on the RogerAI CLI and share,
              not published to Hugging Face, so the hero's "View weights" button came off and
@@ -57,19 +66,14 @@
       </div>
     </section>
 
-    <nav class="toc-tuner" data-tuner aria-label="Sections">
-      <div class="wrap toc-tuner__band">
-      <div class="toc-tuner__readout" aria-hidden="true"></div>
-      <ol class="toc-tuner__scale">
-        <li><a class="toc-tuner__st" href="#model-pages"><b>§1</b><span class="toc-tuner__name">MODEL PAGES</span></a></li>
-        <li><a class="toc-tuner__st" href="#models"><b>§2</b><span class="toc-tuner__name">WAVE MODELS</span></a></li>
-        <li><a class="toc-tuner__st" href="#upstream"><b>§3</b><span class="toc-tuner__name">FRONTIER</span></a></li>
-        <li><a class="toc-tuner__st" href="#roger-edge"><b>§4</b><span class="toc-tuner__name">ROGER EDGE</span></a></li>
-        <li><a class="toc-tuner__st" href="#wave-infinite"><b>§5</b><span class="toc-tuner__name">WAVE INFINITE</span></a></li>
-      </ol>
-      <span class="toc-tuner__needle" aria-hidden="true"></span>
-      </div>
-    </nav>
+    <TocTuner sections={[
+      { id: "model-pages", no: "§1", name: "MODEL PAGES" },
+      { id: "models", no: "§2", name: "WAVE MODELS" },
+      { id: "upstream", no: "§3", name: "FRONTIER" },
+      { id: "mesh", no: "§4", name: "MESH" },
+      { id: "roger-edge", no: "§5", name: "ROGER EDGE" },
+      { id: "wave-infinite", no: "§6", name: "WAVE INFINITE" },
+    ]} />
 
     <!-- MODEL PAGES: the two Wave models with a page of their own. The lamp and the stage
          word render from wave-status.json, the numbers from model-cards.json, so this pair
@@ -86,15 +90,15 @@
         </div>
         <div class="model-pages">
           <a class="tint-panel model-page" href="/research-wave-pico.html">
-            <span class="model-page__status"><i class="model-lamp" data-air="{facts.t.waveAir('pico')}" aria-hidden="true"></i>{@html facts.waveStage('pico')} &middot; <code>{@html facts.waveBand('pico')}</code></span>
+            <span class="model-page__status"><i class="model-lamp" data-air="{facts.t.waveAir('pico')}" aria-hidden="true"></i>{@html facts.waveStage('pico')} &middot; live, free &middot; <code>{@html facts.waveBand('pico')}</code></span>
             <b class="model-page__name">Wave Pico <span>{@html facts.card('pico.size')}</span></b>
-            <span class="model-page__line">A sensor reader that refuses what it cannot read. Answers {@html facts.card('pico.gate-accept')} of real work at {@html facts.card('pico.gate-precision')} precision and escalates the rest.</span>
+            <span class="model-page__line">Reads one sensor stream and says when it is not sure. Answers {@html facts.card('pico.gate-accept')} of real work at {@html facts.card('pico.gate-precision')} precision and hands the rest to a person or a bigger model.</span>
             <span class="model-page__go">Wave Pico model page</span>
           </a>
           <a class="tint-panel model-page" href="/research-wave-nano.html">
-            <span class="model-page__status"><i class="model-lamp" data-air="{facts.t.waveAir('nano')}" aria-hidden="true"></i>{@html facts.waveStage('nano')} &middot; two fire models, chat off</span>
+            <span class="model-page__status"><i class="model-lamp" data-air="{facts.t.waveAir('nano')}" aria-hidden="true"></i>{@html facts.waveStage('nano')} &middot; two fire models</span>
             <b class="model-page__name">Wave Nano <span>{@html facts.card('nano.size')}</span></b>
-            <span class="model-page__line">Reads telemetry, a fleet and a fire site, and talks. Carries the Nano-VL vision module for camera frames.</span>
+            <span class="model-page__line">Reads many sensors at once, reads a camera frame for smoke with its Nano-VL vision module, and answers in plain words.</span>
             <span class="model-page__go">Wave Nano model page</span>
           </a>
         </div>
@@ -108,7 +112,7 @@
             <span class="research-kicker">DESIGNED BY ROGERAI</span>
             <h2 class="model-group-head__title">Wave models</h2>
           </div>
-          <p>The Wave Spectrum, pico to exa &middot; every tier retains its own program status &middot; no checkpoint released yet</p>
+          <p>The Wave Spectrum, pico to exa &middot; each row says where it stands: live, in testing, training or planned &middot; no weights to download, use them through the network</p>
         </div>
 
         <div class="model-list model-list--native">
@@ -121,9 +125,12 @@
             </div>
             <div>
               <span class="research-kicker">ROLE</span>
-              <p>The edge child: reads one machine&rsquo;s telemetry and asserts, with
-                 margins. Trained from scratch on our data; the 293M v6 release is on
-                 air as the free band wave-pico-293m.</p>
+              <!-- "telemetry and asserts" is the phrase research-page.test.mjs reads for this row -->
+              <p>The smallest model. It reads one machine&rsquo;s telemetry and asserts a
+                 fault only when it is sure, with its margin; when it is not sure it says
+                 so. Trained from scratch on our data. The 293M v6 release is live and free
+                 on the network as wave-pico-293m; the weights are not downloadable, you use
+                 it through the network.</p>
               <div class="model-row__actions">
                 <span class="model-stage">On air as wave-pico-293m &middot; v6 release</span>
                 <a class="model-note" href="/research-wave-pico.html">Model page</a>
@@ -140,11 +147,11 @@
             </div>
             <div>
               <span class="research-kicker">ROLE</span>
-              <p>The fleet gateway: rolls up many children, resolves conflicts, and routes
-                 by discovery. Scratch if the data program allows; a base-and-specialize
-                 fallback is held as the control.</p>
+              <p>The fleet gateway: reads many machines through their Pico readers, settles
+                 conflicts between them, and answers in plain words. Trained from scratch on
+                 our data. In testing: built and past our own gate, not on the network yet.</p>
               <div class="model-row__actions">
-                <span class="model-stage">Fire controller and fire vision on air as specialized models &middot; chat off the market</span>
+                <span class="model-stage">Fire controller and fire vision on air as specialized models</span>
                 <a class="model-note" href="/research-wave-nano.html">Model page</a>
               </div>
             </div>
@@ -159,9 +166,10 @@
             </div>
             <div>
               <span class="research-kicker">ROLE</span>
-              <p>The site brain: multi-fleet reasoning across a facility. Trained from
-                 scratch on our own data, and gated on keeping its general ability while
-                 the industrial score rises.</p>
+              <p>The site brain: reasons across every fleet in a facility, and answers
+                 general questions too. Trained from scratch on our own data. In training;
+                 it ships only if it keeps its general ability while the industrial score
+                 rises.</p>
               <div class="model-row__actions">
                 <span class="model-stage">From-scratch 7B run in training</span>
               </div>
@@ -178,7 +186,8 @@
             <div>
               <span class="research-kicker">ROLE</span>
               <p>The plant: full-plant reasoning, competitive on general benchmarks as
-                 well as machines. Base + specialize.</p>
+                 well as machines. Built on a strong open base, then trained on industrial
+                 work. Not on the network yet.</p>
               <div class="model-row__actions">
                 <span class="model-stage">Release build gated &middot; not on the band yet</span>
               </div>
@@ -194,8 +203,8 @@
             </div>
             <div>
               <span class="research-kicker">ROLE</span>
-              <p>Cross-site enterprise: correlates faults and trends across many plants
-                 at once.</p>
+              <p>Across sites: finds the faults and trends that repeat across many plants
+                 at once. Planned.</p>
               <div class="model-row__actions">
                 <span class="model-stage">Architecture and data design</span>
               </div>
@@ -212,7 +221,7 @@
             <div>
               <span class="research-kicker">ROLE</span>
               <p>Regional scale: a leaner giant, expert-pruned and distilled down from
-                 the frontier flagship rather than trained.</p>
+                 the flagship rather than trained from nothing. Planned.</p>
               <div class="model-row__actions">
                 <span class="model-stage">Pruning plan</span>
               </div>
@@ -228,8 +237,9 @@
             </div>
             <div>
               <span class="research-kicker">ROLE</span>
-              <p>The flagship: exascale-class frontier capability, and the teacher the
-                 whole family learns from. Every tier ships with Wave Mesh baked in and
+              <p>The flagship: the largest model, and the teacher the whole family learns
+                 from. Not built yet; it starts from an open frontier base. Every tier
+                 speaks Wave Mesh, the protocol the sizes use to pass readings up, and
                  understands the output of every tier beneath it.</p>
               <div class="model-row__actions">
                 <span class="model-stage">The family teacher</span>
@@ -292,6 +302,10 @@
         </div>
       </div>
     </section>
+
+    <!-- How the mesh works (founder 2026-11-24: it belongs on the parent page, not on each model's). Nano is
+         the parent node in the figure: it is the size that rolls up a fleet. -->
+    <WaveMesh no='4' fig='1' parent='Wave Nano' inset={false} />
 
     <!-- Roger Edge is a SECOND LINE, not an eighth Wave tier. It is deliberately NOT a
          third group inside #models: a reader who scans one list comes away thinking

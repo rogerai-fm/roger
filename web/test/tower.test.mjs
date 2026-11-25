@@ -132,7 +132,7 @@ test("the figures survive no motion, no script, and a narrow screen", () => {
   assert.doesNotMatch(html.match(/<main[\s\S]*?<\/main>/)[0], /<script/i, "nothing is injected");
   const reduced = (css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g) || []).join("");
   assert.match(reduced, /animation: none/, "motion is escapable");
-  assert.match(css, /max-width: 100%|width: 100%/, "the figures scale");
+  assert.match(css + read("styles/components.css"), /\.iso__svg \{[^}]*width: 100%/, "the figures scale (both are in the isometric hand: components.css .iso__svg)");
 });
 
 // The tower page says "the API, the manual and the source call it the broker". That is a

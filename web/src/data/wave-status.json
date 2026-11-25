@@ -142,7 +142,7 @@
         },
         "research-models.stage": {
           "page": "research-models.html",
-          "text": "Fire controller and fire vision on air as specialized models &middot; chat off the market",
+          "text": "Fire controller and fire vision on air as specialized models",
           "wired": false
         },
         "wave-family.recipe": {
@@ -152,7 +152,7 @@
         },
         "research-hardware.card": {
           "page": "research-hardware.html",
-          "text": "Fire controller and fire vision on air as specialized models &middot; chat off the market",
+          "text": "Fire controller and fire vision on air as specialized models",
           "wired": true
         },
         "jev-vs-wave.chart": {
@@ -162,7 +162,7 @@
         },
         "jev-vs-wave.aria": {
           "page": "broadcasts-jev-vs-wave.html",
-          "text": "Wave Nano 1.45B, 874 to 2,899 MB, fire models on air, chat off the market",
+          "text": "Wave Nano 1.45B, 874 to 2,899 MB, fire models on air",
           "wired": false
         }
       }

@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Jev decides about text. Wave decides about machines.
   // Ported from web/src/broadcasts-jev-vs-wave.html (2026-10-29); the copy is the legacy copy.
   // A broadcast on the one post layout (lib/ui/BroadcastPost.svelte): the head and the header
@@ -55,21 +56,14 @@
         <figcaption class="fig mono">FIG. 1 &middot; THE MODEL BESIDE THE MACHINE. WIRES IN, ONE VERDICT OUT.</figcaption>
       </figure>
 
-      <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-      <nav class="toc-tuner" data-tuner aria-label="Sections">
-        <div class="wrap toc-tuner__band">
-        <div class="toc-tuner__readout" aria-hidden="true"></div>
-        <ol class="toc-tuner__scale">
-          <li><a class="toc-tuner__st" href="#s1"><b>§1</b><span class="toc-tuner__name">WHAT JEV ACTUALLY IS</span></a></li>
-          <li><a class="toc-tuner__st" href="#s2"><b>§2</b><span class="toc-tuner__name">THE MAP</span></a></li>
-          <li><a class="toc-tuner__st" href="#s3"><b>§3</b><span class="toc-tuner__name">WHY WE BUILD FOR THE PLANT FLOOR</span></a></li>
-          <li><a class="toc-tuner__st" href="#s4"><b>§4</b><span class="toc-tuner__name">THE LADDER</span></a></li>
-          <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">THE ENTERPRISE TIER</span></a></li>
-          <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">FAQ</span></a></li>
-        </ol>
-        <span class="toc-tuner__needle" aria-hidden="true"></span>
-        </div>
-      </nav>
+      <TocTuner sections={[
+        { id: "s1", no: "§1", name: "WHAT JEV ACTUALLY IS" },
+        { id: "s2", no: "§2", name: "THE MAP" },
+        { id: "s3", no: "§3", name: "WHY WE BUILD FOR THE PLANT FLOOR" },
+        { id: "s4", no: "§4", name: "THE LADDER" },
+        { id: "s5", no: "§5", name: "THE ENTERPRISE TIER" },
+        { id: "s6", no: "§6", name: "FAQ" },
+      ]} />
 
       <div class="bc-post__body">
 
@@ -275,7 +269,7 @@
           <figure class="figure figure--plate figure--chart" data-reveal>
             <div class="scroll-box scroll-box--diagram">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 470" role="img"
-                 aria-label="Chart: size on disk of each Wave tier, quantized, on a log scale from 100 MB to 1 TB. Wave Pico 270 to 562 MB, on air. Wave Nano 1.45B, 874 to 2,899 MB, fire models on air, chat off the market. Wave Micro in training. Wave Giga 16.5 GB at Q4_K_M, built on Qwen3.8-27B. Wave Tera about 60 GB at 100B, base being selected. Wave Peta about 105 GB and Wave Exa about 170 GB, planned. Jev has no bar: hosted only, parameter count undisclosed.">
+                 aria-label="Chart: size on disk of each Wave tier, quantized, on a log scale from 100 MB to 1 TB. Wave Pico 270 to 562 MB, on air. Wave Nano 1.45B, 874 to 2,899 MB, fire models on air. Wave Micro in training. Wave Giga 16.5 GB at Q4_K_M, built on Qwen3.8-27B. Wave Tera about 60 GB at 100B, base being selected. Wave Peta about 105 GB and Wave Exa about 170 GB, planned. Jev has no bar: hosted only, parameter count undisclosed.">
               {@html `<style>
                 .l-hair{stroke:currentColor;opacity:.18}.l-tick{stroke:currentColor;opacity:.30;stroke-dasharray:2 4}
                 .l-bar{fill:currentColor;opacity:.82}.l-plan{fill:currentColor;opacity:.28}.l-built{fill:var(--live)}

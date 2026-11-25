@@ -233,7 +233,7 @@
             <span class="bc-row__body">
               <span class="bc-row__title">Run a Tower - and get paid for the carrying.</span>
               <span class="bc-row__dek">There is a third job on the network now: the mast in
-                the middle. No model, no key to the traffic, 10% of everything it carries -
+                the middle. No model, no key to the traffic, 5% of everything it carries -
                 or run it standalone as your own private relay network.</span>
             </span>
             <span class="bc-row__go" aria-hidden="true">tune in &rarr;</span>

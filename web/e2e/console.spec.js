@@ -54,7 +54,7 @@ test("console: the island hydrates the prerendered card and renders the operator
 test("console: a failed /account is the only redirect to login", async ({ page }) => {
   await page.route(`${BROKER}/**`, (route) => json(route, 401, {}));
   await page.goto("/console.html");
-  await page.waitForURL(/login\.html$/);
+  await page.waitForURL(/login\.html(\?next=[^&]*)?$/);
 });
 
 test("faq: a content page ships no SvelteKit script at all", async ({ page }) => {

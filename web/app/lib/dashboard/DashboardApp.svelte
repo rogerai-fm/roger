@@ -1,4 +1,5 @@
 <script>
+  import GoOnAir from "#lib/ui/GoOnAir.svelte";
   // The dashboard, /dashboard.html (legacy: web/src/js/dashboard.js): the consumer/provider
   // hero view over GET /metrics/series?days=30. Login gate as on every account page: /account
   // confirms the session; a feed that refuses a valid session is an error to show, never a
@@ -49,7 +50,7 @@
   onMount(async () => {
     let a = null;
     try { a = await account(); } catch { a = null; }
-    if (!a) { location.replace("/login.html"); return; }
+    if (!a) { location.replace("/login.html?next=" + encodeURIComponent("/dashboard.html")); return; }
     signedIn = true; acct = a;
     try {
       const r = await api("/metrics/series?days=" + DAYS);
@@ -61,8 +62,8 @@
     } catch { status = "fault"; }
   });
 </script>
-{#snippet chart(plot)}
-  <svg viewBox={plot.viewBox} class="ds-line" preserveAspectRatio="none" role="img">
+{#snippet chart(plot, label)}
+  <svg viewBox={plot.viewBox} class="ds-line" preserveAspectRatio="none" role="img" aria-label={label}>
     {#each plot.grid as g}<line x1={g.x1} x2={g.x2} y1={g.y} y2={g.y} class={g.cls} />{/each}
     {#each plot.lines as l}
       {#if l.area}<path d={l.area} class="ds-area" fill={l.fill} />{/if}
@@ -99,8 +100,8 @@
   <section class="ds-hero" id="hero" hidden={!showHero}>
     <p class="ds-hero__eyebrow">You have saved</p>
     <p class="ds-hero__amt" id="heroAmt">{showHero ? cr(hero.savings) : "-"}</p>
-    <p class="ds-hero__sub">vs {#if toggles}<b id="heroBase" class="ds-hero__toggle" role="button" tabindex="0" aria-label="Compare another frontier model" title="click to compare other frontier models"
-        onclick={stepFn} onkeydown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stepFn(); } }}>{hero.model}</b>{:else}<b id="heroBase">{hero.model}</b>{/if} list price &middot; you paid <b id="heroSpend">{showHero ? cr(n0(sv.spend_usd)) : "-"}</b> where a frontier lab would have billed <b id="heroFrontier">{showHero ? cr(hero.frontier) : "-"}</b></p>
+    <p class="ds-hero__sub">vs {#if toggles}<button type="button" id="heroBase" class="ds-hero__toggle" aria-label="{hero.model}: compare another frontier model" title="Compare another frontier model"
+        onclick={stepFn}>{hero.model}</button>{:else}<b id="heroBase">{hero.model}</b>{/if} list price &middot; you paid <b id="heroSpend">{showHero ? cr(n0(sv.spend_usd)) : "-"}</b> where a frontier lab would have billed <b id="heroFrontier">{showHero ? cr(hero.frontier) : "-"}</b></p>
   </section>
 
   <!-- alt hero for a pure provider: lifetime earned over the window -->
@@ -138,7 +139,7 @@
     <h2>Tokens over time</h2>
     <div class="ds-chart">
       <div class="ds-chart__head"><span class="ds-chart__title">Tokens out per day</span></div>
-      <div id="tokChart">{#if hasData}{@render chart(linePlot(daily, [{ key: "tokens_out", color: "var(--ink-900)", fill: "var(--paper-3)" }]))}{@render xaxis(axisLabels(daily))}{/if}</div>
+      <div id="tokChart">{#if hasData}{@render chart(linePlot(daily, [{ key: "tokens_out", color: "var(--ink-900)", fill: "var(--paper-3)" }]), "Tokens out per day, " + daily.length + " days")}{@render xaxis(axisLabels(daily))}{/if}</div>
     </div>
   </section>
 
@@ -150,7 +151,7 @@
         <span class="ds-chart__title">Per day</span>
         <span class="ds-legend" id="moneyLegend" aria-hidden="true">{#if isConsumer}<span class="ds-legend__sw ds-legend__sw--ink"></span>spend{/if}{#if isProvider}<span class="ds-legend__sw ds-legend__sw--live"></span>earned{/if}</span>
       </div>
-      <div id="moneyChart">{#if hasData && moneySeries.length}{@render chart(linePlot(daily, moneySeries))}{@render xaxis(axisLabels(daily))}{/if}</div>
+      <div id="moneyChart">{#if hasData && moneySeries.length}{@render chart(linePlot(daily, moneySeries), "Money per day, " + daily.length + " days")}{@render xaxis(axisLabels(daily))}{/if}</div>
     </div>
   </section>
 
@@ -159,7 +160,7 @@
     <h2>Requests over time</h2>
     <div class="ds-chart">
       <div class="ds-chart__head"><span class="ds-chart__title">Requests per day</span></div>
-      <div id="reqChart">{#if hasData}{@render chart(linePlot(daily, [{ key: "requests", color: "var(--ink-500)", fill: "var(--paper-2)" }]))}{@render xaxis(axisLabels(daily))}{/if}</div>
+      <div id="reqChart">{#if hasData}{@render chart(linePlot(daily, [{ key: "requests", color: "var(--ink-500)", fill: "var(--paper-2)" }]), "Requests per day, " + daily.length + " days")}{@render xaxis(axisLabels(daily))}{/if}</div>
     </div>
   </section>
 
@@ -176,10 +177,8 @@
   <!-- EARN CTA (only when not yet a provider) -->
   <section class="panel" id="earnCta" hidden={!showEarnCta}>
     <h2>Earn</h2>
-    <p>Put a GPU on air and earn per token. Install, then link this account on the box:</p>
-    <pre class="cmd">curl -fsSL https://rogerai.fm/install.sh | sh
-roger login
-roger share</pre>
+    <p>Put a GPU on air and earn per token. On the machine with the GPU:</p>
+    <GoOnAir />
     <p class="fine">Once a node serves under your account, its activity shows on <a href="/console.html">the console</a>.</p>
   </section>
   </svelte:boundary>

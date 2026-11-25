@@ -1,4 +1,6 @@
 <script>
+  import GoOnAir from "#lib/ui/GoOnAir.svelte";
+  import LoadState from "#lib/ui/LoadState.svelte";
   // Your stations, /stations.html (legacy: web/src/js/stations.js). One credentialed read of
   // GET /stations: the broker scopes the list to the signed-in owner's node bindings, so
   // nothing here sends or trusts a node id from the page. The page tells the truth about WHY
@@ -97,12 +99,12 @@
   });
 </script>
 <div class="authwrap tint-panel">
+<LoadState status={view} what="your stations" />
 <main class="card" id="card" hidden={view === "loading"}>
   <h1>Your stations</h1>
   <p class="sub">Signed in as <b id="who">{who}</b> &middot; every station registered to your account</p>
 
-  <p class="ds-state" id="stLoading" hidden={view !== "loading"}>Loading your stations...</p>
-  <p class="ds-state" id="stError" hidden={view !== "fault"}>Could not load your stations. Try again shortly.</p>
+  <p class="ds-state" id="stError" role="alert" hidden={view !== "fault"}>Could not load your stations. <button type="button" class="ghost" onclick={() => location.reload()}>Try again</button></p>
 
   <section class="acct-state tint-panel" id="stNoOperator" hidden={view !== "nooperator"}>
     <h2>You are not sharing from this sign-in</h2>
@@ -117,7 +119,7 @@ roger share</pre>
   <section class="acct-state tint-panel" id="stEmpty" hidden={view !== "ready" || stations.length > 0}>
     <h2>No stations yet</h2>
     <p>Nothing is registered to your account. Put a GPU on air and it will appear here with its status, usage and earnings.</p>
-    <pre class="cmd">roger share</pre>
+    <GoOnAir />
     <p class="fine">A station is a machine serving a model through the network. Registration binds it to this account, so only you can see its numbers.</p>
   </section>
 

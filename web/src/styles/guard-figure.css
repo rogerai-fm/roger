@@ -1,0 +1,139 @@
+/* =====================================================================
+   RogerAI - the guard-rail figure (app/lib/ui/GuardFigure.svelte), pricing §3.
+
+   The price scale in the isometric hand (2026-11-22; the SVG comes from
+   computer-scientist/article/fig_guard_gen.py, the tones and lines are the
+   .iso__* rules of components.css). A long slab: its front half the request's
+   lane with the rule plates ($10, $20), the wall ($100) and the gate, your
+   ceiling, the lit plate that slides; its back half the shelf where the
+   stations stand as tag blocks. The step list (<ol data-scrub data-scrub-auto>)
+   is tuned by scrub.js and the picture reads the tuned step through the figure's data-step (scrub.js):
+   1 the gate stands at the $10 rule, the $4 block is lit, the request runs to
+   it; 2 the gate slides to $24, the typed number shows, the $20 rule's lamp
+   lights, the $14 block lights and the request runs to it; 3 a $140 block
+   appears past the wall, crossed, and the wall's lamp lights; 4 the $14 block
+   drifts along the shelf to $30, past the gate, and dims; the request runs to
+   $4 again. data-draw (draw.js, components.css): the figure draws itself in the
+   first time it is seen. Lead class .gf on every rule. Colours are tokens;
+   motion is --d-* and --motion. The two slides and every label percent are
+   printed by the generator (--css): under a parallel camera a move along the
+   slab is one translate.
+   ===================================================================== */
+.gf { color: var(--ink-700); }
+.gf .gf__stage { padding-bottom: 1.4em; }   /* the $100 mark sits under the slab's front edge */
+.gf .gf__unit {
+  display: block; margin-bottom: var(--s-1); text-align: right;
+  font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-500);
+}
+.gf .gf__pic { position: relative; }
+
+/* the parts: the gate is the lit one (the sharper edge, lifted, its halo and lamp on); the
+   blocks keep a full edge; each slides by one translate the generator printed */
+.gf .gf__m { --edge: 1; transition: transform var(--d-5) var(--ease-out-quint), opacity var(--d-3); }
+.gf .gf__gate { --edge: 1.25; --slide: translate(45px, 13px); transform: translate(0, -2px); }   /* $10 to $24 */
+.gf .gf__block--b { --slide: translate(45px, 13px); }                                          /* $14 to $30 */
+.gf .gf__gate .iso__halo--part { opacity: .07; }
+.gf .gf__way { opacity: .45; }
+.gf .gf__stop { fill: none; stroke: var(--live); stroke-width: 1.6; stroke-linecap: round; opacity: 0; transition: opacity var(--d-2); }
+.gf .gf__block--d { opacity: 0; }
+.gf .gf__rule .iso__lamp, .gf .gf__block .iso__lamp { transition: fill var(--d-2), stroke var(--d-2); }
+
+/* the words over the stage: your ceiling's name and the typed number above the gate, the
+   prices above their blocks, the marks under the slab's front edge */
+.gf .gf__gatelabel, .gf .gf__typed { position: absolute; translate: -50% -100%; transition: opacity var(--d-2); color: var(--live-text); }
+.gf .gf__gatelabel { left: 35.4%; top: 19.6%; transition: opacity var(--d-2), left var(--d-5) var(--ease-out-quint), top var(--d-5) var(--ease-out-quint); }
+.gf .gf__typed {
+  left: 52.9%; top: 38.6%; padding: 1px 6px; border: 1px solid var(--live); border-radius: var(--r-sm); background: var(--paper);
+  font-family: var(--font-mono); font-size: var(--t-xs); opacity: 0;
+}
+.gf .gf__price {
+  position: absolute; translate: -50% -100%; white-space: nowrap;
+  font-family: var(--font-mono); font-size: var(--t-xs); font-weight: var(--weight-semi); color: var(--ink-900);
+  transition: color var(--d-2), opacity var(--d-3), left var(--d-5) var(--ease-out-quint), top var(--d-5) var(--ease-out-quint);
+}
+.gf .gf__price--a { left: 22.3%; top: 8.4%; color: var(--live-text); }
+.gf .gf__price--b { left: 42.8%; top: 24.4%; }
+.gf .gf__price--c { left: 74.3%; top: 49%; }
+.gf .gf__price--d { left: 93.2%; top: 63.7%; opacity: 0; color: var(--ink-400); }
+.gf .gf__later { display: none; }
+.gf .gf__marks { margin: 0; padding: 0; list-style: none; }
+.gf .gf__mark {
+  position: absolute; translate: -50% 0; text-align: center; white-space: nowrap;
+  font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-900); transition: color var(--d-2);
+}
+.gf .gf__mark small { display: block; font-size: var(--t-micro); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-400); }
+.gf .gf__mark--0 { left: 9.6%; top: 36.5%; }
+.gf .gf__mark--10 { left: 30.1%; top: 52.5%; }
+.gf .gf__mark--20 { left: 45.9%; top: 64.8%; }
+.gf .gf__mark--100 { left: 79%; top: 90.6%; }
+
+/* the steps: the scrubbed list, like the band figure's */
+.gf .gf__steps {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-2);
+  margin: var(--s-5) auto 0; padding: 0; list-style: none; max-width: 760px;
+}
+.gf .gf__steps li { padding: var(--s-2) var(--s-2) var(--s-3); border-radius: var(--r-xl); text-align: center; transition: background-color var(--d-2); }
+.gf .gf__steps b { display: block; color: var(--ink-900); font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; }
+.gf .gf__steps b i { font-style: normal; color: var(--live-text); margin-right: 6px; }
+.gf .gf__steps li.is-tuned { background: var(--paper); }
+.gf .gf__steps li span { display: block; margin-top: 2px; font-size: var(--t-xs); color: var(--ink-400); }
+
+/* ---- the four steps (the still is step 1) ------------------------------- */
+/* 1 and the still: the gate stands at the $10 rule, whose lamp is on; the $4 block is lit; the request runs to it */
+.gf .gf__rule--10 .iso__lamp, .gf .gf__block--a .iso__lamp { fill: var(--live); stroke: none; }
+.gf .gf__mark--10 { color: var(--live-text); }
+.gf.is-drawn .gf__comet--a { opacity: 1; animation: comet calc(var(--motion) * 2s) linear infinite; }
+
+/* 2: the gate slides to $24, the typed number shows, the $20 rule's lamp lights, the $14 block is within reach */
+.gf[data-step]:not([data-step="1"]) .gf__gate { transform: var(--slide) translate(0, -2px); }
+.gf[data-step]:not([data-step="1"]) .gf__rule--10 .iso__lamp { fill: var(--paper); stroke: currentColor; }
+.gf[data-step]:not([data-step="1"]) .gf__mark--10 { color: var(--ink-900); }
+.gf[data-step]:not([data-step="1"]) .gf__gatelabel { left: 52.9%; top: 38.6%; }   /* the name rides the gate; the typed number stands in for it at step 2 */
+.gf[data-step="2"] .gf__typed { opacity: 1; }
+.gf[data-step="2"] .gf__gatelabel { opacity: 0; }
+.gf[data-step="2"] .gf__rule--20 .iso__lamp { fill: var(--live); stroke: none; }
+.gf[data-step="2"] .gf__mark--20 { color: var(--live-text); }
+.gf[data-step="2"] .gf__block--b .iso__lamp, .gf[data-step="3"] .gf__block--b .iso__lamp { fill: var(--live); stroke: none; }
+.gf[data-step="2"] .gf__block--a .iso__lamp, .gf[data-step="3"] .gf__block--a .iso__lamp { fill: var(--paper); stroke: currentColor; }
+.gf[data-step="2"] .gf__block--b .iso__halo--part, .gf[data-step="3"] .gf__block--b .iso__halo--part { opacity: .07; }
+.gf[data-step="2"] .gf__price--b, .gf[data-step="3"] .gf__price--b { color: var(--live-text); }
+.gf[data-step="2"] .gf__price--a, .gf[data-step="3"] .gf__price--a { color: var(--ink-900); }
+.gf[data-step="2"] .gf__comet--a, .gf[data-step="3"] .gf__comet--a { animation: none; opacity: 0; }
+.gf.is-drawn[data-step="2"] .gf__comet--b, .gf.is-drawn[data-step="3"] .gf__comet--b { opacity: 1; animation: comet calc(var(--motion) * 2s) linear infinite; }
+
+/* 3: a $140 block lands past the wall, standing on nothing, and is crossed out; the wall's lamp lights */
+.gf[data-step="3"] .gf__rule--100 .iso__lamp { fill: var(--live); stroke: none; }
+.gf[data-step="3"] .gf__mark--100 { color: var(--live-text); }
+.gf[data-step="3"] .gf__block--d { opacity: .8; }
+.gf[data-step="3"] .gf__price--d { opacity: 1; }
+.gf[data-step="3"] .gf__stop { opacity: 1; transition-delay: var(--d-4); }
+
+/* 4: the $14 block drifts to $30, past the gate, and dims; the request runs to the $4 block again */
+.gf[data-step="4"] .gf__block--b { transform: var(--slide); --edge: .5; }
+.gf[data-step="4"] .gf__price--b { left: 63.3%; top: 40.3%; }
+.gf[data-step="4"] .gf__price--b:not(.gf__later) { display: none; }
+.gf[data-step="4"] .gf__later { display: block; color: var(--ink-400); }
+.gf.is-drawn[data-step="4"] .gf__comet--a { opacity: 1; animation: comet calc(var(--motion) * 2s) linear infinite; }
+
+/* the draw-in order: the floor, the blocks, the rules and the wall, then the gate; the words (HTML) fade up after */
+.gf .gf__floor { --draw-delay: 0s; }
+.gf .gf__block { --draw-delay: var(--d-2); }
+.gf .gf__rule { --draw-delay: var(--d-3); }
+.gf .gf__way { --draw-delay: var(--d-4); }
+.gf .gf__gate { --draw-delay: var(--d-5); }
+.gf.is-drawing:not(.is-drawn) :is(.gf__gatelabel, .gf__price, .gf__marks, .gf__unit) { opacity: 0; }
+.gf.is-drawn:not(.is-settled) :is(.gf__gatelabel, .gf__price--a, .gf__price--b, .gf__price--c, .gf__marks, .gf__unit) { opacity: 1; transition: opacity var(--d-4) ease-out var(--d-5); }
+.gf .gf__marks, .gf .gf__unit { transition: opacity var(--d-3); }
+
+/* phones: the small captions go, the words shrink, the steps stack */
+@media (max-width: 560px) {
+  .gf .gf__stage { padding-inline: 0; }
+  .gf .gf__price { font-size: 10px; }
+  .gf .gf__mark small { display: none; }
+  .gf .gf__unit { display: none; }   /* the caption says per million */
+  .gf .gf__mark { font-size: 10px; }
+  .gf .gf__gatelabel { display: none; }   /* no room beside the prices; the typed 24 and the $10 mark carry the gate */
+  .gf .gf__steps { grid-template-columns: minmax(0, 1fr); }
+  .gf .gf__steps li { text-align: left; padding-block: var(--s-1); }
+  .gf .gf__steps li.is-tuned { background: transparent; }
+}

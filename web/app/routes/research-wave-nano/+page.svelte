@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Wave Nano - one model that reads telemetry, a fleet, a fire site, and talks
   // Ported from web/src/research-wave-nano.html (2026-10-29); copy updated 2026-11-19 (founder review).
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -9,7 +10,6 @@
   import OnAir from "#lib/ui/OnAir.svelte";
   import Rail from "#lib/ui/Rail.svelte";
   import WaveFirewatch from "#lib/ui/WaveFirewatch.svelte";
-  import WaveMesh from "#lib/ui/WaveMesh.svelte";
   const facts = content('research-wave-nano.html');
   const head = siteHead({
     title: 'Wave Nano - one model that reads telemetry, a fleet, a fire site, and talks',
@@ -44,11 +44,14 @@
             <OnAir />
             <span class="hero__callsign">WAVE NANO &middot; {@html facts.card('nano.size')} &middot; {@html facts.waveStage('nano')}</span>
           </span>
-          <h1>Wave Nano.</h1>
+          <!-- Plain first paragraph (SITE-SIMPLIFICATION-AUDIT-2026-11-13, fixes 6 and 9). Every
+               number is a card token; the status words are live / in testing / planned. -->
+          <h1>Wave Nano reads many sensors and a camera, and talks.</h1>
           <p class="research-hero__lead">
-            One {@html facts.card('nano.params')} model that reads telemetry, reads a fleet, reads a fire
-            site, and talks. It does everything Wave Pico does, holds a conversation in plain
-            words, and carries a vision module that reads a camera frame.
+            Wave Nano is a {@html facts.card('nano.params')}-parameter model built by RogerAI Labs. It does
+            what Wave Pico does for many machines at once, reads a camera frame for smoke,
+            and answers questions in plain words. Its fire controller and fire vision module are on
+            the network as specialized models, and its weights are not published.
           </p>
           <div class="research-actions research-actions--lead">
             <a class="research-button" href="#measured">What it scores</a>
@@ -61,7 +64,7 @@
           <span class="tint-panel__tag">At a glance</span>
           <dl>
             <div><dt>Status</dt><dd><i class="model-lamp" data-air="{facts.t.waveAir('nano')}" aria-hidden="true"></i>{@html facts.waveStage('nano')}</dd></div>
-            <div><dt>Band</dt><dd>Fire controller and fire vision: on air, as specialized models. Chat: off the market until it passes the release gate.</dd></div>
+            <div><dt>Band</dt><dd>Fire controller and fire vision: on air, as specialized models.</dd></div>
             <div><dt>Size</dt><dd>{@html facts.card('nano.size')} parameters, from scratch</dd></div>
             <div><dt>Vision</dt><dd>{@html facts.card('nano.vlName')}, {@html facts.card('nano.vlSize')} in all</dd></div>
             <div><dt>Gate</dt><dd>answers {@html facts.card('nano.gate-accept')} of real work at {@html facts.card('nano.gate-precision')} precision</dd></div>
@@ -71,31 +74,26 @@
       </div>
     </section>
 
-    <nav class="toc-tuner" data-tuner aria-label="Sections">
-      <div class="wrap toc-tuner__band">
-      <div class="toc-tuner__readout" aria-hidden="true"></div>
-      <ol class="toc-tuner__scale">
-        <li><a class="toc-tuner__st" href="#purpose"><b>§1</b><span class="toc-tuner__name">PURPOSE</span></a></li>
-        <li><a class="toc-tuner__st" href="#conversation"><b>§2</b><span class="toc-tuner__name">TALK</span></a></li>
-        <li><a class="toc-tuner__st" href="#run"><b>§3</b><span class="toc-tuner__name">RUN</span></a></li>
-        <li><a class="toc-tuner__st" href="#measured"><b>§4</b><span class="toc-tuner__name">MEASURED</span></a></li>
-        <li><a class="toc-tuner__st" href="#limits"><b>§5</b><span class="toc-tuner__name">LIMITS</span></a></li>
-        <li><a class="toc-tuner__st" href="#adapter"><b>§6</b><span class="toc-tuner__name">ADAPTER</span></a></li>
-        <li><a class="toc-tuner__st" href="#vision"><b>§7</b><span class="toc-tuner__name">VISION</span></a></li>
-        <li><a class="toc-tuner__st" href="#mesh"><b>§8</b><span class="toc-tuner__name">MESH</span></a></li>
-        <li><a class="toc-tuner__st" href="#wildfire"><b>§9</b><span class="toc-tuner__name">WILDFIRE</span></a></li>
-      </ol>
-      <span class="toc-tuner__needle" aria-hidden="true"></span>
-      </div>
-    </nav>
+    <TocTuner sections={[
+      { id: "purpose", no: "§1", name: "PURPOSE" },
+      { id: "conversation", no: "§2", name: "TALK" },
+      { id: "run", no: "§3", name: "RUN" },
+      { id: "measured", no: "§4", name: "MEASURED" },
+      { id: "limits", no: "§5", name: "LIMITS" },
+      { id: "adapter", no: "§6", name: "ADAPTER" },
+      { id: "vision", no: "§7", name: "VISION" },
+      { id: "wildfire", no: "§8", name: "WILDFIRE" },
+    ]} />
 
     <section class="section" id="purpose">
       <div class="wrap">
         <div class="section__head section__head--left">
           <span class="sectionno">&sect;1 / PURPOSE</span>
-          <h2>The gateway that can also explain itself.</h2>
-          <p>Wave Nano is the second tier of the Wave family: big enough to roll up a fleet
-             and talk about it, small enough for an edge box.</p>
+          <h2>Reads a whole fleet, and explains what it sees.</h2>
+          <p>Wave Nano is the second size of the Wave family: big enough to read many
+             machines at once and talk about them, small enough for a box at the edge of
+             the site. For a fire site it reports four things: the site&rsquo;s state, what
+             to do next, which sensor decided it, and anything that does not add up.</p>
         </div>
         <div class="wm-split">
           <div>
@@ -131,8 +129,7 @@ What are you, and who made you?
 I am Wave Nano, a 1.45-billion-parameter language model built from scratch by
 RogerAI Labs, an American research and infrastructure company headquartered in
 Orange County, California.</pre></div>
-        <p class="wm-aside">Its own answer to that question, from the release checks. It
-           introduces itself as Wave Nano, built by RogerAI Labs.</p>
+        <p class="wm-aside">Its own answer to that question, from the release checks.</p>
       </div>
     </section>
 
@@ -140,12 +137,10 @@ Orange County, California.</pre></div>
       <div class="wrap">
         <div class="section__head section__head--left">
           <span class="sectionno">&sect;3 / RUN</span>
-          <h2>Fire models on air. Chat off.</h2>
-          <p>On 2026-11-20 at 20:27 PT, Wave Nano&rsquo;s fire controller and fire vision module
-             went on the RogerAI market behind market guards, as specialized models, not chat
-             models. Their bands are <code>wave-nano-fire-controller</code> and
-             <code>wave-nano-fire-vision</code>. Nano chat stays off the market until it passes the
-             release gate. Nano&rsquo;s weights are not published. The CLI shows what is on air
+          <h2>Fire models on air.</h2>
+          <p>Wave Nano&rsquo;s fire controller and fire vision module
+             are on the RogerAI market behind market guards, as specialized models. Their bands are <code>wave-nano-fire-controller</code> and
+             <code>wave-nano-fire-vision</code>. Nano&rsquo;s weights are not published. The CLI shows what is on air
              today, Wave Pico included. A caller of the fire controller writes each tick in one
              fixed key order (&sect;6).</p>
           <p>The fire controller, read through its guard on 1,200 ticks of recorded camera
@@ -221,36 +216,21 @@ Orange County, California.</pre></div>
           <figcaption class="fig mono" id="wm-panel-cap">FIG. 3 - The readouts, each on a scale of 0 to 100. Each bar is the score; the red tick marks it.</figcaption>
         </figure>
 
-        <p class="wm-compare"><b>Against Qwen3.5-2B fine-tuned identically:</b>
-           {@html facts.card('nano.cmp-headline')} on fault identification <span class="wm-ref">{@html facts.cardRef('nano.cmp-headline')}</span>,
-           and far better refusal and damage tolerance. The comparator leaks a confident
-           fault on {@html facts.card('nano.cmp-leak')} of out-of-scope input against Nano&rsquo;s
-           {@html facts.card('nano.leak')}, and answers {@html facts.card('nano.cmp-dup')} of duplicated-line frames
-           wrong against Nano&rsquo;s {@html facts.card('nano.dup')}. The comparator was read against the
-           earlier Nano build, under the same protocol.</p>
+        <!-- The comparator paragraph and the public-suite table (FIG. 4 until 2026-11-24) live in the
+             manual, Appendix B6 (#sNano); the page keeps the one-line verdict, the weak result included. -->
+        <p class="wm-compare"><b>On general benchmarks:</b> last in its size class on every task but
+           TruthfulQA, where it sits inside the class range, and at chance on MMLU and GSM8K. The
+           industrial readouts above are where it leads, and against Qwen3.5-2B fine-tuned the same way
+           it reads {@html facts.card('nano.cmp-headline')} on fault identification
+           <span class="wm-ref">{@html facts.cardRef('nano.cmp-headline')}</span>.
+           <a href="/manual.html#sNano">The comparison and the public table, in the manual &rarr;</a></p>
 
-        <figure class="figure figure--plate wm-standard" aria-labelledby="wm-std-cap">
-          <div class="tier-scroll">
-            <table class="data-table">
-              <thead>
-                <tr><th scope="col">Public suite, read on the release build</th><th scope="col">Wave Nano</th><th scope="col">Six open 1 to 2B models, same instrument</th></tr>
-              </thead>
-              <tbody>
-                <tr><th scope="row">Five-task macro (piqa, ARC, WinoGrande, OpenBookQA)</th><td>{@html facts.card('nano.std-macro')}</td><td>{@html facts.card('nano.std-macro-class')}</td></tr>
-                <tr><th scope="row">HellaSwag</th><td>{@html facts.card('nano.std-hellaswag')}</td><td>{@html facts.card('nano.std-hellaswag-class')}</td></tr>
-                <tr><th scope="row">MMLU, 5-shot</th><td>{@html facts.card('nano.std-mmlu')}</td><td>{@html facts.card('nano.std-mmlu-class')}</td></tr>
-                <tr><th scope="row">GSM8K, 5-shot strict</th><td>{@html facts.card('nano.std-gsm8k')}</td><td>{@html facts.card('nano.std-gsm8k-class')} (four measured)</td></tr>
-                <tr><th scope="row">IFEval, prompt-level strict</th><td>{@html facts.card('nano.std-ifeval')}</td><td>{@html facts.card('nano.std-ifeval-class')} (one measured)</td></tr>
-                <tr><th scope="row">TruthfulQA MC2</th><td>{@html facts.card('nano.std-truthfulqa')}</td><td>{@html facts.card('nano.std-truthfulqa-class')}</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <figcaption class="fig mono" id="wm-std-cap">FIG. 4 - The public small-model suite, every row read here on one day on one instrument, nothing quoted from a model card. On this suite Wave Nano is last in its size class on every task but TruthfulQA, where it sits inside the class range, and at chance on MMLU and GSM8K; the industrial readouts above are where it leads. {@html facts.cardRef('nano.std-macro')}.</figcaption>
-        </figure>
-
+        <!-- The measured trail stays on the page, closed by default (2026-11-24): every R-number the page cites, one tap away. -->
         <aside class="wm-footnote" aria-labelledby="wm-notes-head">
-          <span class="research-kicker" id="wm-notes-head">Measured</span>
-          <ol class="wm-notes">{@html facts.cardNotes('nano')}</ol>
+          <details class="wm-notes__fold">
+            <summary><span class="research-kicker" id="wm-notes-head">Measured</span> <span class="wm-notes__hint">where every number comes from</span></summary>
+            <ol class="wm-notes">{@html facts.cardNotes('nano')}</ol>
+          </details>
         </aside>
       </div>
     </section>
@@ -260,8 +240,8 @@ Orange County, California.</pre></div>
         <div class="section__head section__head--left">
           <span class="sectionno">&sect;5 / LIMITS</span>
           <h2>Where it stops.</h2>
-          <p>Said plainly. One of them, sizing arithmetic without the calculator tool, scores
-             {@html facts.card('nano.fd-sizing')} on the fire-decision items, which are simulated fire scenarios
+          <p>Sizing arithmetic without the calculator tool scores
+             {@html facts.card('nano.fd-sizing')} on the fire-decision items, on different simulated fire scenarios
              with rule-checked answers <span class="wm-ref">{@html facts.cardRef('nano.fd-sizing')}</span>.</p>
         </div>
         <ul class="wm-limits">{@html facts.cardList('nano.limits')}</ul>
@@ -273,10 +253,12 @@ Orange County, California.</pre></div>
         <div class="section__head section__head--left">
           <span class="sectionno">&sect;6 / ADAPTER</span>
           <h2>Two fire adapters, routed per request.</h2>
-          <p>Each adapter is selected per request on the same base, so the base&rsquo;s
-             industrial numbers are untouched. With an adapter switched off, the base reads
-             fire at {@html facts.card('nano.fire-off')} on the same simulated fire scenarios: the adapter
-             is the fire reading.</p>
+          <!-- The adapter definition is the one sentence shared by every page that uses the word. -->
+          <p>An adapter is a small add-on file, trained for one job, that plugs into a Wave
+             model without changing it. Each adapter here is selected per request on the same
+             base, so the base&rsquo;s industrial numbers are untouched. With an adapter switched
+             off, the base reads fire at {@html facts.card('nano.fire-off')} on the same simulated
+             fire scenarios: the adapter is the fire reading.</p>
         </div>
 
         <h3 class="wm-subhead">The fire sensor-reading adapter.</h3>
@@ -340,11 +322,10 @@ Orange County, California.</pre></div>
           <h2>Nano-VL: one camera frame, confirmed for smoke.</h2>
           <p>{@html facts.card('nano.vlName')} is Wave Nano with a vision encoder and a connector,
              {@html facts.card('nano.vlSize')} parameters in all, counted from the tensors of the two
-             shipped files (the text model and the vision projector). It reads
-             single frames: one picture in, smoke or no smoke out. The camera detector
-             detects; this module confirms and describes. The numbers are the shipped build; a
-             second training seed of the same recipe read within 0.01 AUC of it on every list
-             (R.F75 addendum 4, 2026-10-26).</p>
+             shipped files. It reads single frames: one picture in, smoke or no smoke out. The camera
+             detector detects; this module confirms and describes. A second training seed of the same
+             recipe read within 0.01 AUC of it on every list (R.F75 addendum 4, 2026-10-26).
+             <a href="/manual.html#sNano-vision">How it was read &rarr;</a></p>
         </div>
         <ol class="wm-readouts">
           <li class="wm-readout wm-readout--range" style="--lo:{facts.t.cardLo('nano.vl-auc')};--hi:{facts.t.cardHi('nano.vl-auc')};--max:1"><span class="wm-readout__label">Smoke reading, held-out wide-area camera tiles, AUC</span><b>{@html facts.card('nano.vl-auc')}</b><span class="wm-readout__unit">scale 0 to 1</span><i class="wm-meter" aria-hidden="true"></i><span class="wm-ref">{@html facts.cardRef('nano.vl-auc')}</span></li>
@@ -353,11 +334,6 @@ Orange County, California.</pre></div>
           <li class="wm-readout wm-readout--range" style="--lo:{facts.t.cardLo('nano.vl-confirm')};--hi:{facts.t.cardHi('nano.vl-confirm')};--max:1"><span class="wm-readout__label">Confirmer on the camera detector&rsquo;s proposed crop, AUC</span><b>{@html facts.card('nano.vl-confirm')}</b><span class="wm-readout__unit">scale 0 to 1</span><i class="wm-meter" aria-hidden="true"></i><span class="wm-ref">{@html facts.cardRef('nano.vl-confirm')}</span></li>
         </ol>
         <div class="device-contract">
-          <p><b>How it was read.</b> On held-out frames, in float32, the numerics a server
-             computes in. A wide-area frame is read as tiles; one full frame reads
-             {@html facts.card('nano.vl-full')} where its tiles read {@html facts.card('nano.vl-auc')}. Served through
-             our llama.cpp branch, it reads {@html facts.card('nano.vl-served')} on the second network it learned on and
-             a full wide-area frame <span class="wm-ref">{@html facts.cardRef('nano.vl-served')}</span>.</p>
           <p><b>With the detector.</b> The camera detector plus this confirmer reads
              {@html facts.card('nano.vl-pair')} false alarms, where the detector alone has
              {@html facts.card('nano.vl-det')} at the same recall
@@ -365,24 +341,22 @@ Orange County, California.</pre></div>
           <p><b>A module, not a watch.</b> Nano-VL reads single frames. The full watch design
              adds persistence across frames and a per-camera baseline on top, and those are
              not part of these numbers.</p>
-          <p><b>What it needs.</b> Our llama.cpp branch, until three fixes are upstream.</p>
         </div>
         <p class="wm-credit">{@html facts.card('nano.vlCredit')}</p>
       </div>
     </section>
 
-    <WaveMesh no='8' fig='4' parent='Wave Nano' />
-
-    <WaveFirewatch no='9' fig='5' />
+    <WaveFirewatch no='8' fig='4' />
 
     <section class="section research-closing">
       <div class="wrap">
         <h2>Where Wave Nano sits.</h2>
-        <p>The gateway tier of a family that runs from a board beside one machine to a
+        <p>The second size of a family that runs from a board beside one machine to a
            datacenter. Wave Pico is the size below it.</p>
         <div class="research-actions research-actions--lead">
           <a class="research-button" href="/research-wave-pico.html">Wave Pico</a>
           <a class="research-button" href="/research-wave-family.html">The Wave family</a>
+          <a class="research-button" href="/research-models.html#mesh">How the mesh works</a>
           <a class="research-button" href="/research-models.html">Models and status</a>
         </div>
       </div>

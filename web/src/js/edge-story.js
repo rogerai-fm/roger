@@ -108,7 +108,9 @@
   function setScreenA11y(on) {
     if (!screenEl) return;
     screenEl.setAttribute("aria-pressed", String(on));
-    screenEl.setAttribute("aria-label", on ? "Turn the Roger Edge set off" : "Turn the Roger Edge set on");
+    // the screen's accessible name is its own content (the film's label and the story word), so a
+    // sighted reader and a screen reader get the same name (WCAG 2.5.3); the action is the title
+    screenEl.setAttribute("title", on ? "Turn the Roger Edge set off" : "Turn the Roger Edge set on");
   }
 
   /* ---- CRT power-on/off: the screen's HEIGHT is the whole effect ---- */
@@ -321,7 +323,7 @@
       muteBtn.setAttribute("aria-pressed", String(!video.muted));
       muteBtn.classList.toggle("is-unmuted", !video.muted);
       if (muteLabel) muteLabel.textContent = video.muted ? "sound off" : "sound on";
-      muteBtn.setAttribute("aria-label", video.muted ? "Turn the film's sound on" : "Turn the film's sound off");
+      muteBtn.setAttribute("title", video.muted ? "Turn the film's sound on" : "Turn the film's sound off");
     });
   }
 })();

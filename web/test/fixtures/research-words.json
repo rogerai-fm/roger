@@ -39,8 +39,8 @@
   ]
  },
  "broadcasts-free-chatgpt-alternative.html": {
-  "sha": "75bed510c05f0131c33f3622152dff7c2043a0fdc96355aef2e5aa09ad06c3b2",
-  "length": 3753,
+  "sha": "b11d81321c1711cb907cda614ae16b91af2f62902bfd3eb71c751041a6f91e69",
+  "length": 3894,
   "hrefs": [
    "/broadcasts.html",
    "/broadcasts-run-local-llm.html",
@@ -50,8 +50,8 @@
   ]
  },
  "broadcasts-how-llms-work.html": {
-  "sha": "2abd109818520903db95ecf3d4616c806d9211bc279818f46d0c240cdaa840fb",
-  "length": 11807,
+  "sha": "65e986dd9e729fdc44935ce97fe0bc6cf1b55ae8662709d73073d13702936610",
+  "length": 11740,
   "hrefs": [
    "/broadcasts.html",
    "/research-wave-family.html",
@@ -102,8 +102,8 @@
   ]
  },
  "broadcasts-run-a-tower.html": {
-  "sha": "24bd6a5c0e6b491e7c1e6832a2fdf6994e9ce9f7ce7e921e3207a95fd9eb833a",
-  "length": 12198,
+  "sha": "cee4a60a040c4d95e17b312307eab856b777221843fe041c7ce606d52593cfab",
+  "length": 12195,
   "hrefs": [
    "/broadcasts.html",
    "/payouts.html",
@@ -123,18 +123,19 @@
   ]
  },
  "broadcasts-share-gpu-earn.html": {
-  "sha": "0ef742c52e2fafb97f872b12ad90bc40c1c08a7b167518895afc4db3e3b81ba7",
-  "length": 5012,
+  "sha": "e4a52bcef0f1c9d160723d9dcdd31ca1169d6ae2ff420256a9441ce74696d086",
+  "length": 5779,
   "hrefs": [
    "/broadcasts.html",
    "/models.html",
+   "/privacy.html#prompt-content-safety",
    "/payouts.html",
    "/manual.html"
   ]
  },
  "broadcasts-sharing-your-gpu-is-safe.html": {
-  "sha": "6e91c3bdf0b89708d86816d66234cd01a5aa9fdd0718144d5c8786e6803bdbae",
-  "length": 7336,
+  "sha": "c86b7d2f07e591347535ca420de129e0f80b515694bbc0c9a3a171a4d3cd4a31",
+  "length": 7510,
   "hrefs": [
    "/broadcasts.html",
    "/security.html"
@@ -159,8 +160,8 @@
   ]
  },
  "broadcasts.html": {
-  "sha": "fd641ce1115dcb9fcd87dfdee7e4216c2bc08f298d9305b3fdbae086729a51d0",
-  "length": 4583,
+  "sha": "2d30be15adc25ce3e15bcfdd68096ddc87f628c58f577e83eaa8122454676a29",
+  "length": 4582,
   "hrefs": [
    "/broadcasts-how-llms-work.html",
    "/broadcasts-jev-vs-wave.html",
@@ -180,9 +181,24 @@
    "/broadcasts-independence-v5.html"
   ]
  },
+ "research-custom-tuning.html": {
+  "sha": "7d59918e6036fb58d2ab28a95feac07227fbb110cd2f46f9d3fef310621131a2",
+  "length": 4625,
+  "hrefs": [
+   "/research.html",
+   "/manual.html#sTune-how",
+   "/manual.html#sTune-files",
+   "mailto:labs@rogerai.fm?subject=Wave%20on%20site",
+   "/manual.html#sTune-where",
+   "/manual.html#sTune-measured",
+   "/manual.html#sTune-data",
+   "mailto:labs@rogerai.fm?subject=Custom%20tuning",
+   "/research.html"
+  ]
+ },
  "research-hardware.html": {
-  "sha": "a104670e5104045e7f7f8deb0b6fe090979c0e960676225b1844be59edd4e44b",
-  "length": 8505,
+  "sha": "982935319fddea77cd2d7d0d3964fc9fcaf62889294b7b6088d0478262f5b107",
+  "length": 7503,
   "hrefs": [
    "/research.html",
    "/research-models.html",
@@ -207,8 +223,8 @@
   ]
  },
  "research-industry.html": {
-  "sha": "14a4dea3e650b308b3382bd7f1e65a353bbbbafe610480cadca059dd117b983e",
-  "length": 8938,
+  "sha": "b7a4f1810472523161ef7117cb8c179a18ae11756024836c1e7c9347cf2ff2f4",
+  "length": 9205,
   "hrefs": [
    "/research.html",
    "#market-oilgas",
@@ -221,6 +237,7 @@
    "#market-defense",
    "#market-wildfire",
    "https://unsplash.com/photos/u13zBF4r56A",
+   "/research-oil-gas.html",
    "https://unsplash.com/photos/VuR4oHZ3ucc",
    "https://unsplash.com/photos/8gr6bObQLOI",
    "https://unsplash.com/photos/vWUOx-3r7SY",
@@ -228,6 +245,7 @@
    "https://unsplash.com/photos/6wSevhW1Dzc",
    "https://unsplash.com/photos/QTP8UKW_PgI",
    "https://unsplash.com/photos/8QZGzUbatJU",
+   "/research-wildfire.html",
    "/assets/edge/hero-fd.mp4",
    "/research-models.html#roger-edge",
    "mailto:labs@rogerai.fm?subject=Industrial%20pilot",
@@ -236,8 +254,8 @@
   ]
  },
  "research-models.html": {
-  "sha": "05bc2680914fc9fba4a28a6602c23ca982b78fa4dac53be8d26d0387dfcbd5ec",
-  "length": 6467,
+  "sha": "85b8325c91d86f2a62caeb9b6939c27a3d8aa53a9d8c288acfb100b22b0b7ea0",
+  "length": 9044,
   "hrefs": [
    "/research.html",
    "/research-wave-pico.html",
@@ -255,36 +273,56 @@
    "/research-wave-family.html#infinite"
   ]
  },
+ "research-oil-gas.html": {
+  "sha": "e4a70703df732b5ce6f46d89be83b436ed8f313285f0e4238ed3654a60fd236e",
+  "length": 7884,
+  "hrefs": [
+   "/research-industry.html",
+   "/research-custom-tuning.html",
+   "/research-custom-tuning.html#files",
+   "/research-custom-tuning.html#how",
+   "/research-hardware.html",
+   "/research-custom-tuning.html#files",
+   "/research-wave-family.html",
+   "/research-industry.html#envelope",
+   "mailto:labs@rogerai.fm?subject=Oil%20and%20gas"
+  ]
+ },
  "research-wave-family.html": {
-  "sha": "0ff2c7c00df0ff2e0c6b009870be57442260fbafdda30cc9ccc63cb3eb67432c",
-  "length": 17313,
+  "sha": "5d0c8ed4bafd3ef8c71da3f9237d2cc8250d49e6af901e42d9d9dff0d9602778",
+  "length": 8596,
   "hrefs": [
    "/research.html",
    "#infinite",
    "/research-wave-pico.html",
    "/research-wave-nano.html",
    "/research-industry.html#devices",
+   "/manual.html#sFamily-built",
+   "/manual.html#sFamily-jobs",
    "/playbox.html#factory",
    "/research.html#models",
    "/broadcasts.html"
   ]
  },
  "research-wave-nano.html": {
-  "sha": "1c0c8fe099b031b1065d9741b0f7bdf205ad5a8303fda9a648d94074237b07b8",
-  "length": 18891,
+  "sha": "251b8421d5690e99a1cf618e144e9b047f34ad2193733621a284279a48109c51",
+  "length": 16141,
   "hrefs": [
    "/research-models.html",
    "#measured",
    "#vision",
    "/research-wave-pico.html",
+   "/manual.html#sNano",
+   "/manual.html#sNano-vision",
    "/research-wave-pico.html",
    "/research-wave-family.html",
+   "/research-models.html#mesh",
    "/research-models.html"
   ]
  },
  "research-wave-pico.html": {
-  "sha": "727a8596f351af7f502dcf398fbd37f75455e52df3fb569a62e53c57340b2c21",
-  "length": 8586,
+  "sha": "3d12e2982870d1399e24df9dc7ebd2b8243d4f67cd4f4466e1c21058a0f75acf",
+  "length": 7150,
   "hrefs": [
    "/research-models.html",
    "#run",
@@ -292,12 +330,27 @@
    "/research-wave-nano.html",
    "/research-wave-nano.html",
    "/research-wave-family.html",
+   "/research-models.html#mesh",
    "/research-models.html"
   ]
  },
+ "research-wildfire.html": {
+  "sha": "6bf85ca03985984020e5154a426b508492c409634b1951fb9d1a6543952a35d6",
+  "length": 7866,
+  "hrefs": [
+   "/research-industry.html",
+   "/research-custom-tuning.html",
+   "/research-custom-tuning.html#files",
+   "/research-industry.html#industry",
+   "/research-wave-nano.html#adapter",
+   "/research-custom-tuning.html",
+   "/research-wave-nano.html",
+   "/research-industry.html"
+  ]
+ },
  "research.html": {
-  "sha": "bfa12d345668f47581594d306f0c870d8a3f6a7177db9cd94d412b44548521ed",
-  "length": 5311,
+  "sha": "5af18b9c7192a06e7f73a61ee15f8815f3938cc0d12fe70095a4948a72f4dd58",
+  "length": 5351,
   "hrefs": [
    "/research-models.html",
    "/research-wave-pico.html",
@@ -305,6 +358,7 @@
    "/research-wave-family.html",
    "/research-hardware.html",
    "/research-industry.html",
+   "/research-custom-tuning.html",
    "/broadcasts.html",
    "/models.html",
    "/research-models.html",

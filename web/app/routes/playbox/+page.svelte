@@ -54,8 +54,9 @@
              (layout audit 2026-08-17: "the instrument does not begin until below
              the fold"); the blurbs carry one idea now and the labels do the rest. -->
         <p class="pg-hero__sub" data-reveal data-reveal-delay="120" id="pgHeroConsole">
-          Load a model like a cassette and press play. <b>LIVE</b> tapes are hosted models
-          answering over the network; everything else on the shelf says plainly what it is.
+          Three demos; only this one, the Console, talks to a live model. Pick a model and send it
+          text, voice, an image or a tool request. <b>LIVE</b> tapes are hosted models answering
+          over the network; recorded ones replay a saved result and say so.
         </p>
         <p class="pg-hero__sub" id="pgHeroMesh" hidden>
           RogerAI builds <b>LLMs for machines</b>. Wire a device to a model, play the signal,
@@ -86,14 +87,14 @@
     <div class="wrap pg-modes pg-deckswitch">
       <span class="pg-deckswitch__legend" id="pgDeckLegend">
         <span class="pg-deckswitch__no" aria-hidden="true">SEL</span>
-        Three decks on one instrument - pick one
+        Three demos on one page; only the Console talks to a live model
       </span>
       <div class="pg-modes__tabs" role="tablist" aria-labelledby="pgDeckLegend">
         <button class="pg-mode" id="pgModeConsole" type="button" role="tab"
                 aria-selected="true" aria-controls="pgConsoleView" tabindex="0">
           <span class="pg-mode__lamp" aria-hidden="true"></span>
           <span class="pg-mode__face">
-            <b>CONSOLE</b><span>load a model, press play</span>
+            <b>CONSOLE</b><span>chat with a live model on the network</span>
             <em class="pg-mode__hint">chat &middot; voice &middot; image &middot; tools &middot; embeds</em>
           </span>
         </button>
@@ -101,7 +102,7 @@
                 aria-selected="false" aria-controls="pgMeshView" tabindex="-1">
           <span class="pg-mode__lamp" aria-hidden="true"></span>
           <span class="pg-mode__face">
-            <b>WAVE MESH</b><span>devices, wire formats, the mesh that reads them</span>
+            <b>WAVE MESH</b><span>replay recorded sensor data through Wave models</span>
             <em class="pg-mode__hint">sensors &rarr; models &rarr; what they said</em>
           </span>
         </button>
@@ -109,7 +110,7 @@
                 aria-selected="false" aria-controls="pgFactoryView" tabindex="-1">
           <span class="pg-mode__lamp" aria-hidden="true"></span>
           <span class="pg-mode__face">
-            <b>FACTORY</b><span>the cookie line: run it, then automate it</span>
+            <b>FACTORY</b><span>a game: keep three machines running, then automate them</span>
             <em class="pg-mode__hint">read &rarr; detect &rarr; explain &rarr; automate</em>
           </span>
         </button>
@@ -292,8 +293,7 @@
                 <p class="dk__surfnote"><b>Wave Nano</b> is the brain in these devices, the
                   gateway tier of the Wave Spectrum. The tier targets 0.8&ndash;1.5B. Its
                   1.45B scratch build has two fire models on air, the fire controller and
-                  fire vision, as specialized models, not chat models. Nano chat stays off the
-                  market until it passes the release gate.</p>
+                  fire vision, as specialized models.</p>
                 <p class="dk__surfnote"><b>Wave Pico</b> is the
                   edge tier that runs on a Pi. It is scratch-trained at 293M, on air as
                   the free band wave-pico-293m, and it runs with no GPU.</p>
@@ -362,6 +362,7 @@
                         <stop offset="1" class="dk-c__shellbottom"/>
                       </linearGradient>
                     </defs>
+                    <ellipse class="dk-c__halo" cx="160" cy="203" rx="150" ry="9"/>
                     <rect class="dk-c__body" x="4" y="4" width="312" height="192" rx="14"/>
                     <path class="dk-c__bevel" d="M19 10h282a9 9 0 0 1 9 9v159a9 9 0 0 1-9 9H19a9 9 0 0 1-9-9V19a9 9 0 0 1 9-9Z"/>
                     <rect class="dk-c__label" x="24" y="18" width="272" height="58" rx="6"/>

@@ -205,6 +205,20 @@
 /* usecase-strip (:23) jumps here by fragment; without this the sticky 64px .nav
    (base.css) covers the card's bleed photo. Same convention as manual.css/wave-factory.css. */
 .deployment-grid article[id] { scroll-margin-top: 88px; }
+/* A card with a page of its own (oil and gas, 2026-11-21): the small mono link at the foot
+   of the card stretches over the whole card (::after), so the card is the door; the photo
+   credit sits above it and stays its own link. The red rule under the card answers the hover. */
+.deployment-grid article:has(> .deployment-grid__more) { position: relative; }
+.deployment-grid__more {
+  display: inline-block; margin-top: var(--s-3);
+  font-size: var(--t-xs); font-weight: var(--weight-semi); letter-spacing: 0.04em;
+  color: var(--live-text); text-decoration: none;
+}
+.deployment-grid__more::after { content: ""; position: absolute; inset: 0; }
+.deployment-grid__more:focus-visible { outline: 2px solid var(--live); outline-offset: 2px; }
+.deployment-grid article:has(> .deployment-grid__more:hover) > b,
+.deployment-grid article:has(> .deployment-grid__more:focus-visible) > b { color: var(--live-text); }
+.deployment-grid article:has(> .deployment-grid__more) .photo-credit { z-index: 1; }
 /* Nine markets (research-industry) close 3x3 on the base three across. At two across
    (the 820px breakpoint below) the ninth card takes the whole row rather than sit
    beside an empty cell, and its picture goes wide so the full-row card is not a tall
@@ -381,15 +395,6 @@
   .capability__scores li:last-child { border-bottom: 0; }
 }
 
-.tier-matrix { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
-.tier-matrix caption { color: var(--ink-500); font-size: var(--t-sm); text-align: left; padding-bottom: var(--s-4); }
-.tier-matrix th, .tier-matrix td { padding: var(--s-3) var(--s-4); text-align: left; vertical-align: top; border-bottom: 1px solid var(--hairline); }
-.tier-matrix tbody tr:last-child th, .tier-matrix tbody tr:last-child td { border-bottom: 0; }
-.tier-matrix tbody th { color: var(--ink-900); font-weight: 500; }
-.tier-matrix td { color: var(--ink-500); }
-.tier-matrix .tier-cell { color: var(--ink-900); font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .04em; white-space: nowrap; }
-.tier-scroll { overflow-x: auto; border-block: 2px solid var(--ink-900); background: var(--paper); }
-.tier-scroll table { min-width: 640px; }
 
 @media (max-width: 820px) {
   .capability-split { grid-template-columns: 1fr; }
@@ -591,65 +596,115 @@ html.js .scope__modes { display: inline-flex; border: 1px solid var(--hairline-2
 }
 }
 
-/* ---------- where the box sits ----------------------------------------------
-   An OT security team asks "what level does it run at" before anything else, and
-   prose cannot answer it - the answer IS a position in a hierarchy. Levels stack
-   the conventional way, process at the bottom, enterprise at the top. */
+/* ---------- where the box sits (a building cut open in the isometric hand, 2026-11-22) ------------
+   An OT security team asks "what level does it run at" before anything else, and prose cannot
+   answer it: the answer IS a position in a hierarchy. Drawn by computer-scientist/article/
+   fig_purdue_gen.py in the shared hand (components.css .iso__*): six floor plates stacked the
+   Purdue way, process on the ground, enterprise on the roof, the DMZ a thin plate drawn light
+   because it is a boundary and not a place. The Wave console stands on L3 beside the historian;
+   its riser leaves its top, passes the DMZ and the roof and enters the enterprise block: outbound,
+   and only outbound. A second riser rises from the supervisory screen on L2 into the console's
+   floor: reads. Roger Edge stands on the ground floor apart from the sensors, on a short mast,
+   wired to nothing; its dashed way runs out past the end of the stack, up, and along L3 to the
+   console: escalates, intermittent. Safety stands on its own ground across a clear gap with the
+   heavier silhouette and a lamp that is not lit. Two packets ride CSS offset-path on the risers
+   (paths printed by the generator's --css) and fade where a plate hides the riser; frozen, each
+   parks on a stretch in plain view. The level names are HTML in a column at the left of the
+   stage, the names and tags HTML over it; under 560px the column becomes a list under the
+   picture and the sub-lines and tags go, the caption carrying their words. */
 .purdue { margin: var(--s-6) 0 0; }
-.purdue__svg { display: block; width: 100%; height: auto; }
-/* in the diagram scroll box: never narrower than the width where its 9px labels read at 11px */
-.purdue { --diagram-min: 880px; }
+.purdue__stage { --purdue-col: 31%; padding-bottom: 2.6em; }
+.purdue__levels {
+  position: absolute; left: var(--s-2); top: var(--s-3); bottom: 2.6em; width: calc(var(--purdue-col) - var(--s-2));
+  margin: 0; padding: 0; list-style: none;
+}
+.purdue__level {
+  position: absolute; right: var(--s-3); transform: translateY(-60%); white-space: nowrap; text-align: right;
+  font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .04em; color: var(--ink-500);
+}
+.purdue__lv { color: var(--ink-900); font-weight: var(--weight-semi); }
+.purdue__level--l54 { top: 12.9%; }
+.purdue__level--dmz { top: 18.4%; }
+.purdue__level--l3 { top: 31.1%; }
+.purdue__level--l2 { top: 41.7%; }
+.purdue__level--l1 { top: 50.3%; }
+.purdue__level--l0 { top: 59%; }
+.purdue__pic { position: relative; margin-left: var(--purdue-col); }
+/* The DMZ is a boundary, not a place things live in: the light edge. Our two boxes and safety keep
+   the full edge; safety heavier still, since it is the one thing drawn to be out of reach. */
+.purdue__dmz { --edge: .35; }
+.purdue__us, .purdue__edge { --edge: 1.1; }
+.purdue__sis { --edge: 1.25; }
+.purdue__riser { stroke-opacity: .55; }
+/* Escalation runs the other way, up from the device, and it is intermittent by design (only what
+   the tiny model cannot classify), so it is dashed. */
+.purdue__esc { stroke-dasharray: 3 2.5; }
+.purdue__name--us { left: 49.2%; top: 41.7%; color: var(--ink-900); }
+.purdue__sub--us { left: 49.2%; top: 44.5%; }
+.purdue__name--edge { left: 4.0%; top: 73.7%; color: var(--ink-900); }
+.purdue__sub--edge { left: 4.0%; top: 76.6%; }   /* under the ground floor's front edge, not across it */
+.purdue__tag--out { left: 48.6%; top: 28.0%; }
+.purdue__tag--read { left: 47.4%; top: 55.6%; }
+.purdue__tag--esc { right: 97.3%; top: 35.0%; }
+.purdue__name--sis { left: 66.1%; width: 30%; top: 93.0%; text-align: center; color: var(--ink-900); }
+.purdue__sub--sis { left: 66.1%; width: 30%; top: 96.6%; text-align: center; }
+.purdue__sub--never { top: 100.2%; color: var(--live-text); }
 
-.purdue__levels rect { fill: var(--paper-2); stroke: var(--hairline-2); stroke-width: 1; }
-.purdue__levels text {
-  fill: var(--ink-500); font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
+/* Outbound is the claim worth drawing, so its packet is the red one. Each packet runs its riser
+   over the first 60% of the loop and fades where the riser passes inside a plate: the out riser
+   is hidden under the DMZ (30 to 50% of its length) and inside the roof plate (from 77%), the
+   read riser inside the L3 plate (from 67%). */
+.purdue__pkt { fill: var(--ink-900); opacity: 0; }
+.purdue__pkt--out { fill: var(--live); }
+.purdue__pkt--read {
+  offset-path: path("M79 0.3 L79 -7.5");
+  animation: purdue-read calc(var(--motion) * 5s) linear infinite;
 }
-.purdue__lv { fill: var(--ink-900); font-weight: var(--weight-semi); }
-/* The DMZ is a boundary, not a place things live in. */
-.purdue__dmz rect { fill: none; stroke-dasharray: 4 3; }
-
-.purdue__us rect { fill: var(--paper); stroke: var(--live); stroke-width: 1.5; }
-.purdue__us text {
-  fill: var(--ink-900); font-family: var(--font-mono); font-size: 12px;
-  font-weight: var(--weight-semi); letter-spacing: .1em; text-anchor: middle;
+.purdue__pkt--out {
+  offset-path: path("M80 -22.2 L80 -43.4");
+  animation: purdue-out calc(var(--motion) * 5s) linear infinite calc(var(--motion) * 2.2s);
 }
-.purdue__us .purdue__sub {
-  fill: var(--ink-500); font-size: 10px; font-weight: 400; letter-spacing: .04em;
+@keyframes purdue-read {
+  0% { offset-distance: 0%; opacity: 0; }
+  5% { opacity: 1; }
+  38% { opacity: 1; }
+  44% { opacity: 0; }
+  60%, 100% { offset-distance: 100%; opacity: 0; }
 }
-
-/* Roger Edge is ours too, so it keeps the red frame - but it is a classifier on its
-   own sensor node, not the L3 model moved downward, so it is drawn narrower and its
-   subtitle carries the distinction. It deliberately sits clear of the L0/L1 bands: it
-   is wired to nothing in the control system. */
-.purdue__edge rect { fill: var(--paper); stroke: var(--live); stroke-width: 1.5; }
-.purdue__edge text {
-  fill: var(--ink-900); font-family: var(--font-mono); font-size: 11px;
-  font-weight: var(--weight-semi); letter-spacing: .1em; text-anchor: middle;
+@keyframes purdue-out {
+  0% { offset-distance: 0%; opacity: 0; }
+  4% { opacity: 1; }
+  17% { opacity: 1; }
+  21% { opacity: 0; }
+  30% { opacity: 0; }
+  33% { opacity: 1; }
+  42% { opacity: 1; }
+  46% { opacity: 0; }
+  60%, 100% { offset-distance: 100%; opacity: 0; }
 }
-.purdue__edge .purdue__sub {
-  fill: var(--ink-500); font-size: 9px; font-weight: 400; letter-spacing: .04em;
+@media (prefers-reduced-motion: reduce) {
+  .purdue__pkt { animation: none !important; opacity: 1; }
+  .purdue__pkt--read { offset-distance: 35%; }
+  .purdue__pkt--out { offset-distance: 16%; }
 }
-
-.purdue__flow path { fill: none; stroke: var(--ink-400); stroke-width: 1.5; }
-/* Outbound is the claim worth drawing, so it is the only saturated line here. */
-.purdue__out { stroke: var(--live) !important; }
-/* Escalation runs the other way - up from the device - and it is intermittent by
-   design (only what the tiny model cannot classify), so it is dashed. */
-.purdue__esc { stroke-dasharray: 4 3; }
-.purdue__tag--esc { text-anchor: end; }
-.purdue__tag {
-  fill: var(--ink-400); font-family: var(--font-mono); font-size: 9px;
-  letter-spacing: .08em; text-transform: uppercase;
+/* below a full stage the level column is narrower than its longest line (about 270px against
+   234 to 254): the levels become the list under the picture, as on a phone, and the picture takes
+   the width, keeping a margin for the escalation tag at its left; the names and tags stay */
+@media (max-width: 1199px) {
+  .purdue__stage { display: flex; flex-direction: column; }
+  .purdue__levels {
+    position: static; order: 2; width: auto; margin-top: var(--s-5);
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-1) var(--s-3);
+  }
+  .purdue__level { position: static; transform: none; text-align: left; white-space: normal; }
+  .purdue__pic { margin-left: 6.5em; }
 }
-
-/* Safety sits outside the reach of everything above it, and is drawn that way. */
-.purdue__sis rect { fill: none; stroke: var(--ink-900); stroke-width: 1.5; }
-.purdue__sis text {
-  fill: var(--ink-900); font-family: var(--font-mono); font-size: 11px;
-  font-weight: var(--weight-semi); letter-spacing: .08em; text-anchor: middle;
+@media (max-width: 560px) {   /* the phone: the list form above, smaller; the sub-lines and tags go, the caption carries them */
+  .purdue__stage { padding-top: var(--s-3); padding-bottom: 2.4em; }
+  .purdue__level { font-size: var(--t-micro); }
+  .purdue__pic { margin-left: 0; }
+  .purdue__sub, .purdue__tag { display: none; }
 }
-.purdue__sis .purdue__sub { fill: var(--ink-500); font-size: 9px; font-weight: 400; }
-.purdue__never { fill: var(--live-text) !important; }
 
 .purdue figcaption {
   margin-top: var(--s-4); color: var(--ink-500);
@@ -696,9 +751,16 @@ main section[id] { scroll-margin-top: 72px; }
    the stock industry photography set in mono so the ink-and-one-red palette holds
    (the hardware board shots keep their colour: they identify real products) */
 .deployment-grid__shot img { filter: grayscale(1) contrast(1.04); }
+/* a card with a page of its own (oil and gas, wildfire) answers the pointer in colour: the
+   photo lifts out of mono while the card is hovered or its link has focus (founder 2026-11-24).
+   Cards without a page stay mono, so colour means "this one opens". */
+.deployment-grid article:has(> .deployment-grid__more) .deployment-grid__shot img { transition: filter var(--d-3, .3s) ease; }
+.deployment-grid article:has(> .deployment-grid__more):hover .deployment-grid__shot img,
+.deployment-grid article:has(> .deployment-grid__more:focus-visible) .deployment-grid__shot img { filter: none; }
+@media (prefers-reduced-motion: reduce) { .deployment-grid article:has(> .deployment-grid__more) .deployment-grid__shot img { transition: none; } }
 
 .model-list { border-top: 0; }
-.capability, .tier-scroll { border-block: 0; border: 1px solid var(--hairline); border-radius: var(--panel-r); }
+.capability { border-block: 0; border: 1px solid var(--hairline); border-radius: var(--panel-r); }
 .model-roadmap, .model-naming { border-radius: 0 var(--r-xl) var(--r-xl) 0; }
 
 /* inside an inset band the tinted cards step to the raised ground */
@@ -776,3 +838,6 @@ main .band--inset :is(.developer-step, .deployment-grid article, .research-onwar
 .gate__way--good { border: 2px solid var(--ink-900); }
 .gate .fig { margin-top: var(--s-4); }
 @media (max-width: 560px) { .gate__way { padding: var(--s-3); } }
+
+/* a quiet note under a figure or a block: the Wave model pages and the mesh on research-models (2026-11-24, from wave-model.css) */
+.wm-aside { max-width: 68ch; margin: var(--s-6) 0 0; color: var(--ink-500); font-size: var(--t-sm); line-height: var(--lh-body); }

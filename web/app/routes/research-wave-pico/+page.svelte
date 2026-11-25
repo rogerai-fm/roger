@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // Wave Pico - a sensor reader that refuses what it cannot read
   // Ported from web/src/research-wave-pico.html (2026-10-29); copy updated 2026-11-19 (founder review).
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -9,7 +10,6 @@
   import OnAir from "#lib/ui/OnAir.svelte";
   import Rail from "#lib/ui/Rail.svelte";
   import WaveFirewatch from "#lib/ui/WaveFirewatch.svelte";
-  import WaveMesh from "#lib/ui/WaveMesh.svelte";
   const facts = content('research-wave-pico.html');
   const head = siteHead({
     title: 'Wave Pico - a sensor reader that refuses what it cannot read',
@@ -42,12 +42,15 @@
             <OnAir />
             <span class="hero__callsign">WAVE PICO &middot; {@html facts.card('pico.size')} &middot; {@html facts.waveStage('pico')}</span>
           </span>
-          <h1>Wave Pico.</h1>
+          <!-- Plain first paragraph (SITE-SIMPLIFICATION-AUDIT-2026-11-13, fixes 6 and 9). Every
+               number is a card token; the status words are live / in testing / planned. -->
+          <h1>Wave Pico reads one sensor and says when it is not sure.</h1>
           <p class="research-hero__lead">
-            A {@html facts.card('pico.params')} sensor reader that refuses what it cannot read. It reads
-            one telemetry channel, names what is wrong with the instrument or the process,
-            and when it is not sure it says so, as a record a person or a larger model can
-            act on.
+            Wave Pico is a {@html facts.card('pico.params')} model built by RogerAI Labs. It reads one
+            stream of machine data, names the fault or the process state, and when it is not
+            confident it hands the reading to a person or a bigger model instead of guessing.
+            It runs on a Raspberry Pi with no GPU. It is live and free on the network today;
+            the weights are not downloadable, you use it through the network.
           </p>
           <div class="research-actions research-actions--lead">
             <a class="research-button" href="#run">Run it</a>
@@ -70,29 +73,24 @@
       </div>
     </section>
 
-    <nav class="toc-tuner" data-tuner aria-label="Sections">
-      <div class="wrap toc-tuner__band">
-      <div class="toc-tuner__readout" aria-hidden="true"></div>
-      <ol class="toc-tuner__scale">
-        <li><a class="toc-tuner__st" href="#purpose"><b>§1</b><span class="toc-tuner__name">PURPOSE</span></a></li>
-        <li><a class="toc-tuner__st" href="#run"><b>§2</b><span class="toc-tuner__name">RUN</span></a></li>
-        <li><a class="toc-tuner__st" href="#measured"><b>§3</b><span class="toc-tuner__name">MEASURED</span></a></li>
-        <li><a class="toc-tuner__st" href="#limits"><b>§4</b><span class="toc-tuner__name">LIMITS</span></a></li>
-        <li><a class="toc-tuner__st" href="#adapter"><b>§5</b><span class="toc-tuner__name">ADAPTER</span></a></li>
-        <li><a class="toc-tuner__st" href="#mesh"><b>§6</b><span class="toc-tuner__name">MESH</span></a></li>
-        <li><a class="toc-tuner__st" href="#wildfire"><b>§7</b><span class="toc-tuner__name">WILDFIRE</span></a></li>
-      </ol>
-      <span class="toc-tuner__needle" aria-hidden="true"></span>
-      </div>
-    </nav>
+    <TocTuner sections={[
+      { id: "purpose", no: "§1", name: "PURPOSE" },
+      { id: "run", no: "§2", name: "RUN" },
+      { id: "measured", no: "§3", name: "MEASURED" },
+      { id: "limits", no: "§4", name: "LIMITS" },
+      { id: "adapter", no: "§5", name: "ADAPTER" },
+      { id: "wildfire", no: "§6", name: "WILDFIRE" },
+    ]} />
 
     <section class="section" id="purpose">
       <div class="wrap">
         <div class="section__head section__head--left">
           <span class="sectionno">&sect;1 / PURPOSE</span>
           <h2>One channel in, one honest verdict out.</h2>
-          <p>Wave Pico is the smallest tier of the Wave family, built to sit beside one
-             machine and read what that machine emits.</p>
+          <p>Wave Pico is the smallest size of the Wave family, built to sit beside one
+             machine and read what that machine emits. It answers only when it is confident
+             enough; we measured where that line is. Below the line it passes the reading
+             up with a note that says where to look.</p>
         </div>
         <div class="wm-split">
           <div>
@@ -112,8 +110,9 @@
         <div class="section__head section__head--left">
           <span class="sectionno">&sect;2 / RUN</span>
           <h2>Free on the band, one command away.</h2>
-          <p>Wave Pico is on air as a free band. The band serves the release measured on this
-             page. Install the CLI, then tune in: <code>roger use</code> opens a local
+          <p>Wave Pico is live on the network as a free band. The weights are not
+             downloadable; you use it through the network, and the band serves the release
+             measured on this page. Install the CLI, then tune in: <code>roger use</code> opens a local
              OpenAI-compatible endpoint on your own machine, and anything that speaks that
              API can call it.</p>
         </div>
@@ -185,9 +184,12 @@
            Pico release with the same data and the same protocol
            <span class="wm-ref">{@html facts.cardRef('pico.comparator')}</span>.</p>
 
+        <!-- The measured trail stays on the page, closed by default (2026-11-24): every R-number the page cites, one tap away. -->
         <aside class="wm-footnote" aria-labelledby="wm-notes-head">
-          <span class="research-kicker" id="wm-notes-head">Measured</span>
-          <ol class="wm-notes">{@html facts.cardNotes('pico')}</ol>
+          <details class="wm-notes__fold">
+            <summary><span class="research-kicker" id="wm-notes-head">Measured</span> <span class="wm-notes__hint">where every number comes from</span></summary>
+            <ol class="wm-notes">{@html facts.cardNotes('pico')}</ol>
+          </details>
         </aside>
       </div>
     </section>
@@ -208,7 +210,9 @@
         <div class="section__head section__head--left">
           <span class="sectionno">&sect;5 / ADAPTER</span>
           <h2>One adapter, routed per request.</h2>
-          <p>The fire adapter is a {@html facts.card('pico.adapter-size')} LoRA adapter for this base. The
+          <!-- The adapter definition is the one sentence shared by every page that uses the word. -->
+          <p>An adapter is a small add-on file, trained for one job, that plugs into a Wave
+             model without changing it. The fire adapter is a {@html facts.card('pico.adapter-size')} LoRA adapter for this base. The
              server loads it beside the model and switches it on only for the requests that
              ask for it. It is never merged into the base, so the industrial reading stays
              exactly as measured above. Tested two ways: simulated fire scenarios with known
@@ -224,18 +228,17 @@
       </div>
     </section>
 
-    <WaveMesh no='6' fig='4' parent='Wave Pico' />
-
-    <WaveFirewatch no='7' fig='5' />
+    <WaveFirewatch no='6' fig='4' />
 
     <section class="section research-closing">
       <div class="wrap">
         <h2>Where Wave Pico sits.</h2>
-        <p>The smallest tier of a family that runs from a board beside one machine to a
+        <p>The smallest size of a family that runs from a board beside one machine to a
            datacenter. Wave Nano is the next size up.</p>
         <div class="research-actions research-actions--lead">
           <a class="research-button" href="/research-wave-nano.html">Wave Nano</a>
           <a class="research-button" href="/research-wave-family.html">The Wave family</a>
+          <a class="research-button" href="/research-models.html#mesh">How the mesh works</a>
           <a class="research-button" href="/research-models.html">Models and status</a>
         </div>
       </div>

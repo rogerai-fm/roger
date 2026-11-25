@@ -1,0 +1,105 @@
+/* =====================================================================
+   RogerAI - the hold figure (app/lib/ui/HoldFigure.svelte), pricing §4.
+
+   The day lane in the isometric hand (2026-11-22; the SVG comes from
+   computer-scientist/article/fig_hold_gen.py, the tones and lines are the
+   .iso__* rules of components.css). A long slab with the day marks cut across
+   it, the earning as a coin at day 0 (a thick disc, the principal, with a thin
+   wafer on it, the 10% slice), the bank as a box at the lane's end. The page's
+   lifecycle list (pricing.css .lifecycle, <ol data-scrub data-scrub-auto>) sits
+   inside the figure and is its step list; the picture reads the tuned stage
+   through the figure's data-step (scrub.js): 1 Accrued (the coin at day 0); 2 Held (the wafer lifts off to
+   the back row, both float on their halos, the hold spans show); 3 Payable
+   (each part lands on its day mark, its lamp on); 4 Paid (both slide into the
+   bank, the comets run the lane in, the bank's lamp lights). Every move is one
+   translate of a group, printed by the generator: exact under the parallel
+   camera. data-draw: the figure draws itself in the first time it is seen.
+   Lead class .hf on every rule. Colours are tokens; motion is --d-* and --motion.
+   ===================================================================== */
+.hf { color: var(--ink-700); }
+.hf .hf__stage { padding-bottom: 1.2em; }   /* "your bank" sits under the slab's front edge */
+/* the row names hang left of the lane's end: the stage keeps their room inside the panel at every width
+   (they were cut by the panel edge below about 1200px), and grows by the same room so the drawing keeps its size */
+.hf .hf__stage { padding-left: 7.5rem; max-width: calc(820px + 7.5rem - var(--s-2)); }
+.hf .hf__pic { position: relative; }
+
+/* the parts: the two slabs of the earning keep a full edge and move by translates; the lamps
+   light when payable; the halos show while held */
+.hf .hf__m { --edge: 1; transition: transform var(--d-5) var(--ease-out-quint), opacity var(--d-3); }
+.hf .hf__m .iso__lamp, .hf .hf__bank .iso__lamp { transition: fill var(--d-2), stroke var(--d-2); }
+.hf .hf__hold { fill: none; stroke: currentColor; stroke-width: 1; stroke-dasharray: 3 3; stroke-opacity: .4; opacity: 0; transition: opacity var(--d-3); }
+.hf .hf__way { opacity: .3; }
+
+/* the words over the stage: the row names at the lane's left end, the shares riding above their
+   parts (the same translates as the parts, as percents), the days under the slab's front edge */
+.hf .hf__who { translate: -100% -50%; }
+.hf .hf__who--main { left: 5.7%; top: 17.7%; }
+.hf .hf__who--slice { left: 7.7%; top: 6%; }
+.hf .hf__chip {
+  position: absolute; translate: -50% -100%; white-space: nowrap;
+  font-family: var(--font-mono); font-size: var(--t-xs); font-weight: var(--weight-semi); color: var(--ink-900);
+  transition: color var(--d-2), opacity var(--d-3), left var(--d-5) var(--ease-out-quint), top var(--d-5) var(--ease-out-quint);
+}
+.hf .hf__chip--main { left: 11.6%; top: 7.6%; color: var(--live-text); }
+.hf .hf__chip--slice { left: 19.8%; top: 14.2%; opacity: 0; }
+.hf .hf__days { margin: 0; padding: 0; list-style: none; }
+.hf .hf__day {
+  position: absolute; translate: -50% 0; white-space: nowrap;
+  font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-400); transition: color var(--d-2);
+}
+.hf .hf__day--0 { left: 9.9%; top: 30.9%; }
+.hf .hf__day--30 { left: 30.1%; top: 46.4%; }
+.hf .hf__day--90 { left: 70.5%; top: 77.5%; }
+.hf .hf__day--bank { left: 84%; top: 87.8%; }
+
+/* the lifecycle list inside the plate: its hairline on the plate's ground */
+.hf .lifecycle { margin-top: var(--s-6); }
+.hf .lifecycle li { border-top-color: var(--hairline); }
+
+/* ---- the four stages (the still is stage 1) ----------------------------- */
+/* 1 and the still: the coin lands at day 0 */
+.hf .hf__day--0 { color: var(--ink-900); }
+
+/* 2 Held: the wafer lifts off to the back row; both float on their halos; the hold spans show */
+.hf[data-step="2"] .hf__hold { opacity: 1; }
+.hf[data-step="2"] .hf__m--main { transform: translate(0, -2px); }
+.hf[data-step="2"] .hf__m--slice { transform: translate(18.9px, 5.7px) translate(0, -2px); }   /* off the coin to its own place on the back row */
+.hf[data-step="2"] .hf__m .iso__halo--part { opacity: .07; }
+.hf[data-step="2"] .hf__chip--main { color: var(--ink-500); }
+.hf[data-step="2"] .hf__chip--slice { opacity: 1; color: var(--ink-500); }
+.hf[data-step="2"] .hf__day--30, .hf[data-step="2"] .hf__day--90 { color: var(--ink-900); }
+
+/* 3 Payable: each part lands on its day mark, lit; the holds fade */
+.hf[data-step="3"] .hf__m--main { transform: translate(46.8px, 13.5px); }
+.hf[data-step="3"] .hf__m--slice { transform: translate(145.3px, 42.2px); }
+.hf[data-step="3"] .hf__m .iso__lamp { fill: var(--live); stroke: none; }
+.hf[data-step="3"] .hf__chip--main { left: 31.8%; top: 24.5%; color: var(--live-text); }
+.hf[data-step="3"] .hf__chip--slice { left: 74.4%; top: 56.2%; opacity: 1; color: var(--live-text); }
+.hf[data-step="3"] .hf__hold { opacity: .35; }
+.hf[data-step="3"] .hf__day--30, .hf[data-step="3"] .hf__day--90 { color: var(--live-text); }
+
+/* 4 Paid: both slide into the bank (behind its front face), the comets run the lane in, its lamp lights */
+.hf[data-step="4"] .hf__m--main { transform: translate(170.6px, 49.2px); }
+.hf[data-step="4"] .hf__m--slice { transform: translate(175.6px, 51px); }
+.hf[data-step="4"] .hf__chip--main { left: 85.3%; top: 65.6%; opacity: 0; transition-delay: 0s, var(--d-5), 0s, 0s; }
+.hf[data-step="4"] .hf__chip--slice { left: 87.5%; top: 66.2%; opacity: 0; transition-delay: 0s, var(--d-5), 0s, 0s; }
+.hf.is-drawn[data-step="4"] .hf__comet { opacity: 1; animation: comet calc(var(--motion) * 1.6s) linear infinite; }
+.hf[data-step="4"] .hf__bank .iso__lamp { fill: var(--live); stroke: none; }
+.hf[data-step="4"] .hf__day--bank { color: var(--live-text); }
+
+/* the draw-in order: the lane, the ways, the bank, then the coin; the words (HTML) fade up after */
+.hf .hf__lane { --draw-delay: 0s; }
+.hf .hf__way, .hf .hf__hold { --draw-delay: var(--d-2); }
+.hf .hf__bank { --draw-delay: var(--d-3); }
+.hf .hf__m { --draw-delay: var(--d-5); }
+.hf.is-drawing:not(.is-drawn) :is(.hf__chip, .hf__days, .hf__who) { opacity: 0; }
+.hf.is-drawn:not(.is-settled) :is(.hf__chip--main, .hf__days, .hf__who) { opacity: 1; transition: opacity var(--d-4) ease-out var(--d-5); }
+
+/* phones: the row names go, the words shrink */
+@media (max-width: 560px) {
+  .hf .hf__stage { padding-inline: 0; }
+  .hf .hf__who { display: none; }
+  .hf .hf__chip { font-size: 10px; }
+  .hf .hf__day { font-size: 9px; letter-spacing: .06em; }
+  .hf .hf__day--bank { display: none; }
+}

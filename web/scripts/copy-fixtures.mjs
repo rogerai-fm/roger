@@ -29,11 +29,14 @@ if (kind === "research") {
   const data = load(f);
   if (!pages.length) throw new Error(`name the pages to regenerate in ${f}`);
   for (const page of pages) {
+    // rest: the test squashes the fixture text again, so a decoded < or & must go back to its entity
     let html = dist(page).replace(/<!--[\s\S]*?-->/g, "");
+    // rest: app.html's tuner is checked on its own (rest-rollout.test.mjs NEW_TUNER) and left out of the words
     const m = kind === "rest"
       ? ([...html.matchAll(/<main\b[\s\S]*?<\/main>/g)].map((x) => x[0]).join("\n") || html).replace(/<script\b[\s\S]*?<\/script>/g, "")
+          .replace(page === "app.html" ? /<nav\b[^>]*data-tuner[\s\S]*?<\/nav>/g : /$^/g, "")
       : html.slice(html.search(/<main\b/), html.indexOf("</main>") + 7).replace(/<nav class="(?:toc-tuner|page-index)\b[^"]*"[\s\S]*?<\/nav>/g, "");
-    data[page] = { text: kind === "rest" ? squashText(m) : decodeText(m.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim(),
+    data[page] = { text: kind === "rest" ? squashText(m).replace(/&/g, "&amp;").replace(/</g, "&lt;") : decodeText(m.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim(),
                    hrefs: [...m.matchAll(/href="([^"]*)"/g)].map((x) => x[1]) };
     console.log(`${f}: ${page} regenerated`);
   }

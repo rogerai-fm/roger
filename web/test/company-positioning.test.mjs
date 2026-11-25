@@ -36,7 +36,9 @@ test("homepage masthead joins the company identity to the product promise", () =
   // claim (RogerAI's research side is about OPEN models), reworded away from
   // the literal "open model research" string this used to require. Pinned to
   // the actual claim, not just the near-universal word "open" or "models".
-  assert.match(hero, /enabling open models/i);
+  // 2026-11-14 (founder: show, don't tell): the hero is a definition and three labels; the
+  // lab's line lives on the Labs card in the company section, still on the homepage.
+  assert.match(home, /enabling open models/i);
   assert.match(hero, /routing/i);
   assert.match(hero, /failover/i);
   assert.match(hero, /metering/i);
@@ -44,16 +46,21 @@ test("homepage masthead joins the company identity to the product promise", () =
   assert.ok(hero.indexOf('class="install"') > hero.indexOf("<h1"), "install remains in the hero");
 });
 
-test("a compact institutional strip separates Network, Labs, and evidence", () => {
+// 2026-11-21 (founder): the third door is the industrial use cases ("Made for manufacturing"), not the
+// broadcasts; "Open Air Waves" keeps its link in §3 and the footer. The "why industrial" row under the
+// doors carries no link of its own.
+test("a compact institutional strip separates Network, Labs, and the industrial use cases", () => {
   const home = readFileSync(path.join(DIST, "index.html"), "utf8");
   const strip = home.match(/<aside class="institution-strip"[\s\S]*?<\/aside>/)?.[0] || "";
   assert.match(strip, /RogerAI Network/);
   assert.match(strip, /RogerAI Labs/);
-  assert.match(strip, /Open Air Waves/);
+  assert.match(strip, /Made for manufacturing/);
   assert.match(strip, /href="\/company\.html"/);
   assert.match(strip, /href="\/research\.html"/);
-  assert.match(strip, /href="\/broadcasts\.html"/);
+  assert.match(strip, /href="\/research-industry\.html"/);
   assert.equal((strip.match(/<a\b/g) || []).length, 3, "one focused link per surface");
+  assert.match(strip, /Why industrial/);
+  assert.equal((strip.match(/institution-strip__reasons[\s\S]*?<\/ol>/)?.[0].match(/<li>/g) || []).length, 4, "four reasons");
 });
 
 test("Company and Labs appear before technical detail and monetization", () => {

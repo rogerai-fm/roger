@@ -90,7 +90,7 @@ describe("states", () => {
     expect(el("heroBase").textContent).toBe("claude-opus-4-8");
     expect(el("heroFrontier").textContent).toBe("$30.00");
     expect(el("heroAmt").textContent).toBe("$26.00");
-    await fireEvent.keyDown(el("heroBase"), { key: "Enter" });
+    await fireEvent.click(el("heroBase"));   // a real <button>: the browser turns Enter and Space into this click
     expect(el("heroBase").textContent).toBe("gemini-2.5-pro");
     expect(el("heroAmt").textContent).toBe("$2.00");   // gemini would have billed $6 against $4 paid
   });
@@ -123,7 +123,7 @@ describe("the login-loop rule", () => {
     broker({ "/account": [401, {}] });
     const navs = fakeLocation({ pathname: "/dashboard.html" });
     render(DashboardApp);
-    await waitFor(() => expect(navs).toEqual(["/login.html"]));
+    await waitFor(() => expect(navs).toEqual(["/login.html?next=%2Fdashboard.html"]));
   });
   for (const status of [401, 403]) {
     it(`a ${status} from /metrics/series shows an error and does NOT bounce to login`, async () => {

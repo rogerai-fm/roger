@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // RogerAI Research - models for local hardware
   // Ported from web/src/research.html (2026-10-29); the copy is the legacy copy.
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -31,10 +32,15 @@
           <OnAir />
           <span class="hero__callsign">ROGERAI LABS</span>
         </span>
-        <h1>Models built for local constraints.</h1>
+        <!-- Plain first paragraph (SITE-SIMPLIFICATION-AUDIT-2026-11-13, fix 9): what the lab
+             does and what it means for the reader, before any program vocabulary. The status
+             words are the three the whole site uses: live, in testing, planned. -->
+        <h1>Small models that run on hardware you already own.</h1>
         <p class="research-hero__lead">
-          We make useful models smaller and faster on local hardware.
-          Every project has a specific job, visible status, and inspectable evidence.
+          Wave: small models that read machine data and run inside a site with no
+          internet, from a Raspberry Pi up. Pico is live and free on the network, Nano is
+          in testing, the larger sizes are planned. Every number we publish names the
+          hardware and the test it came from.
         </p>
         <!-- These buttons ARE the section menu. They were "Explore models / Read the
              evidence / View weights", which pointed at one anchor, one sub-page and an
@@ -48,6 +54,7 @@
           <a class="research-button" href="/research-wave-family.html">The Wave family</a>
           <a class="research-button" href="/research-hardware.html">Hardware</a>
           <a class="research-button" href="/research-industry.html">Industrial deployment</a>
+          <a class="research-button" href="/research-custom-tuning.html">Custom tuning</a>
           <a class="research-button" href="/broadcasts.html">Open Air Waves</a>
         </div>
         </div>
@@ -74,22 +81,15 @@
 
     <!-- Why the lab exists, before what it has built. Three statements, each of
          which is a commitment somebody could hold us to rather than a mood. -->
-    <!-- contents: the shared toc-tuner; its names repeat the section labels below -->
-    <nav class="toc-tuner" data-tuner aria-label="Sections">
-      <div class="wrap toc-tuner__band">
-      <div class="toc-tuner__readout" aria-hidden="true"></div>
-      <ol class="toc-tuner__scale">
-        <li><a class="toc-tuner__st" href="#why"><b>§0</b><span class="toc-tuner__name">WHY</span></a></li>
-        <li><a class="toc-tuner__st" href="#models"><b>§1</b><span class="toc-tuner__name">MODELS</span></a></li>
-        <li><a class="toc-tuner__st" href="#principles"><b>§2</b><span class="toc-tuner__name">PROOF</span></a></li>
-        <li><a class="toc-tuner__st" href="#industry"><b>§3</b><span class="toc-tuner__name">DEPLOYMENT</span></a></li>
-        <li><a class="toc-tuner__st" href="#services"><b>§4</b><span class="toc-tuner__name">ENGAGEMENTS</span></a></li>
-        <li><a class="toc-tuner__st" href="#developers"><b>§5</b><span class="toc-tuner__name">DEVELOPERS</span></a></li>
-        <li><a class="toc-tuner__st" href="#follow"><b>§6</b><span class="toc-tuner__name">FOLLOW THE WORK</span></a></li>
-      </ol>
-      <span class="toc-tuner__needle" aria-hidden="true"></span>
-      </div>
-    </nav>
+    <TocTuner sections={[
+      { id: "why", no: "§0", name: "WHY" },
+      { id: "models", no: "§1", name: "MODELS" },
+      { id: "principles", no: "§2", name: "PROOF" },
+      { id: "industry", no: "§3", name: "DEPLOYMENT" },
+      { id: "services", no: "§4", name: "ENGAGEMENTS" },
+      { id: "developers", no: "§5", name: "DEVELOPERS" },
+      { id: "follow", no: "§6", name: "FOLLOW THE WORK" },
+    ]} />
 
     <section class="section" id="why">
       <div class="wrap">
@@ -102,8 +102,8 @@
         <div class="deployment-grid">
           <article class="tint-panel"><b>Small enough to own</b><p>A model on hardware you already own is a
              model nobody can withdraw, reprice, or deprecate out from under you.</p></article>
-          <article class="tint-panel"><b>Published as it happens</b><p>Weights, recipes, raw evaluations and
-             the failures.</p></article>
+          <article class="tint-panel"><b>Published as it happens</b><p>Recipes, raw evaluations, the
+             failures, and the weights of the open models we optimize.</p></article>
           <article class="tint-panel"><b>Built in America, open to everyone</b><p>Designed and built in
              Orange County, California. The formats are standard, the runtimes are
              other people&#39;s, and nothing we publish needs us to keep existing.</p></article>
@@ -139,8 +139,8 @@
             </div>
           </div>
           <p class="scope__axis">
-            <span data-axis="variations">Range is the parameter class. Bearing is the capability variation each slot carries.</span>
-            <span data-axis="jobs">Range is the parameter class. Bearing is a plant job, and a slot&rsquo;s arc covers the jobs it takes part in.</span>
+            <span data-axis="variations">Each ring is one model size. Each label around the edge is a capability variation, and a slot&rsquo;s arc spans the ones it carries.</span>
+            <span data-axis="jobs">Each ring is one model size. Each label around the edge is a plant job, and a slot&rsquo;s arc covers the jobs it takes part in.</span>
           </p>
           <div class="scope__body">
         <div class="scroll-box scroll-box--diagram">
@@ -345,10 +345,11 @@
             </li>
         </ol>
           </div>
-          <figcaption id="scope-caption">Every band is a declared design target, not a
-            measurement, and bands are placed for legibility in ladder order. Wave Pico
+          <figcaption id="scope-caption">Every size is a declared design target, not a
+            measurement, and the sizes are placed for legibility in ladder order. Wave Pico
             is on air as wave-pico-293m, the v6 release; no public checkpoint is released
-            yet. Above the plot, Wave Tera (80&ndash;120B), Wave Peta (150&ndash;200B)
+            yet, so you use it through the network rather than downloading it. Above the
+            plot, Wave Tera (80&ndash;120B), Wave Peta (150&ndash;200B)
             and Wave Exa (&gt;280B) complete the Spectrum - see the family field guide.
             Plant jobs come from the field guide&rsquo;s jobs table; a slot taking part
             in a job does not mean it carries that job alone.</figcaption>
@@ -358,12 +359,12 @@
         <div class="research-onward">
           <a class="tint-panel" href="/research-models.html">
             <b>Models and status</b>
-            <span>Every Wave model and every upstream build we optimize, each with its
-              program status, lineage, license, and evidence contract.</span>
+            <span>Every Wave model and every large open model we optimize, with where
+              each one stands: live, in testing or planned.</span>
           </a>
           <a class="tint-panel" href="/research-wave-family.html">
             <b>Family field guide</b>
-            <span>What each slot is for, which plant jobs it can carry, the measurement
+            <span>What each size is for, which plant jobs it can do, the measurement
               that decides where a job belongs, and Wave Infinite, the prototype model
               program.</span>
           </a>
@@ -392,12 +393,10 @@
              standard formats and runtimes.</p>
           <p><b>Local first.</b> You may download and run qualifying artifacts locally.
              Publishing through the RogerAI network is optional.</p>
-          <p class="research-prose__see">A section headed &ldquo;claims follow
-             measurements&rdquo; should say where the measurements are:
-             <a href="/research-hardware.html#experiments">the runs and the bench</a> name
-             the rig, the model and the sweep;
-             <a href="/broadcasts.html">Open Air Waves</a> carries each one in full,
-             including the ones that went the wrong way.</p>
+          <p class="research-prose__see">Where the measurements are:
+             <a href="/research-hardware.html#experiments">the runs and the bench</a>, and
+             <a href="/broadcasts.html">Open Air Waves</a> for each one in full, including
+             the ones that went the wrong way.</p>
         </div>
       </div>
     </section>
@@ -406,15 +405,12 @@
       <div class="wrap">
         <div class="section__head section__head--left">
           <span class="sectionno">&sect;3 / DEPLOYMENT</span>
-          <h2>Local inference where the network stops.</h2>
+          <h2>Runs inside the site, where the network stops.</h2>
           <p>Oil and gas, power generation, manufacturing, aerospace, mining, water
-             utilities, healthcare, defense sustainment, and wildfire mitigation: plants,
-             hospitals, field sites and homes at the wildland edge run segmented, air-gapped
-             or simply lost networks, and that constraint is the whole opportunity. Models
-             stay advisory and out of real-time closed-loop control - in healthcare that
-             means the equipment and facilities layer, never a patient&rsquo;s care, and in
-             wildfire it means a warning beside the sprinklers, never the fire protection
-             itself.</p>
+             utilities, healthcare, defense sustainment, wildfire mitigation: plants,
+             hospitals, field sites and homes at the wildland edge, on networks that are
+             segmented, air-gapped or simply gone. Wave runs there and stays advisory, out
+             of closed-loop control, beside the safety systems and never in them.</p>
         </div>
         <div class="research-onward">
           <a class="tint-panel" href="/research-industry.html">
@@ -491,11 +487,14 @@
     <section class="section research-closing" id="follow">
       <div class="wrap">
         <span class="sectionno">§6 / FOLLOW THE WORK</span>
-        <h2>Weights, source, and field notes.</h2>
-        <p>Release detail lives with the artifact; decisions and measurements live in
-           Open Air Waves.</p>
+        <h2>Open builds, source, and field notes.</h2>
+        <!-- Fix 6 (SITE-SIMPLIFICATION-AUDIT-2026-11-13): no "Weights" label while no Wave
+             weights exist. The Hugging Face org holds the open builds we optimize (the
+             DeepSeek GGUF); Wave is served through the network only. -->
+        <p>The open models we optimize are on Hugging Face. No Wave weights are published;
+           you use a Wave model through the network.</p>
         <div class="research-actions research-actions--lead">
-          <a class="research-button" href="https://huggingface.co/rogerai-fyi">Weights</a>
+          <a class="research-button" href="https://huggingface.co/rogerai-fyi">Hugging Face</a>
           <a class="research-button" href="https://github.com/rogerai-fm/roger">Source</a>
           <a class="research-button" href="/broadcasts.html">Open Air Waves</a>
           <a class="research-button" href="mailto:labs@rogerai.fm">Contact Labs</a>

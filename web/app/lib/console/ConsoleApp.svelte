@@ -22,7 +22,7 @@
   onMount(async () => {
     let acct = null;
     try { acct = await account(); } catch { acct = null; }
-    if (!acct) { location.replace("/login.html"); return; }
+    if (!acct) { location.replace("/login.html?next=" + encodeURIComponent("/console.html")); return; }
     signedIn = true;
     who = RogerFmt.handle(acct.github_login);
     try {
@@ -75,7 +75,7 @@
         <tbody id="logRows">
           {#each events as e}
           <tr class="cn-row">
-            <td class="cn-st"><span class="cn-dot {e.success ? 'cn-dot--ok' : 'cn-dot--fail'}" title={e.success ? "ok" : "failed"}>{e.success ? "◉" : "○"}</span></td>
+            <td class="cn-st"><span class="cn-dot {e.success ? 'cn-dot--ok' : 'cn-dot--fail'}" role="img" aria-label={e.success ? "Succeeded" : "Failed"} title={e.success ? "Succeeded" : "Failed"}>{e.success ? "◉" : "○"}</span></td>
             <td class="cn-model" title={e.model || ""}>{e.model || "(unknown)"}</td>
             <td class="cn-node" title={e.node || ""}>{e.node || "-"}</td>
             <td class="num cn-tok" title="{n0(e.tokens_in)} in / {n0(e.tokens_out)} out tokens">{kfmt(e.tokens_in)} / {kfmt(e.tokens_out)}</td>

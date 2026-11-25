@@ -1,4 +1,5 @@
 <script>
+  import TocTuner from "#lib/ui/TocTuner.svelte";
   // The App - RogerAI for iPhone, iPad & Mac
   // Ported from web/src/app.html (2026-10-29); the copy is the legacy copy.
   import { siteHead, CSS_SHARED, CSS_ACCOUNT } from "#lib/head.js";
@@ -17,7 +18,7 @@
 </script>
 <svelte:head>{@html head}</svelte:head>
   <!-- running head: this page is one bound document -->
-  <Rail head='RogerAI · The Handheld' rev='Rev. 2026.07 · ((•))' orange />
+  <Rail head='RogerAI · The Handheld' rev='Rev. 2026.11 · ((•))' orange />
 
   <!-- ============================ NAV ============================ -->
   <Nav variant='marketing' home='/' current='app' />
@@ -27,7 +28,16 @@
   <!-- ============================ HERO ============================ -->
   <!-- The old standing-by plate lived here until 2026-07: the transmitter is
        warm now - RogerAI shipped on the App Store 2026-07-09. Every screenshot
-       on this page is the REAL app (self-hosted; CSP allows img-src 'self'). -->
+       on this page is the REAL app (self-hosted; CSP allows img-src 'self').
+       2026-11-21: the Mac, iPhone and watch plates for Tune In, the Band, the
+       tool cards, Base Station, Edge, the Operator hub, Ping and the wrist set
+       are the App Store composites of the 1.3 build (roger-ios
+       Screenshots/appstore-1.3, exported 2026-11-12 to 2026-11-20; headline and
+       caption baked in, device on art). The live listing read Version 1.4 when
+       they were mounted (apps.apple.com, checked 2026-11-21), so they are the
+       app as it shipped one version back, not a mockup. The tune sheet, tool
+       toggles, agent action, voice settings and Connect plates are the earlier
+       raw captures; the TUI and WebUI tiles wait for a reshoot. -->
   <section class="app-hero">
     <div class="wrap app-hero__inner">
 
@@ -58,7 +68,8 @@
             <img src="assets/app/appstore-badge.svg" alt="Download RogerAI on the App Store"
                  width="180" height="60" />
           </a>
-          <span class="app-hero__meta mono">FREE · iOS 17+ · iPHONE, iPAD &amp; APPLE-SILICON MACS · 39&nbsp;MB</span>
+          <!-- size and the watch line: the live listing, apps.apple.com, read 2026-11-21 (35.2 MB; Apple Watch, watchOS 26+) -->
+          <span class="app-hero__meta mono">FREE · iOS 17+ · iPHONE, iPAD, APPLE WATCH &amp; APPLE-SILICON MACS · 35.2&nbsp;MB</span>
         </div>
 
         <!-- The page's own section menu. Same row every other top-level page uses
@@ -86,7 +97,7 @@
           <span class="app-shot app-shot--mac app-hero__mac">
             <img src="assets/app/mac-tunein.webp"
                  srcset="assets/app/mac-tunein-640.webp 640w, assets/app/mac-tunein.webp 1280w" sizes="(max-width: 860px) 92vw, 720px"
-                 alt="The RogerAI Mac app: the Tune In room with the two-way-radio hero art and a private on-device station"
+                 alt="The RogerAI Mac app's Tune In room, headed Home GPUs, on air: the sidebar lists Tune In, Band, Share, Base Station, Connect, Edge and Operator, and the station is tuned to On device, Apple, free and private"
                  width="1280" height="800" />
           </span>
           <span class="app-shot app-shot--phone app-hero__phone">
@@ -105,25 +116,25 @@
        The page's sections on the site's tuning scale (components.css .toc-tuner),
        named from their own labels. It replaced a page-local dial rule on every
        section: the needle now rests on the section in view. Never pinned. -->
-  <nav class="toc-tuner" data-tuner aria-label="Sections">
-    <div class="wrap toc-tuner__band">
-    <div class="toc-tuner__readout" aria-hidden="true"></div>
-    <ol class="toc-tuner__scale">
-      <li><a class="toc-tuner__st" href="#tunein"><b>§1</b><span class="toc-tuner__name">TUNE IN</span></a></li>
-      <li><a class="toc-tuner__st" href="#onair"><b>§2</b><span class="toc-tuner__name">ON AIR</span></a></li>
-      <li><a class="toc-tuner__st" href="#band"><b>§3</b><span class="toc-tuner__name">THE BAND</span></a></li>
-      <li><a class="toc-tuner__st" href="#routing"><b>§4</b><span class="toc-tuner__name">ROUTING</span></a></li>
-      <li><a class="toc-tuner__st" href="#operator"><b>§5</b><span class="toc-tuner__name">THE OPERATOR</span></a></li>
-      <li><a class="toc-tuner__st" href="#connect"><b>§6</b><span class="toc-tuner__name">CONNECT</span></a></li>
-      <li><a class="toc-tuner__st" href="#mac"><b>§7</b><span class="toc-tuner__name">THE DESK SET</span></a></li>
-      <li><a class="toc-tuner__st" href="#spec-sheet"><b>§8</b><span class="toc-tuner__name">THE SPEC SHEET</span></a></li>
-      <li><a class="toc-tuner__st" href="#cli"><b>§9</b><span class="toc-tuner__name">THE TERMINAL APP</span></a></li>
-      <li><a class="toc-tuner__st" href="#webui"><b>§10</b><span class="toc-tuner__name">THE BROWSER CONSOLE</span></a></li>
-      <li><a class="toc-tuner__st" href="#install"><b>§11</b><span class="toc-tuner__name">INSTALL</span></a></li>
-    </ol>
-    <span class="toc-tuner__needle" aria-hidden="true"></span>
-    </div>
-  </nav>
+  <TocTuner sections={[
+    { id: "tunein", no: "§1", name: "TUNE IN" },
+    { id: "onair", no: "§2", name: "ON AIR" },
+    { id: "band", no: "§3", name: "THE BAND" },
+    { id: "routing", no: "§4", name: "ROUTING" },
+    { id: "operator", no: "§5", name: "THE OPERATOR" },
+    { id: "cards", no: "§6", name: "THE CARDS" },
+    { id: "basestation", no: "§7", name: "BASE STATION" },
+    { id: "edge", no: "§8", name: "EDGE" },
+    { id: "connect", no: "§9", name: "CONNECT" },
+    { id: "hub", no: "§10", name: "THE OPERATOR HUB" },
+    { id: "ping", no: "§11", name: "PING" },
+    { id: "watch", no: "§12", name: "THE WRIST SET" },
+    { id: "mac", no: "§13", name: "THE DESK SET" },
+    { id: "spec-sheet", no: "§14", name: "THE SPEC SHEET" },
+    { id: "cli", no: "§15", name: "THE TERMINAL APP" },
+    { id: "webui", no: "§16", name: "THE BROWSER CONSOLE" },
+    { id: "install", no: "§17", name: "INSTALL" },
+  ]} />
 
 
   <!-- ============================ §1 TUNE IN ============================ -->
@@ -215,11 +226,11 @@
                alt="The Band on iPhone: a live station list with per-model prices, speeds and FREE tags"
                width="780" height="1688" loading="lazy" />
         </span>
-        <span class="app-shot app-shot--mac">
+        <span class="app-shot app-shot--mac app-shot--plate">
           <span class="fig">FIG. 5 - SAME BAND, BIG SCREEN</span>
           <img src="assets/app/mac-band.webp"
                  srcset="assets/app/mac-band-640.webp 640w, assets/app/mac-band.webp 1280w" sizes="(max-width: 860px) 92vw, 560px"
-               alt="The Band on the Mac: the same live station roster on the desk set"
+               alt="The Band on the Mac, headed Read the band: who is on air, how fast they answer, and what a million tokens costs. The roster lists wave-pico-293m, gpt-oss-20b and grok-4.5 as FREE, then paid stations with their price per million"
                width="1280" height="800" loading="lazy" />
         </span>
       </div>
@@ -304,11 +315,107 @@
     </div>
   </section>
 
-  <!-- ============================ §6 CONNECT ============================ -->
-  <section class="section app-feature" id="connect">
+  <!-- ============================ §6 THE CARDS (1.3) ============================ -->
+  <section class="section app-feature" id="cards">
     <div class="wrap app-feature__grid">
       <div class="app-feature__copy" data-reveal>
-        <span class="sectionno">§6 / CONNECT · USE IT ANYWHERE</span>
+        <span class="sectionno">§6 / THE CARDS · ASK, IT CHECKS</span>
+        <h2>It checks, then answers.</h2>
+        <p>
+          Ask about the weather and the station checks first. The answer comes back as a
+          <b>card in the chat</b>: the place, the temperature now, the hours ahead and the
+          days after, in °F or °C. Weather, places nearby and the web all come back this way.
+          The one on the plates ran on the on-device station, so nothing left the phone.
+        </p>
+      </div>
+      <div class="app-feature__media app-feature__media--pair" data-reveal data-reveal-delay="80">
+        <span class="app-shot app-shot--phone app-shot--plate">
+          <span class="fig">FIG. 11 - THE WEATHER CARD</span>
+          <img src="assets/app/iphone-weather.webp"
+                 srcset="assets/app/iphone-weather-400.webp 400w, assets/app/iphone-weather.webp 780w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 340px, 300px"
+               alt="iPhone plate headed Ask your phone, It checks, then answers: a chat asks about the Bay Area weather, the reply says it is cloudy and 61 in San Francisco, a line reads Checked the weather in Bay Area, and a card shows 61 degrees cloudy with an hourly row and a six-day forecast"
+               width="780" height="1688" loading="lazy" />
+        </span>
+        <span class="app-shot app-shot--mac app-shot--plate">
+          <span class="fig">FIG. 12 - THE SAME CARD, ON THE DESK</span>
+          <img src="assets/app/mac-weather.webp"
+                 srcset="assets/app/mac-weather-640.webp 640w, assets/app/mac-weather.webp 1280w" sizes="(max-width: 860px) 92vw, 560px"
+               alt="Mac plate headed Ask your Mac, It checks, then answers: the Tune In room with the same San Francisco weather card under the reply, marked on device and private"
+               width="1280" height="800" loading="lazy" />
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ §7 BASE STATION (1.3) ============================ -->
+  <section class="section app-feature app-feature--flip" id="basestation">
+    <div class="wrap app-feature__grid">
+      <div class="app-feature__copy" data-reveal>
+        <span class="sectionno">§7 / BASE STATION · CARRY YOUR SESSION</span>
+        <h2>Carry your session.</h2>
+        <p>
+          Run <code class="inline">/remote-control</code> inside <code class="inline">roger</code>
+          on a machine and that live agent goes on your <b>Base Station</b>. Pick it up on the
+          phone or the Mac where the desk left off. Private to your account, relayed through
+          the broker, not end-to-end encrypted. <b>The tools still run, and still ask, on the host.</b>
+        </p>
+      </div>
+      <div class="app-feature__media app-feature__media--pair" data-reveal data-reveal-delay="80">
+        <span class="app-shot app-shot--phone app-shot--plate">
+          <span class="fig">FIG. 13 - THE SESSION, ON THE PHONE</span>
+          <img src="assets/app/iphone-basestation.webp"
+                 srcset="assets/app/iphone-basestation-400.webp 400w, assets/app/iphone-basestation.webp 780w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 340px, 300px"
+               alt="iPhone plate headed Base Station, Carry your session: the Base Station screen with a drawing of a radio desk, the note that a live agent from roger continues here, a Sign in button, and the line your account only, relayed through the broker, not end-to-end encrypted, tools run on the host"
+               width="780" height="1688" loading="lazy" />
+        </span>
+        <span class="app-shot app-shot--mac app-shot--plate">
+          <span class="fig">FIG. 14 - THE SESSION, ON THE DESK</span>
+          <img src="assets/app/mac-basestation.webp"
+                 srcset="assets/app/mac-basestation-640.webp 640w, assets/app/mac-basestation.webp 1280w" sizes="(max-width: 860px) 92vw, 560px"
+               alt="Mac plate headed Base Station, Carry your session: pick up a live agent on the Mac where your desk left off, private to your account. The Base Station room sits in the sidebar between Share and Connect with a Sign in button"
+               width="1280" height="800" loading="lazy" />
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ §8 EDGE (1.3) ============================ -->
+  <section class="section app-feature" id="edge">
+    <div class="wrap app-feature__grid">
+      <div class="app-feature__copy" data-reveal>
+        <span class="sectionno">§8 / EDGE · YOUR OWN MACHINES</span>
+        <h2>Your own machines, over the local network.</h2>
+        <p>
+          Join your private <b>Edge</b> over the local network. Nothing goes through the
+          internet. Tap <b>Start pinging</b> and your own machines find this phone and use
+          what it can do, or scan an invite from one of them. Each device carries a name
+          you can change.
+        </p>
+      </div>
+      <div class="app-feature__media app-feature__media--pair" data-reveal data-reveal-delay="80">
+        <span class="app-shot app-shot--phone app-shot--plate">
+          <span class="fig">FIG. 15 - NOT ON AN EDGE, YET</span>
+          <img src="assets/app/iphone-edge.webp"
+                 srcset="assets/app/iphone-edge-400.webp 400w, assets/app/iphone-edge.webp 780w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 340px, 300px"
+               alt="iPhone plate headed Roger Edge, Your own machines: the Edge screen reads Not on an Edge, let your own machines find this phone and use what it can do, with the device name sharp-wren-32, a Start pinging button and a Scan invite button"
+               width="780" height="1688" loading="lazy" />
+        </span>
+        <span class="app-shot app-shot--mac app-shot--plate">
+          <span class="fig">FIG. 16 - THE EDGE, ON THE DESK</span>
+          <img src="assets/app/mac-edge.webp"
+                 srcset="assets/app/mac-edge-640.webp 640w, assets/app/mac-edge.webp 1280w" sizes="(max-width: 860px) 92vw, 560px"
+               alt="Mac plate headed Roger Edge, Your own machines: join your private Edge over the local network, nothing goes through the internet. The Edge room shows the machine keen-vole-22, Start pinging and Scan invite"
+               width="1280" height="800" loading="lazy" />
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ §9 CONNECT ============================ -->
+  <section class="section app-feature app-feature--flip" id="connect">
+    <div class="wrap app-feature__grid">
+      <div class="app-feature__copy" data-reveal>
+        <span class="sectionno">§9 / CONNECT · USE IT ANYWHERE</span>
         <h2>Your endpoint works everywhere.</h2>
         <p>
           Mint a key and paste RogerAI into <b>any OpenAI-compatible app</b> - a chat
@@ -319,14 +426,14 @@
       </div>
       <div class="app-feature__media app-feature__media--pair" data-reveal data-reveal-delay="80">
         <span class="app-shot app-shot--phone">
-          <span class="fig">FIG. 11 - MINT A KEY</span>
+          <span class="fig">FIG. 17 - MINT A KEY</span>
           <img src="assets/app/iphone-connect.webp"
                  srcset="assets/app/iphone-connect-400.webp 400w, assets/app/iphone-connect.webp 780w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 340px, 300px"
                alt="Connect on iPhone: the broker base URL, a Mint-a-key button and step-by-step recipes for chat apps and editors"
                width="780" height="1688" loading="lazy" />
         </span>
         <span class="app-shot app-shot--mac">
-          <span class="fig">FIG. 12 - THE SAME KEY, ON THE DESK</span>
+          <span class="fig">FIG. 18 - THE SAME KEY, ON THE DESK</span>
           <img src="assets/app/mac-connect.webp"
                  srcset="assets/app/mac-connect-640.webp 640w, assets/app/mac-connect.webp 1280w" sizes="(max-width: 860px) 92vw, 560px"
                alt="Connect on the Mac: the same endpoint recipes for chat apps, Cursor, Raycast and Python"
@@ -336,11 +443,117 @@
     </div>
   </section>
 
-  <!-- ============================ §7 THE DESK SET ============================ -->
+  <!-- ============================ §10 THE OPERATOR HUB (1.3) ============================ -->
+  <section class="section app-feature" id="hub">
+    <div class="wrap app-feature__grid">
+      <div class="app-feature__copy" data-reveal>
+        <span class="sectionno">§10 / THE OPERATOR HUB · YOUR STATION, YOUR KEYS</span>
+        <h2>Your station, your keys.</h2>
+        <p>
+          The <b>Operator</b> room is the station's own desk. Sign in to see your activity,
+          top up, and keep this device linked to your wallet. The on-air state and the
+          wallet balance sit at the top; the rest of the page is yours once you are in.
+        </p>
+      </div>
+      <div class="app-feature__media app-feature__media--pair" data-reveal data-reveal-delay="80">
+        <span class="app-shot app-shot--phone app-shot--plate">
+          <span class="fig">FIG. 19 - THE HUB, ON THE PHONE</span>
+          <img src="assets/app/iphone-hub.webp"
+                 srcset="assets/app/iphone-hub-400.webp 400w, assets/app/iphone-hub.webp 780w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 340px, 300px"
+               alt="iPhone plate headed Operator, Your station, your keys: the Operator screen reads On air, Operator, shows an empty wallet balance, an operator at a radio desk under a tower, and a Sign in button"
+               width="780" height="1688" loading="lazy" />
+        </span>
+        <span class="app-shot app-shot--mac app-shot--plate">
+          <span class="fig">FIG. 20 - THE HUB, ON THE DESK</span>
+          <img src="assets/app/mac-hub.webp"
+                 srcset="assets/app/mac-hub-640.webp 640w, assets/app/mac-hub.webp 1280w" sizes="(max-width: 860px) 92vw, 560px"
+               alt="Mac plate headed Operator, Your station, your keys: sign in to see your activity, top up, and keep this device linked to your wallet. The Operator room shows the wallet balance and the drawing of an operator at the desk"
+               width="1280" height="800" loading="lazy" />
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ §11 PING (1.3) ============================ -->
+  <section class="section app-feature app-feature--flip" id="ping">
+    <div class="wrap app-feature__grid">
+      <div class="app-feature__copy" data-reveal>
+        <span class="sectionno">§11 / PING · MEET PING</span>
+        <h2>See what it is doing.</h2>
+        <p>
+          <b>Ping</b> is a small character that shows when the chat is thinking, looking
+          something up, or answering. Tap it, hold it, give it a pat.
+        </p>
+        <p>
+          Make it yours: pick an eye color, a head, a hat. <b>The eye color becomes the
+          color of the whole app</b>: buttons, signals and the tab bar.
+        </p>
+      </div>
+      <div class="app-feature__media app-feature__media--pair" data-reveal data-reveal-delay="80">
+        <span class="app-shot app-shot--phone app-shot--plate">
+          <span class="fig">FIG. 21 - PING, EXCITED</span>
+          <img src="assets/app/iphone-ping.webp"
+                 srcset="assets/app/iphone-ping-400.webp 400w, assets/app/iphone-ping.webp 780w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 340px, 300px"
+               alt="iPhone plate headed Meet Ping, See what it is doing: Ping, a black bracket-headed character with a purple eye and a hat, stands in purple rings over the caption Excited, something good just landed"
+               width="780" height="1688" loading="lazy" />
+        </span>
+        <span class="app-shot app-shot--phone app-shot--plate">
+          <span class="fig">FIG. 22 - YOUR PING</span>
+          <img src="assets/app/iphone-ping-yours.webp"
+                 srcset="assets/app/iphone-ping-yours-400.webp 400w, assets/app/iphone-ping-yours.webp 780w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 340px, 300px"
+               alt="iPhone plate headed Make it yours, Pick a color, a head, a hat: Ping wears a wizard hat and a blue eye, and the Your Ping sheet below offers Surprise me, a share button and a row of eye colors with blue selected"
+               width="780" height="1688" loading="lazy" />
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ §12 THE WRIST SET (1.3) ============================
+       Raw watch captures (422 x 514, 2026-11-20), not composites. The watch line and
+       its requirement are from the live listing, read 2026-11-21. -->
+  <section class="section app-feature" id="watch">
+    <div class="wrap app-feature__grid">
+      <div class="app-feature__copy" data-reveal>
+        <span class="sectionno">§12 / THE WRIST SET · APPLE WATCH</span>
+        <h2>Ask from your wrist.</h2>
+        <p>
+          RogerAI runs on <b>Apple Watch</b>. Tap or hold to speak, type a question, or pick
+          a <b>quick ask</b>, and the answer reads on the face with the station that sent it.
+          Pick the face you wear: Beacon, the red on-air dot, or Ping in 3D.
+          Requires watchOS 26 or later.
+        </p>
+      </div>
+      <div class="app-feature__media app-feature__media--trio" data-reveal data-reveal-delay="80">
+        <span class="app-shot app-shot--phone app-shot--watch">
+          <span class="fig">FIG. 23 - THE FACES</span>
+          <img src="assets/app/watch-faces.webp"
+                 srcset="assets/app/watch-faces-400.webp 400w, assets/app/watch-faces.webp 422w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 30vw, 220px"
+               alt="Apple Watch screen headed Face: Beacon, the red on-air dot; Ping, the mascot in 3D, ticked; and Carrier, the carrier wave orb"
+               width="422" height="514" loading="lazy" />
+        </span>
+        <span class="app-shot app-shot--phone app-shot--watch">
+          <span class="fig">FIG. 24 - QUICK ASKS</span>
+          <img src="assets/app/watch-quick.webp"
+                 srcset="assets/app/watch-quick-400.webp 400w, assets/app/watch-quick.webp 422w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 30vw, 220px"
+               alt="Apple Watch screen headed Quick asks: suggest a small act of kindness for today, one tip to sleep better tonight, give me a two minute desk stretch"
+               width="422" height="514" loading="lazy" />
+        </span>
+        <span class="app-shot app-shot--phone app-shot--watch">
+          <span class="fig">FIG. 25 - AN ANSWER</span>
+          <img src="assets/app/watch-answer.webp"
+                 srcset="assets/app/watch-answer-400.webp 400w, assets/app/watch-answer.webp 422w" sizes="(max-width: 560px) 45vw, (max-width: 860px) 30vw, 220px"
+               alt="Apple Watch screen answering Why is the sky blue: the sky looks blue because molecules in the air scatter sunlight, short blue wavelengths bounce around the most, signed by the station gpt-oss-20b"
+               width="422" height="514" loading="lazy" />
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ §13 THE DESK SET ============================ -->
   <section class="section app-desk" id="mac">
     <div class="wrap">
       <div class="section__head section__head--left" data-reveal>
-        <span class="sectionno">§7 / THE DESK SET · MACOS</span>
+        <span class="sectionno">§13 / THE DESK SET · MACOS</span>
         <h2>Native on the Mac.</h2>
         <p>
           The same app, built for Apple silicon - not a wrapped website. Sidebar,
@@ -349,28 +562,35 @@
         </p>
       </div>
       <div class="app-desk__stage" data-reveal data-reveal-delay="80">
-        <span class="app-shot app-shot--mac">
-          <span class="fig">FIG. 13 - THE DESK SET, ON AIR</span>
+        <span class="app-shot app-shot--mac app-shot--plate">
+          <span class="fig">FIG. 26 - THE DESK SET, ON AIR</span>
           <img src="assets/app/mac-tunein.webp"
                  srcset="assets/app/mac-tunein-640.webp 640w, assets/app/mac-tunein.webp 1280w" sizes="(max-width: 860px) 92vw, 960px"
-               alt="RogerAI on the Mac, full width: the Tune In room with the two-way-radio hero art, sidebar and a private on-device station"
+               alt="Mac plate headed Tune In, Home GPUs, on air: tune in to real machines running open models, pay per token, or run a station on your own device. The Tune In room shows the sidebar, the dark dial with its red dot, and four try-asking prompts"
+               width="1280" height="800" loading="lazy" />
+        </span>
+        <span class="app-shot app-shot--mac app-shot--plate">
+          <span class="fig">FIG. 27 - PING, ON THE DESK</span>
+          <img src="assets/app/mac-ping.webp"
+                 srcset="assets/app/mac-ping-640.webp 640w, assets/app/mac-ping.webp 1280w" sizes="(max-width: 860px) 92vw, 960px"
+               alt="Mac plate headed Meet Ping, See what it is doing: Ping stands in red rings in its own window, captioned Happy, that went well, with a Customize Ping button and a row of moods from Live and Idle to Dizzy along the bottom"
                width="1280" height="800" loading="lazy" />
         </span>
       </div>
     </div>
   </section>
 
-  <!-- ============================ §8 SPEC SHEET ============================ -->
+  <!-- ============================ §14 SPEC SHEET ============================ -->
   <section class="section app-spec" id="spec-sheet">
     <div class="wrap">
       <div class="section__head section__head--left" data-reveal>
-        <span class="sectionno">§8 / THE SPEC SHEET</span>
+        <span class="sectionno">§14 / THE SPEC SHEET</span>
         <h2>Read the plate.</h2>
       </div>
       <dl class="app-spec__plate mono" data-reveal data-reveal-delay="80">
         <div class="app-spec__row"><dt>price</dt><dd>free download · pay per token · optional monthly cap, so it never surprises you</dd></div>
-        <div class="app-spec__row"><dt>requires</dt><dd>iOS 17+ · iPadOS 17+ · macOS on Apple silicon</dd></div>
-        <div class="app-spec__row"><dt>size</dt><dd>39 MB on the wire</dd></div>
+        <div class="app-spec__row"><dt>requires</dt><dd>iOS 17+ · iPadOS 17+ · watchOS 26+ · macOS on Apple silicon</dd></div>
+        <div class="app-spec__row"><dt>size</dt><dd>35.2 MB on the wire</dd></div>
         <div class="app-spec__row"><dt>account</dt><dd>none to start - on-device and free stations are anonymous</dd></div>
         <div class="app-spec__row"><dt>privacy</dt><dd>on-device replies never leave the phone · confidential ◆ routes TEE-attested only</dd></div>
         <div class="app-spec__row"><dt>callsign</dt><dd>broadcasting live from Orange County, California</dd></div>
@@ -379,11 +599,11 @@
   </section>
 
   <div class="tone-zone" data-tone="ink">
-  <!-- ==================== §9 THE TERMINAL APP (roger) ====================
+  <!-- ==================== §15 THE TERMINAL APP (roger) ====================
        The desktop pair, deliberately SMALLER than the handheld's six plates:
        one section each, one rotating figure each. They are an honourable
-       mention on the app page, not a second product pitch - the manual (§1,
-       §10) is where the terminal app is documented.
+       mention on the app page, not a second product pitch - the manual is
+       where the terminal app is documented.
        Every plate is a REAL capture of the shipped binary (2026-08-23). The
        account line in the terminal header carries the operator's e-mail; it is
        redacted in the exported plate, not cropped away, so the header still
@@ -391,13 +611,13 @@
   <section class="section app-feature" id="cli">
     <div class="wrap app-feature__grid">
       <div class="app-feature__copy" data-reveal>
-        <span class="sectionno">§9 / THE TERMINAL APP · roger</span>
-        <h2>The whole band, in a terminal.</h2>
+        <span class="sectionno">§15 / THE TERMINAL APP · roger</span>
+        <h2>The world's models, or your own, in a terminal.</h2>
         <p>
-          <code class="inline">roger</code> is the dial: one binary, <b>a local harness
-          for local models</b>. Browse the band, tune into a station, open a channel and
-          talk. It also finds the models already on your machine and puts them on air
-          when you say so.
+          <code class="inline">roger</code> is one binary, <b>a local harness for local
+          models</b>. Browse our band of models, voices and search, and tune in to use
+          them privately. You can also share your own models from your own machine, free
+          or at a rate that earns.
         </p>
         <p>
           <b>[0]</b> is the agent, a small tool-capable operator that reads files and runs
@@ -408,7 +628,7 @@
       </div>
       <div class="app-feature__media" data-reveal data-reveal-delay="80">
         <div class="app-rot">
-          <span class="fig">FIG. 14 - THE DIAL · FOUR SCREENS</span>
+          <span class="fig">FIG. 28 - THE DIAL · FOUR SCREENS</span>
           <div class="app-rot__stack">
             <figure class="app-tile" style="--i:0">
               <figcaption class="app-tile__bar mono">roger · [1] tune in</figcaption>
@@ -444,11 +664,11 @@
     </div>
   </section>
 
-  <!-- ==================== §10 THE BROWSER CONSOLE (roger webui) ==================== -->
+  <!-- ==================== §16 THE BROWSER CONSOLE (roger webui) ==================== -->
   <section class="section app-feature app-feature--flip" id="webui">
     <div class="wrap app-feature__grid">
       <div class="app-feature__copy" data-reveal>
-        <span class="sectionno">§10 / THE BROWSER CONSOLE · roger webui</span>
+        <span class="sectionno">§16 / THE BROWSER CONSOLE · roger webui</span>
         <h2>Same station, wider window.</h2>
         <p>
           <code class="inline">roger webui</code> opens the same radio in a browser tab:
@@ -465,7 +685,7 @@
       </div>
       <div class="app-feature__media" data-reveal data-reveal-delay="80">
         <div class="app-rot">
-          <span class="fig">FIG. 15 - THE CONSOLE · FOUR TABS</span>
+          <span class="fig">FIG. 29 - THE CONSOLE · FOUR TABS</span>
           <div class="app-rot__stack">
             <figure class="app-tile" style="--i:0">
               <figcaption class="app-tile__bar mono">roger webui · browse</figcaption>
@@ -501,8 +721,8 @@
     </div>
   </section>
 
-  <!-- ==================== §11 INSTALL (the roger binary) ====================
-       §9 and §10 show the terminal and the browser console but never how to GET
+  <!-- ==================== §17 INSTALL (the roger binary) ====================
+       §15 and §16 show the terminal and the browser console but never how to GET
        roger; this is that step, right before the mobile CTA. Same install__box
        copy-button the homepage uses - the component is styled site-wide in
        base.css and site.js wires copy-to-clipboard for every .install__box, so
@@ -510,11 +730,11 @@
   <section class="section app-install" id="install">
     <div class="wrap">
       <div class="app-install__inner" data-reveal>
-        <span class="sectionno">§11 / INSTALL · roger</span>
+        <span class="sectionno">§17 / INSTALL · roger</span>
         <h2>Get <code class="inline">roger</code> on your machine.</h2>
         <p class="install__lead">One binary for macOS, Linux and Windows. It finds the models
           already on your machine, puts them on air if you want, and tunes you into everyone
-          else&rsquo;s - the terminal (§9) and the browser console (§10) are the same
+          else&rsquo;s - the terminal (§15) and the browser console (§16) are the same
           <code class="inline">roger</code>.</p>
         <InstallBox id='installCmdApp'>curl -fsSL https://rogerai.fm/install.sh | sh</InstallBox>
         <div class="install__meta">

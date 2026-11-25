@@ -8,7 +8,7 @@
   import Nav from "#lib/ui/Nav.svelte";
   const head = siteHead({
     title: 'Sign in - RogerAI',
-    desc: 'Sign in to RogerAI to monetize your spare local models. Consuming needs no account.',
+    desc: 'Sign in to RogerAI to spend from a wallet on paid models or to get paid for sharing your spare local models. Free models need no account.',
     robots: "noindex",
     canonical: 'https://rogerai.fm/login.html',
     css: [...CSS_ACCOUNT],

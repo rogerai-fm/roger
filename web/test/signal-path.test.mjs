@@ -77,9 +77,8 @@ test("the figure is described for screen readers, not just drawn", () => {
   assert.match(fig, /aria-labelledby="signal-caption"/);
   assert.match(fig, /id="signal-caption"/);
   assert.match(visible(fig), /\S{200,}|.{200,}/, "the caption explains the path in prose");
-  // Decorative layers must not be announced.
-  for (const layer of ["signal__wire", "signal__packets", "signal__labels"]) {
-    const g = fig.match(new RegExp(`<g class="${layer}"[^>]*>`))?.[0] || "";
-    assert.match(g, /aria-hidden="true"/, `${layer} is decorative`);
-  }
+  // The drawing is decorative and must not be announced: since 2026-11-22 it is one isometric
+  // SVG (the hand in components.css .iso__*), hidden as a whole, with every word in HTML over it.
+  assert.match(fig, /<svg class="iso__svg"[^>]*aria-hidden="true"/, "the drawing is aria-hidden");
+  assert.doesNotMatch(fig, /<text/, "no SVG text: every word is HTML");
 });
