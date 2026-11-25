@@ -49,6 +49,7 @@ import (
 	"rogerai.fm/roger/v7/internal/netpriv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"rogerai.fm/roger/v7/internal/protocol"
@@ -281,6 +282,47 @@ func (n Notice) notify(err error) {
 	if n != nil && err != nil {
 		n(err)
 	}
+}
+
+// towerAuditEvery is how often a tenancy asks its hub which transcripts Core wants. Zero is the
+// hub client's own default; a test sets it shorter so an audit answer does not take a minute.
+var towerAuditEvery atomic.Int64
+
+// upstreamSaid remembers which upstream statuses the operator has already been told about in
+// this run. A provider's refusal differs per request (an id, a timestamp), so de-duplicating on
+// the message text would repeat the same news on every relayed request; one line per status is
+// what the operator needs.
+type upstreamSaid struct {
+	mu   sync.Mutex
+	said map[int]bool
+}
+
+// first reports whether status is new to this run, and records it.
+func (u *upstreamSaid) first(status int) bool {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	if u.said == nil {
+		u.said = map[int]bool{}
+	}
+	if u.said[status] {
+		return false
+	}
+	u.said[status] = true
+	return true
+}
+
+// upstreamNotice is what the operator reads, on their own machine only, when the model behind
+// this Station answers a relayed request with an error. The detail is already redacted of the
+// upstream key and then shortened (station.HTTPUpstream); a refused key gets its own words, so
+// an operator whose provider rotated or revoked the key can tell that from a model fault.
+//
+// Contract: features/tower/tower_upstream_key.feature.
+func upstreamNotice(se *station.UpstreamStatusError) error {
+	if se.Status == http.StatusUnauthorized || se.Status == http.StatusForbidden {
+		return fmt.Errorf("the upstream refused its key (status %d) on a relayed request - check the "+
+			"key this share was started with: %s", se.Status, se.Detail)
+	}
+	return fmt.Errorf("the upstream answered status %d on a relayed request: %s", se.Status, se.Detail)
 }
 
 // hubRefusedIdentity reports whether a hub error is an authentication refusal - the one
@@ -943,6 +985,10 @@ func (t transcriptSource) SignedTranscript(attemptID string) (signed, request, r
 // later attach is a different event with a different meaning: this node WAS on the fabric, so
 // its absence is a change rather than a non-event, and it is retried and said out loud.
 func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir string, out io.Writer, notice Notice) error {
+	said := &upstreamSaid{} // one operator line per upstream status, for the life of this run
+	if err := checkUpstreamKey(cfg.UpstreamKey); err != nil {
+		return err
+	}
 	var (
 		exec                station.EdgeExecutor
 		coreKey, coreEnvKey []byte
@@ -1022,10 +1068,17 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 			}
 			exec = station.EdgeExecutor{
 				Station: st, CoreKey: coreKey, Network: link.PublicNetwork,
-				Upstream: station.HTTPUpstream{URL: cfg.Upstream},
-				Outbox:   station.NewOutbox(256),
-				Seen:     station.NewAttemptCache(),
-				Log:      cfg.ModelLog,
+				// The upstream key rides here exactly as on the classic path, and is redacted at the
+				// source (features/tower/tower_upstream_key.feature).
+				Upstream: station.HTTPUpstream{URL: cfg.Upstream, Key: cfg.UpstreamKey},
+				OnUpstreamError: func(se *station.UpstreamStatusError) {
+					if said.first(se.Status) {
+						notice.notify(upstreamNotice(se))
+					}
+				},
+				Outbox: station.NewOutbox(256),
+				Seen:   station.NewAttemptCache(),
+				Log:    cfg.ModelLog,
 				// Transcripts make this node AUDITABLE: Core's sampled/adaptive audit asks for the
 				// exact bytes behind a settled receipt, and a node that retains nothing can only
 				// answer "not retained". Keep-all over the recent window (the store is bounded).
@@ -1214,7 +1267,7 @@ func serveTowerTenancy(ctx context.Context, cfg Config, at TowerAttachment,
 	// the serve plane works is a real and separate problem (an old tower, a Core that cannot be
 	// reached through this hub) and re-attaching would not fix it; letting it trip the streak
 	// would have a node abandon a relay that is paying it.
-	go towerhub.AnswerAudits(tctx, client, at.StationID, transcriptSource{exec}, coreEnvKey, 0, func(err error) {
+	go towerhub.AnswerAudits(tctx, client, at.StationID, transcriptSource{exec}, coreEnvKey, time.Duration(towerAuditEvery.Load()), func(err error) {
 		notice.notify(fmt.Errorf("relay audit: %w", err))
 	})
 	// THESE ARE ADDITIONAL TO THE CLASSIC POLL WORKERS, not a share of them. agent.Start

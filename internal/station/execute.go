@@ -35,9 +35,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
+	"unicode/utf16"
+	"unicode/utf8"
 
 	"rogerai.fm/roger/v7/internal/ctxsig"
 	"rogerai.fm/roger/v7/internal/towercore/dispatch"
@@ -98,11 +102,106 @@ func attemptOf(grant []byte) string {
 // HTTPUpstream serves from an OpenAI-compatible endpoint - the shape every local runner
 // already speaks, so a Station is pointed at what the operator is running rather than
 // requiring anything new of them.
+//
+// Contract: features/tower/tower_upstream_key.feature.
+//
+// Key is the bearer key a key-protected upstream requires (`roger share --upstream-key`). It
+// is sent to the upstream and to nothing else, and it is REDACTED here, at the source, from
+// every byte the upstream returns - body and error text alike - so the receipt digest, the
+// token count, the audit transcript, the consumer's sealed answer and the operator's log line
+// are all made from the same redacted bytes and none of them can carry it.
 type HTTPUpstream struct {
 	URL     string
+	Key     string
 	Client  *http.Client
 	Timeout time.Duration
 }
+
+// RedactKey strips key from b in every form a JSON encoder, or a hand-rolled one, can write it:
+// each CHARACTER of the key may appear verbatim or as \uXXXX (either case of hex digit; a
+// character outside the Basic Multilingual Plane as its \uXXXX\uXXXX surrogate pair), "/" also
+// as \/, and " and \ as \" and \\. That covers the verbatim key, json.Marshal's form with or
+// without HTML escaping (< > & become \u003c \u003e \u0026), and any mix of escaped and plain
+// characters. Per character, not per byte: a key need not be ASCII, and a pattern built from the
+// bytes of a multi-byte character is not valid UTF-8 and does not compile (it panicked every
+// serving path on the first reply - found by the pre-push audit 2026-11-24). A key that is not
+// valid UTF-8 at all is matched verbatim only, since no JSON encoder writes invalid UTF-8 in an
+// escaped form. A no-op for an empty key, which would match everywhere.
+func RedactKey(b []byte, key string) []byte {
+	if key == "" || len(b) == 0 {
+		return b
+	}
+	if !utf8.ValidString(key) {
+		return bytes.ReplaceAll(b, []byte(key), []byte("[redacted]"))
+	}
+	return keyPattern(key).ReplaceAll(b, []byte("[redacted]"))
+}
+
+// keyPattern is the RE2 pattern RedactKey matches: one alternation per key character. RE2 runs in time
+// linear in the body, so a large body cannot make redaction slow. Compiled once per key: the
+// classic streaming path redacts every line.
+func keyPattern(key string) *regexp.Regexp {
+	if re, ok := keyPatterns.Load(key); ok {
+		return re.(*regexp.Regexp)
+	}
+	re := compileKeyPattern(key)
+	keyPatterns.Store(key, re)
+	return re
+}
+
+// keyPatterns caches compiled patterns by key. A process serves one or a few keys.
+var keyPatterns sync.Map
+
+func compileKeyPattern(key string) *regexp.Regexp {
+	var p strings.Builder
+	for _, c := range key {
+		alts := []string{regexp.QuoteMeta(string(c)), jsonEscapePattern(c)}
+		switch c {
+		case '/':
+			alts = append(alts, `\\/`)
+		case '"':
+			alts = append(alts, `\\"`)
+		case '\\':
+			alts = append(alts, `\\\\`)
+		}
+		p.WriteString("(?:" + strings.Join(alts, "|") + ")")
+	}
+	return regexp.MustCompile(p.String())
+}
+
+// jsonEscapePattern matches c written as a JSON \u escape, hex digits in either case: \uXXXX for a
+// character in the Basic Multilingual Plane, the \uXXXX\uXXXX surrogate pair for one beyond it.
+func jsonEscapePattern(c rune) string {
+	units := []rune{c}
+	if c > 0xFFFF {
+		hi, lo := utf16.EncodeRune(c)
+		units = []rune{hi, lo}
+	}
+	var p strings.Builder
+	for _, u := range units {
+		p.WriteString(`\\u`)
+		for _, d := range []byte(fmt.Sprintf("%04x", u)) {
+			p.WriteString(hexClass(d))
+		}
+	}
+	return p.String()
+}
+
+// hexClass matches one hex digit in either case.
+func hexClass(d byte) string {
+	if d >= 'a' && d <= 'f' {
+		return "[" + string([]byte{d}) + string([]byte{d - 'a' + 'A'}) + "]"
+	}
+	return string([]byte{d})
+}
+
+// upstreamReadLimit bounds what one upstream reply may be, so a reply that streams forever cannot
+// exhaust the Station's memory.
+const upstreamReadLimit = 8 << 20
+
+// ErrUpstreamTooLarge refuses a reply past upstreamReadLimit. It is refused, not cut: a cut could
+// leave a prefix of the upstream key that redaction no longer recognises.
+var ErrUpstreamTooLarge = errors.New("the model returned more than this Station reads")
 
 func (u HTTPUpstream) Serve(ctx context.Context, request []byte) ([]byte, error) {
 	timeout := u.Timeout
@@ -117,6 +216,9 @@ func (u HTTPUpstream) Serve(ctx context.Context, request []byte) ([]byte, error)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if u.Key != "" {
+		req.Header.Set("Authorization", "Bearer "+u.Key)
+	}
 	client := u.Client
 	if client == nil {
 		client = http.DefaultClient
@@ -128,10 +230,16 @@ func (u HTTPUpstream) Serve(ctx context.Context, request []byte) ([]byte, error)
 	defer resp.Body.Close()
 	// Bounded: an upstream that streams forever must not be able to exhaust this Station's
 	// memory on one request.
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
+	body, err := io.ReadAll(io.LimitReader(resp.Body, upstreamReadLimit+1))
 	if err != nil {
 		return nil, err
 	}
+	if len(body) > upstreamReadLimit {
+		return nil, ErrUpstreamTooLarge
+	}
+	// Redacted BEFORE anything is measured, signed, kept or shortened: a cut made first could
+	// leave part of the key that a whole-key replace no longer matches.
+	body = RedactKey(body, u.Key)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, &UpstreamStatusError{Status: resp.StatusCode, RetryAfter: retryAfterSeconds(resp.Header.Get("Retry-After")),
 			Detail: truncate(string(body), 200), ContextWindow: ctxsig.IsRefusal(resp.StatusCode, string(body))}

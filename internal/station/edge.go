@@ -90,10 +90,15 @@ type EdgeExecutor struct {
 	// Seen is the sealed path's one-serve-per-attempt guard (see AttemptCache). Nil disables
 	// replay suppression - acceptable only in tests; a wired node should always carry one.
 	Seen *AttemptCache
+	// OnUpstreamError, when set, hears every non-2xx reply from the upstream on this
+	// Station's own machine. The error is already redacted (HTTPUpstream does it at the
+	// source). It is how the operator learns what the model said; the wire carries only the
+	// class.
+	OnUpstreamError func(*UpstreamStatusError)
 	// Log is the operator's own output. One line goes here for each attempt the model answered
-	// with an error status, with the model's words (bounded, nothing unprintable), and nowhere
-	// else: the failure that crosses the Tower carries only a class (see ServeSealed). Nil
-	// keeps nothing.
+	// with an error status, with the model's words (bounded, nothing unprintable, and already
+	// redacted of the upstream key), and nowhere else: the failure that crosses the Tower
+	// carries only a class (see ServeSealed). Nil keeps nothing.
 	Log io.Writer
 	Now func() time.Time
 }
@@ -142,6 +147,11 @@ func (e EdgeExecutor) Serve(ctx context.Context, in EdgeRequest) EdgeResponse {
 	if err != nil {
 		// The upstream's own words: an operator debugging a Station needs what the model
 		// actually said, and a consumer needs to know it was the model rather than the grant.
+		// They are already redacted of the upstream key (HTTPUpstream does it at the source).
+		e.heardUpstream(err)
+		if errors.Is(err, ErrUpstreamTooLarge) {
+			return fail(502, "the model returned more than this grant allows")
+		}
 		return fail(502, "the model did not answer: "+err.Error())
 	}
 	// THE CEILING APPLIES TO THE ANSWER TOO. Without this the output bound in the grant would
@@ -178,6 +188,14 @@ func (e EdgeExecutor) Serve(ctx context.Context, in EdgeRequest) EdgeResponse {
 		Body:    body,
 		Receipt: base64.StdEncoding.EncodeToString(rec.Signed),
 		Status:  200,
+	}
+}
+
+// heardUpstream hands an upstream's non-2xx reply to the operator's hook, if one is set.
+func (e EdgeExecutor) heardUpstream(err error) {
+	var se *UpstreamStatusError
+	if e.OnUpstreamError != nil && errors.As(err, &se) {
+		e.OnUpstreamError(se)
 	}
 }
 

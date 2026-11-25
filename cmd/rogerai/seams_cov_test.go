@@ -212,7 +212,7 @@ func TestCmdShareDetectionPicksRequestedModel(t *testing.T) {
 	stubShareSeams(t)
 	stubDetectFull(t, []detect.Found{
 		{Name: "a", BaseURL: "http://127.0.0.1:1/v1", Chat: "http://127.0.0.1:1/v1/chat/completions", Models: []string{"other"}},
-		{Name: "b", BaseURL: "http://127.0.0.1:2/v1", Chat: "http://127.0.0.1:2/v1/chat/completions", Models: []string{"wanted"}, Key: "sk-x"},
+		{Name: "b", BaseURL: "http://127.0.0.1:2/v1", Chat: "http://127.0.0.1:2/v1/chat/completions", Models: []string{"wanted"}, Key: "sk-wanted-key"},
 	}, nil)
 
 	cfg := config{Broker: "https://b", User: "u"}
@@ -220,7 +220,7 @@ func TestCmdShareDetectionPicksRequestedModel(t *testing.T) {
 
 	// The 2nd endpoint (serving "wanted", with a key) must be the one adopted + saved.
 	saved := loadConfig().Share
-	if saved == nil || saved.Upstream != "http://127.0.0.1:2/v1" || saved.UpstreamKey != "sk-x" {
+	if saved == nil || saved.Upstream != "http://127.0.0.1:2/v1" || saved.UpstreamKey != "sk-wanted-key" {
 		t.Fatalf("model-matching pick wrong: %+v", saved)
 	}
 }

@@ -496,7 +496,7 @@ func TestCmdShareExplicitUpstreamHarvestsEnvKey(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	stubShareSeams(t)
 	stubDetectProbeKey(t, func(url, key string) (detect.Found, detect.Status) {
-		return detect.Found{BaseURL: url, Chat: url, Models: []string{"m1"}, Key: "sk-env"}, detect.Reachable
+		return detect.Found{BaseURL: url, Chat: url, Models: []string{"m1"}, Key: "sk-env-harvested"}, detect.Reachable
 	})
 	runShareAsync(t, config{Broker: "https://b", User: "u"},
 		[]string{"m1", "--upstream", "http://127.0.0.1:5555/v1"})

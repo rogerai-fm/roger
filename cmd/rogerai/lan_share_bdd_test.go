@@ -114,7 +114,7 @@ func (s *lanShareBDD) machineServes(band string) error {
 	s.model = band
 	up := completionUpstream(s.t, "self")
 	c := loadConfig()
-	c.Share = &Share{Upstream: up.URL + "/v1", UpstreamKey: "k", Model: band}
+	c.Share = &Share{Upstream: up.URL + "/v1", UpstreamKey: "lan-test-upstream-key", Model: band}
 	if err := saveConfig(c); err != nil {
 		return err
 	}

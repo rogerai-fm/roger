@@ -46,6 +46,9 @@ func NodeID() string { return idFromPriv(NodeKey()) }
 // It loops until the context is cancelled. Poll and per-job errors are transient - the node
 // simply re-polls - because a standalone plant should keep serving across a Tower blip.
 func ServeLocalTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, out io.Writer) error {
+	if err := checkUpstreamKey(cfg.UpstreamKey); err != nil {
+		return err
+	}
 	pollClient := &http.Client{Timeout: 40 * time.Second} // longer than the plane's poll window
 	execClient := &http.Client{Timeout: 10 * time.Minute} // a real prompt is real work (upstream)
 	towerClient := execClient                             // completions and chunks posted to the Tower

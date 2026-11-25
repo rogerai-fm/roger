@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/mattn/go-isatty"
+	"rogerai.fm/roger/v7/internal/agent"
 	"rogerai.fm/roger/v7/internal/buildinfo"
 	"rogerai.fm/roger/v7/internal/detect"
 	"rogerai.fm/roger/v7/internal/netbind"
@@ -298,6 +299,10 @@ func promptUpstreamKey(needKey []string) (detect.Found, bool) {
 			return detect.Found{}, false
 		}
 		if strings.TrimSpace(key) == "" {
+			continue
+		}
+		if err := agent.CheckUpstreamKey(strings.TrimSpace(key)); err != nil {
+			fmt.Printf("%v.\n", err)
 			continue
 		}
 		if f, st := detect.ProbeKey(base, strings.TrimSpace(key)); st == detect.Reachable {

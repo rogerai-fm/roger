@@ -95,4 +95,10 @@ regexes = [
   # literal following a variable named `auth`. Nothing to rotate; the shape will recur,
   # so tighten the rule rather than grow this list if it does.
   '''^v1/no/leading/slash$''',
+  # AUDITED 2026-11-25. Test fixture in internal/agent/tower_upstream_key_bdd_test.go
+  # (e9e4a89bb5, PR #32): `const ukKey = ...`, a made-up value (a counting run of hex digits
+  # plus KEYZ) that the upstream-key spec feeds through every Tower path to prove the key is
+  # sent upstream and redacted from replies, logs and errors. Not a credential - it never
+  # existed outside the test. Exact value only, so any other key there still fails.
+  '''^sk-test-0123456789abcdefKEYZ$''',
 ]

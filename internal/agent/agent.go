@@ -28,11 +28,13 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"unicode/utf8"
 
 	"rogerai.fm/roger/v7/internal/client"
 	"rogerai.fm/roger/v7/internal/keyfile"
 	"rogerai.fm/roger/v7/internal/protocol"
 	"rogerai.fm/roger/v7/internal/servedfile"
+	"rogerai.fm/roger/v7/internal/station"
 )
 
 // shareFeeRate is the platform take used only to ESTIMATE the session's live
@@ -515,6 +517,9 @@ func (s *Session) ProbeStats() (reqs, tokens int64) {
 // Start registers the node and launches its outbound poll loops, returning a
 // Session for live stats + Stop (the TUI's in-process /share). It does NOT block.
 func Start(cfg Config) (*Session, error) {
+	if err := checkUpstreamKey(cfg.UpstreamKey); err != nil {
+		return nil, err
+	}
 	priv := loadOrCreateKey()
 	pubHex := hex.EncodeToString(priv.Public().(ed25519.PublicKey))
 	token := cfg.BridgeToken
@@ -736,6 +741,31 @@ func heartbeatUntil(broker, nodeID string, rereg *reregistrar, sess *Session) {
 	}
 }
 
+// minUpstreamKeyLen is the shortest upstream key a share will start with. Redaction replaces
+// the key wherever an upstream echoes it, and a key of a few characters would match ordinary
+// words in ordinary answers - mangling them, and telling anyone who compares the two which
+// characters the key is made of.
+//
+// Contract: features/tower/tower_upstream_key.feature.
+const minUpstreamKeyLen = 8
+
+// ErrUpstreamKeyTooShort refuses a share whose upstream key cannot be safely redacted.
+var ErrUpstreamKeyTooShort = fmt.Errorf("the upstream key is too short to keep out of replies "+
+	"(fewer than %d characters) - give the local server a longer key", minUpstreamKeyLen)
+
+// CheckUpstreamKey refuses a key too short to redact safely. No key at all is fine. Exported so
+// every place that accepts or saves a key (the share flag, the onboarding paste, the TUI's save)
+// refuses it BEFORE anything is written, not only at start.
+func CheckUpstreamKey(key string) error { return checkUpstreamKey(key) }
+
+// checkUpstreamKey is CheckUpstreamKey.
+func checkUpstreamKey(key string) error {
+	if key != "" && utf8.RuneCountInString(key) < minUpstreamKeyLen {
+		return ErrUpstreamKeyTooShort
+	}
+	return nil
+}
+
 // redactUpstreamKey strips the node's upstream bearer key from bytes about to be
 // relayed back to the broker/consumer. Standard OpenAI-compatible servers never echo
 // the request Authorization header into their response, but a misconfigured proxy /
@@ -743,12 +773,10 @@ func heartbeatUntil(broker, nodeID string, rereg *reregistrar, sess *Session) {
 // operator's OWN upstream key can never leave the machine in a job result. A no-op
 // when no key is configured (and never called with an empty key, which would match
 // everywhere).
-func redactUpstreamKey(b []byte, key string) []byte {
-	if key == "" {
-		return b
-	}
-	return bytes.ReplaceAll(b, []byte(key), []byte("[redacted]"))
-}
+//
+// One implementation for every path: station.RedactKey, which also catches the key's JSON escape
+// forms (features/tower/tower_upstream_key.feature).
+func redactUpstreamKey(b []byte, key string) []byte { return station.RedactKey(b, key) }
 
 func isStream(body []byte) bool {
 	var p struct {

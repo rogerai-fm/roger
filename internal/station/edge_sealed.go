@@ -126,22 +126,26 @@ func (e EdgeExecutor) ServeSealed(ctx context.Context, grantRaw, sealedReq []byt
 
 	body, err := e.Upstream.Serve(ctx, request)
 	if err != nil {
+		e.heardUpstream(err)
 		// GENERIC, DELIBERATELY. On this path the failure string crosses the TOWER in the
 		// clear (it is the one thing that cannot be sealed - the consumer needs to read it to
 		// know why nothing opened). An upstream's own error body can echo fragments of the
 		// request (validation errors often quote what they rejected), and err.Error() embeds a
 		// slice of that body - so forwarding it would hand consumer plaintext to the exact
-		// party this design blinds. The operator has the model's words on their own output
-		// (Log, one line per attempt the model answered with an error status); the wire gets
-		// only the class. A TYPED status reply adds its status and Retry-After
-		// (two numbers, no echo), so the relay can answer a consumer's 429 as a 429 with its
-		// wait (features/routing/edge_bridge_parity.feature) instead of a generic failure.
+		// party this design blinds. The operator hears the model's (redacted) words on their own
+		// machine: through OnUpstreamError, and as one line per attempt on Log. The wire gets
+		// only the class. A TYPED status reply adds its status and Retry-After (two numbers, no
+		// echo), so the relay can answer a consumer's 429 as a 429 with its wait
+		// (features/routing/edge_bridge_parity.feature) instead of a generic failure.
 		var se *UpstreamStatusError
 		if errors.As(err, &se) {
 			if e.Log != nil {
 				fmt.Fprintln(e.Log, operatorLine(grant.AttemptID, se))
 			}
 			return nil, nil, se.Class()
+		}
+		if errors.Is(err, ErrUpstreamTooLarge) {
+			return nil, nil, "the model returned more than this grant allows"
 		}
 		return nil, nil, "the model did not answer"
 	}

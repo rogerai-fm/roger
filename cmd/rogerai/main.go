@@ -876,6 +876,11 @@ func tuiHooks(cfg config) tui.Hooks {
 		// custom or key-protected upstream survives a restart (the TUI mirror of the save
 		// in `roger share`; the host owns the config write).
 		SaveUpstream: func(upstream, key string) {
+			// A key too short to keep out of replies is never saved: every later start would
+			// refuse it (tower_upstream_key.feature).
+			if agent.CheckUpstreamKey(key) != nil {
+				return
+			}
 			c := loadConfig()
 			if c.Share == nil {
 				c.Share = &Share{}
@@ -1559,6 +1564,11 @@ func cmdShare(cfg config, args []string) error {
 	advanced := fs.Bool("advanced", false, "show advanced flags (--node --region --parallel --upstream --modality --ctx --confidential --free-window --schedule --curated --upstream-price-in --upstream-price-out --probe-min --category --tag --tuning --policy --license --base-model)")
 	fs.Usage = func() { fmt.Print(shareUsage) }
 	fs.Parse(rest)
+	// A key too short to keep out of replies is refused here, before it can be probed with,
+	// saved, or replayed into every later start (tower_upstream_key.feature).
+	if err := agent.CheckUpstreamKey(*upKey); err != nil {
+		return err
+	}
 	// The preflight answers a question about the MACHINE, so it runs before anything that
 	// touches the model server or the broker: an operator asking "is this box worth it?"
 	// should not have their upstream probed, or a login demanded, to find out.
@@ -1872,6 +1882,11 @@ func cmdShare(cfg config, args []string) error {
 	// ONCE here whether the resolved upstream is Osaurus (root-banner fingerprint) so the relay
 	// applies them without re-probing per job; a no-op flag for every other backend.
 	osaurusUpstream := osaurusBrand || detect.IsOsaurus(strings.TrimSuffix(up, "/chat/completions"))
+	// Whatever the key's source (flag, saved config, detection, the onboarding paste), it is
+	// checked before persistUpstream can save it.
+	if err := agent.CheckUpstreamKey(*upKey); err != nil {
+		return err
+	}
 	cfgRun := agent.Config{
 		Broker: *broker, Upstream: up, UpstreamKey: *upKey, Osaurus: osaurusUpstream,
 		// HW carries the PRIVACY-BUCKETED class (multi-gpu / single-gpu / apple / cpu),

@@ -21,7 +21,7 @@ func TestSpeechURLIsBesideTheChatURL(t *testing.T) {
 func TestServeSpeechForOnlyOnAirVoices(t *testing.T) {
 	c := New(Config{Broker: fakeBroker(t), Station: "amber-fox"})
 	c.SetRows([]ShareRow{
-		{Model: "voice-1", Modality: "tts", Upstream: "http://127.0.0.1:0/v1/chat/completions", UpstreamKey: "sk-v"},
+		{Model: "voice-1", Modality: "tts", Upstream: "http://127.0.0.1:0/v1/chat/completions", UpstreamKey: "sk-voice-key"},
 		{Model: "chat-1", Ctx: 8192, Upstream: "http://127.0.0.1:0/v1/chat/completions"},
 	})
 	_, _, ok := c.ServeSpeechFor("voice-1")
@@ -31,7 +31,7 @@ func TestServeSpeechForOnlyOnAirVoices(t *testing.T) {
 	u, k, ok := c.ServeSpeechFor("voice-1")
 	require.True(t, ok)
 	require.Equal(t, "http://127.0.0.1:0/v1/audio/speech", u)
-	require.Equal(t, "sk-v", k)
+	require.Equal(t, "sk-voice-key", k)
 	_, _, ok = c.ServeSpeechFor("chat-1")
 	require.False(t, ok, "a chat band is not a voice")
 	_, _, ok = c.ServeSpeechFor("no-such-model")
