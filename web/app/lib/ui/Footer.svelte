@@ -32,6 +32,8 @@
         <a href="/research-wave-family.html">Wave family</a>
         <a href="/research-hardware.html">Hardware</a>
         <a href="/research-industry.html">Industrial</a>
+        <a href="/research-oil-gas.html">Oil and gas</a>
+        <a href="/research-wildfire.html">Wildfire</a>
         <a href="/research-custom-tuning.html">Custom tuning</a>
       </div>
       <div class="footer__group">

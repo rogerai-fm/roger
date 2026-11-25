@@ -6,6 +6,8 @@
   // 2026-11-14 (founder): show, don't tell. Each section is a heading, a line, a figure, and a strip of
   // one-line cards. The full account of every step lives in the manual (manual.html#sTune) and each
   // section links to it. The figures' scrubbed lists play on their own while in view (data-scrub-auto).
+  // 2026-11-25 (founder): tuning is by engagement only, not self-serve. The page explains the process
+  // and sends people to the contact form's tuning topic (data-lets-talk="tuning"); no public price.
   import { siteHead, CSS_SHARED } from "#lib/head.js";
   import Footer from "#lib/ui/Footer.svelte";
   import Nav from "#lib/ui/Nav.svelte";
@@ -38,13 +40,14 @@
             <a class="wf-back mono" href="/research.html">&larr; RogerAI Labs</a>
             <span class="hero__eyebrow">
               <OnAir />
-              <span class="hero__callsign">CUSTOM TUNING &middot; RESEARCH PROTOTYPE</span>
+              <span class="hero__callsign">CUSTOM TUNING &middot; BY ENGAGEMENT</span>
             </span>
             <h1>Train a Wave model on your records. Use it privately, from anywhere.</h1>
             <p class="research-hero__lead">
-              Your records, labels and documents go in. Out comes a newly trained model, within
-              minutes, that understands what you trained it on, and only you can reach it. Designed in
-              Orange County, California. Served on our global decentralized cloud.
+              We work with you, one engagement at a time. First we check whether a prompt would do.
+              If tuning wins, your records teach a Wave model, you get a report you can check, and
+              only you can reach the result. Designed in Orange County, California. Our cloud is
+              global.
             </p>
           </div>
           <!-- THE FILM (2026-11-15): Ping plugs the records into the set, drawn in the approved
@@ -66,28 +69,31 @@
 
     <TocTuner sections={[
       { id: "how", no: "§1", name: "HOW" },
-      { id: "files", no: "§2", name: "FILES" },
-      { id: "where", no: "§3", name: "PRIVATE" },
-      { id: "measured", no: "§4", name: "MEASURED" },
-      { id: "not-yet", no: "§5", name: "DATA" },
-      { id: "talk", no: "§6", name: "TALK" },
+      { id: "fit", no: "§2", name: "FIT" },
+      { id: "files", no: "§3", name: "FILES" },
+      { id: "where", no: "§4", name: "PRIVATE" },
+      { id: "measured", no: "§5", name: "MEASURED" },
+      { id: "not-yet", no: "§6", name: "DATA" },
+      { id: "talk", no: "§7", name: "TALK" },
     ]} />
 
     <section class="section" id="how">
       <div class="wrap">
         <div class="section__head section__head--left">
-          <span class="sectionno">§1 / HOW IT WORKS</span>
-          <h2>What happens when you send us records.</h2>
-          <p>One of our spare GPUs fine-tunes a specialized Wave model of a size that fits your
-            task. Wave models are never published, and your add-on stays on our cloud too.</p>
+          <span class="sectionno">§1 / HOW AN ENGAGEMENT RUNS</span>
+          <h2>Five steps, worked through with you.</h2>
+          <p>Not a self-serve upload. We scope each job with you, and quote it before anything
+            trains.</p>
         </div>
         <div class="device-contract">
-          <p><b>1. You send examples.</b> A spreadsheet export, or a file you made for OpenAI or
-            Fireworks. We check it line by line.</p>
-          <p><b>2. We train an add-on.</b> A file of 14 to 34 MB. Two to thirty minutes on one GPU.</p>
-          <p><b>3. You read the report.</b> How often it was right on records it never saw, and
-            whether it met your bar.</p>
-          <p><b>4. You use it, or you don&rsquo;t.</b> A private band on our cloud, or we delete
+          <p><b>1. You tell us the task.</b> Seven short questions in the contact form. A sample of
+            records helps.</p>
+          <p><b>2. We check the fit.</b> We read your records and try a prompt first. If a prompt
+            is enough, we say so and nothing trains.</p>
+          <p><b>3. We train an add-on.</b> A file of 14 to 34 MB. Two to thirty minutes on one GPU.</p>
+          <p><b>4. You read the report.</b> The untuned model beside the tuned one, on records it
+            never saw, against your bar.</p>
+          <p><b>5. You use it, or you don&rsquo;t.</b> A private band on our cloud, or we delete
             your examples.</p>
         </div>
         <AddonShelfFigure fig={2} />
@@ -95,10 +101,29 @@
       </div>
     </section>
 
+    <section class="section band band--inset" id="fit">
+      <div class="wrap">
+        <div class="section__head section__head--left">
+          <span class="sectionno">§2 / WHEN IT FITS</span>
+          <h2>Tuning wins on a narrow job done often.</h2>
+          <p>Newer models follow a good prompt well. We only train when the report can show the
+            difference.</p>
+        </div>
+        <div class="device-contract">
+          <p><b>A good fit.</b> One narrow task, done many times a day. Labelled examples, enough
+            to hold some back. A bar you can check.</p>
+          <p><b>A prompt is enough.</b> A format or a tone. Facts that change every week. A handful
+            of examples, or no way to tell right from wrong.</p>
+          <p><b>Why it is not self-serve.</b> Most of the work is the data and the bar, not the
+            training run. That needs a conversation.</p>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="files">
       <div class="wrap">
         <div class="section__head section__head--left">
-          <span class="sectionno">§2 / THREE FILES</span>
+          <span class="sectionno">§3 / THREE FILES</span>
           <h2>What you send, and what you get back.</h2>
         </div>
         <div class="device-contract">
@@ -118,7 +143,7 @@
     <section class="section" id="where">
       <div class="wrap">
         <div class="section__head section__head--left">
-          <span class="sectionno">§3 / WHERE IT RUNS</span>
+          <span class="sectionno">§4 / WHERE IT RUNS</span>
           <h2>It runs on our cloud. Only you can reach it.</h2>
           <p>Want Wave and your add-on on your own machines, with no network at all?
             <a href="mailto:labs@rogerai.fm?subject=Wave%20on%20site">Write to us</a>.</p>
@@ -140,7 +165,7 @@
     <section class="section" id="measured">
       <div class="wrap">
         <div class="section__head section__head--left">
-          <span class="sectionno">§4 / WHAT WE MEASURED</span>
+          <span class="sectionno">§5 / WHAT WE MEASURED</span>
           <h2>What it did on two public datasets.</h2>
           <p>Excavator work orders and offshore incident reports, both public. Every number is on
             records the model never saw.</p>
@@ -163,8 +188,8 @@
     <section class="section" id="not-yet">
       <div class="wrap">
         <div class="section__head section__head--left">
-          <span class="sectionno">§5 / YOUR DATA, AND WHAT IS NOT BUILT</span>
-          <h2>Your records, and what is not built yet.</h2>
+          <span class="sectionno">§6 / YOUR DATA, AND HOW WE WORK</span>
+          <h2>Your records, and how we work with them.</h2>
         </div>
         <div class="device-contract">
           <p><b>Your data.</b> Used for one job. Say forget and we delete it and write down what
@@ -172,8 +197,8 @@
             names before you send.</p>
           <p><b>Files from other services.</b> An OpenAI or Fireworks training file runs here
             unchanged. Tool calls and images are refused, and the check says why.</p>
-          <p><b>Not yet.</b> An upload page, a queue, a price. Write to us and we run it for
-            you.</p>
+          <p><b>By engagement.</b> No upload page and no public price. We scope the job with you
+            and run it for you.</p>
         </div>
         <p class="sec-more mono"><a href="{MANUAL}-data">What happens to your records, in
           the manual &rarr;</a></p>
@@ -182,13 +207,12 @@
 
     <section class="section research-closing" id="talk">
       <div class="wrap">
-        <span class="sectionno">§6 / TALK TO US</span>
-        <h2>Send us a spreadsheet.</h2>
-        <p>Records and labels? Write to us. We run the check and tell you what it finds before
-          anything trains.</p>
+        <span class="sectionno">§7 / TALK TO US</span>
+        <h2>Tell us the task.</h2>
+        <p>Seven short questions. We answer with whether tuning fits, before anything trains.</p>
         <div class="research-actions research-actions--lead">
-          <a class="research-button" data-lets-talk aria-expanded="false"
-             href="mailto:labs@rogerai.fm?subject=Custom%20tuning">Contact RogerAI Labs</a>
+          <a class="research-button" data-lets-talk="tuning" aria-expanded="false"
+             href="mailto:labs@rogerai.fm?subject=Custom%20tuning%20engagement">Start an engagement</a>
           <a class="research-button" href="/research.html">Back to Labs</a>
         </div>
       </div>

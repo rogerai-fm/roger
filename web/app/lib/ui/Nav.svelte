@@ -72,7 +72,18 @@
               <a class="nav__sub" href="/research-wave-nano.html"><b>Wave Nano</b><span>1.45B: telemetry, a fleet, a fire site, and conversation.</span></a>
             </div>
             <a href="/research-hardware.html"><b>Hardware</b><span>ESP32 to DGX Spark: which board carries which tier, and the honest stage of each.</span></a>
-            <a href="/research-industry.html"><b>Industrial deployment</b><span>Where the box sits in a plant network, and what it never touches.</span></a>
+            <span class="nav__deckrow">
+              <a href="/research-industry.html"><b>Industrial deployment</b><span>Where the box sits in a plant network, and what it never touches.</span></a>
+              <button class="nav__more nav__more--sub" type="button" id="navIndustryPagesBtn"
+                      aria-expanded="false" aria-controls="navIndustryPagesPanel"
+                      aria-label="Show the industry pages" data-show="Show the industry pages" data-hide="Hide the industry pages">
+                <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </button>
+            </span>
+            <div class="nav__decks" id="navIndustryPagesPanel" hidden>
+              <a class="nav__sub" href="/research-oil-gas.html"><b>Oil and gas</b><span>The field, machines, pipelines and manuals, read on site.</span></a>
+              <a class="nav__sub" href="/research-wildfire.html"><b>Wildfire</b><span>Fire early warning: smell first, look second, tell a person why.</span></a>
+            </div>
             <a href="/research-custom-tuning.html"><b>Custom tuning</b><span>A Wave model trained on your records, served privately to you, with a report you can check.</span></a>
             <a href="/broadcasts.html"><b>Broadcasts</b><span>What we shipped, what we measured, what did not work.</span></a>
           </div>

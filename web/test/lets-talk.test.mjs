@@ -73,3 +73,14 @@ test("lets-talk: the defining stylesheet ships on every page using the dialog", 
       `${page} carries a stylesheet that includes the dialog rules`);
   }
 });
+
+// 2026-11-25 (founder): custom tuning is by engagement only. The tuning page's call opens the dialog
+// on the tuning topic, whose starter note carries the intake questions.
+test("lets-talk: the tuning page opens the engagement topic with the intake questions", () => {
+  assert.match(read("research-custom-tuning.html"), /<a[^>]*data-lets-talk="tuning"[^>]*href="mailto:labs@rogerai\.fm[^"]*"/);
+  assert.match(component("LetsTalk"), /<option value="tuning">Custom tuning engagement<\/option>/);
+  const js = src("js/lets-talk.js");
+  for (const q of ["The task, in one sentence", "Requests per month", "Examples we have", "How we will judge it",
+    "How sensitive the records are", "Where it must run", "Timeline"]) assert.ok(js.includes(q), `the tuning starter asks: ${q}`);
+  assert.match(js, /getAttribute\("data-lets-talk"\)/, "a trigger may name its topic");
+});

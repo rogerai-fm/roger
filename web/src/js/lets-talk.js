@@ -28,6 +28,9 @@
   // reads like a questionnaire. Plain hyphens only (founder style: no em dashes).
   var STARTERS = {
     industrial: "Hi RogerAI team - we are looking at an advisory model beside our existing control systems.\n\n- Site and industry:\n- The workload (alarms, work orders, logs):\n- Where a box could sit (control room, purged cabinet):\n\nWhat would a pilot look like?",
+    // The tuning intake (2026-11-25, founder: engagements only, no self-serve). Seven lines that
+    // decide whether tuning fits at all; a prompt is often enough, and we would rather say so first.
+    tuning: "Hi RogerAI team, we would like to talk about a custom tuning engagement.\n\n- The task, in one sentence:\n- Requests per month, roughly:\n- Examples we have (how many, what format):\n- How we will judge it (a bar, examples held back):\n- How sensitive the records are:\n- Where it must run (your cloud, our machines, a device):\n- Timeline:\n",
     custom: "Hi RogerAI team - I would like to talk about a custom or optimized model.\n\n- Use case:\n- Base model or family of interest:\n- Target hardware and constraints:\n\nCould you walk me through the options?",
     station: "Hi RogerAI team - I have hardware and want to put it on air.\n\n- Hardware (GPU, RAM):\n- Models I want to serve:\n- Anything unusual about my setup:\n",
     press: "Hi RogerAI team - reaching out about a partnership or press.\n\n- Who we are:\n- What we have in mind:\n- Timeline:\n",
@@ -35,6 +38,7 @@
   };
   var SUBJECTS = {
     industrial: "Industrial pilot",
+    tuning: "Custom tuning engagement",
     custom: "Custom or optimized model",
     station: "Run a station",
     press: "Partnership or press",
@@ -59,6 +63,9 @@
   }
   function open(fromEl) {
     lastFocus = fromEl || document.activeElement;
+    // A trigger may name its topic (data-lets-talk="tuning"); a bare trigger keeps the last one.
+    var want = fromEl && fromEl.getAttribute && fromEl.getAttribute("data-lets-talk");
+    if (want && STARTERS[want]) topic.value = want;
     modal.hidden = false; scrim.hidden = false;
     document.documentElement.classList.add("lt-open");
     fillStarter();

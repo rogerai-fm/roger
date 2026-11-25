@@ -147,6 +147,8 @@ test("the nav panels reveal every page that is otherwise hub-only", () => {
     "/research-models.html",
     "/research-wave-family.html",
     "/research-industry.html",
+    "/research-oil-gas.html",   // 2026-11-25 (founder): the industry pages nest under Industrial deployment
+    "/research-wildfire.html",
     "/broadcasts.html",
     "/careers.html",
     "/voices.html",
