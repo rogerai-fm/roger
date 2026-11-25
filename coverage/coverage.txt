@@ -5400,7 +5400,7 @@ rogerai.fm/roger/v7/internal/tui/tui.go:4784:				atOnAirLimit				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4788:				hasSchedule				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4796:				pilotLamp				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4815:				marquee					91.7%
-rogerai.fm/roger/v7/internal/tui/tui.go:4836:				editorLivePreview			96.0%
+rogerai.fm/roger/v7/internal/tui/tui.go:4836:				editorLivePreview			92.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4885:				maskKey					100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4901:				modalFooter				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4922:				footer					92.3%
