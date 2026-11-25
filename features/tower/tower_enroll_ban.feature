@@ -1,5 +1,16 @@
 # APPROVED SPEC - founder approved 2026-11-24 ("approved"). Changes to an approved scenario need re-approval.
-# BUILD STATUS: NOT BUILT. Approval is not implementation - this line says which.
+# BUILD STATUS: PARTIAL. Built: cmd/rogerai-broker/tower.go (brokerOperatorPolicy, towerOwnerBanned,
+# keyAccountBanned, mayRunTower, suspendTowersOfBanned, sweepBannedTowersIfDue; checks at token and
+# challenge, and a re-check after admission), strikes.go (banOwner suspends), report.go and tunnel.go
+# (the ban-sync tick re-runs suspension), toweredgeattach.go (attach uses the same helper),
+# internal/towercore/enroll (the one enroll-time ban check; spends a ban-refused token),
+# internal/towercore/admit (SpendToken, AllTowers). Not built: moving a suspended Tower's Stations
+# under R4, which waits on station_mobility_idempotency.feature R4.
+#
+# Build notes (2026-11-24): an account that cannot be checked is refused with 503, never granted.
+# Expired Towers cannot be suspended and are skipped; any future re-admission path must check bans
+# itself. A Tower enrolled under a login the account has since renamed cannot be traced to the
+# account: the store keeps no record of earlier logins.
 #
 # Found 2026-11-23 while fixing the Station attach signer (station_attach_signer.feature).
 #
