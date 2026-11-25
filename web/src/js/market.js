@@ -113,7 +113,9 @@
 
   /* ---------- the six painted rows: a shop window, not a leaderboard ------
      Strict top-6-by-signal made the homepage look like six near-identical human
-     bands: curated and free supply (real, on air, lower signal) never surfaced.
+     bands: curated and free supply (real, on air) seldom surfaced. A curated-only
+     band has a real signal but scores nothing on the supply term, so it tends to
+     sit below a band with people's stations.
      Anchor on the top three signals, then guarantee a seat to a curated band and
      a free band when any is live (picked at random among candidates), fill the
      rest at random, and re-sort by signal so the meter still reads high-to-low.
