@@ -65,7 +65,7 @@ test("(b) the manual's contents are a tuner of every section, in order, and noth
   const st = stations(t);
   const ids = [...html.matchAll(/<section class="man-sec" id="([^"]+)"/g)].map((m) => m[1]);
   // features/lan/trust_and_honesty.feature (the manual's LAN section, run by TestLANDocsBDD) adds §L.
-  assert.equal(ids.length, 26, "the manual has its 26 sections (§L LAN mode joined 2026-10-07; B3 Custom tuning and B4 The money joined 2026-11-14; §M Local models and §E Edge joined 2026-11-21; B5 The Wave family and B6 Wave Nano joined 2026-11-24)");
+  assert.equal(ids.length, 27, "the manual has its 27 sections (§L LAN mode joined 2026-10-07; B3 Custom tuning and B4 The money joined 2026-11-14; §M Local models and §E Edge joined 2026-11-21; B5 The Wave family and B6 Wave Nano joined 2026-11-24; §S Search joined 2026-11-25)");
   assert.deepEqual(st.map((s) => s.id), ids, "one station per section, in page order");
   assert.doesNotMatch(html, /class="man-toc/, "the old sticky rail is gone");
   assert.doesNotMatch(stripCss(src("styles/manual.css")), /position:\s*sticky/, "nothing on the manual is sticky");

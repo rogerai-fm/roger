@@ -701,6 +701,7 @@ li:nth-child(7) > .wave-bar { --gap: 2.4px; }
 .toc-tuner:has(li:nth-child(24):last-child) { --tuner-n: 24; }
 .toc-tuner:has(li:nth-child(25):last-child) { --tuner-n: 25; }
 .toc-tuner:has(li:nth-child(26):last-child) { --tuner-n: 26; }
+.toc-tuner:has(li:nth-child(27):last-child) { --tuner-n: 27; }
 .toc-tuner:has(li:nth-child(13) a:is(:hover, :focus-visible)) { --at: 12; }
 .toc-tuner:has(li:nth-child(14) a:is(:hover, :focus-visible)) { --at: 13; }
 .toc-tuner:has(li:nth-child(15) a:is(:hover, :focus-visible)) { --at: 14; }
@@ -715,6 +716,7 @@ li:nth-child(7) > .wave-bar { --gap: 2.4px; }
 .toc-tuner:has(li:nth-child(24) a:is(:hover, :focus-visible)) { --at: 23; }
 .toc-tuner:has(li:nth-child(25) a:is(:hover, :focus-visible)) { --at: 24; }
 .toc-tuner:has(li:nth-child(26) a:is(:hover, :focus-visible)) { --at: 25; }
+.toc-tuner:has(li:nth-child(27) a:is(:hover, :focus-visible)) { --at: 26; }
 .toc-tuner:has(li:nth-child(13) a:is(:hover, :focus-visible)) li:nth-child(13) .toc-tuner__name,
 .toc-tuner:has(li:nth-child(14) a:is(:hover, :focus-visible)) li:nth-child(14) .toc-tuner__name,
 .toc-tuner:has(li:nth-child(15) a:is(:hover, :focus-visible)) li:nth-child(15) .toc-tuner__name,
@@ -729,6 +731,7 @@ li:nth-child(7) > .wave-bar { --gap: 2.4px; }
 .toc-tuner:has(li:nth-child(24) a:is(:hover, :focus-visible)) li:nth-child(24) .toc-tuner__name { opacity: 1; }
 .toc-tuner:has(li:nth-child(25) a:is(:hover, :focus-visible)) li:nth-child(25) .toc-tuner__name,
 .toc-tuner:has(li:nth-child(26) a:is(:hover, :focus-visible)) li:nth-child(26) .toc-tuner__name { opacity: 1; }
+.toc-tuner:has(li:nth-child(27) a:is(:hover, :focus-visible)) li:nth-child(27) .toc-tuner__name { opacity: 1; }
 /* a finer scale gets smaller numerals */
 .toc-tuner:has(li:nth-child(13)) b { font-size: clamp(0.8rem, 0.55rem + 0.5vw, 1.1rem); letter-spacing: -0.04em; }
 @media (max-width: 760px) {

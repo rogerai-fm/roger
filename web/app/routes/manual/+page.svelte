@@ -147,6 +147,7 @@
       <li><a class="toc-tuner__st" href="#sLAN"><b>§L</b><span class="toc-tuner__name">LAN mode</span></a></li>
       <li><a class="toc-tuner__st" href="#sEdge"><b>§E</b><span class="toc-tuner__name">Edge</span></a></li>
       <li><a class="toc-tuner__st" href="#sV"><b>§V</b><span class="toc-tuner__name">Voices</span></a></li>
+      <li><a class="toc-tuner__st" href="#sSearch"><b>§S</b><span class="toc-tuner__name">Search</span></a></li>
       <li><a class="toc-tuner__st" href="#s5"><b>§5</b><span class="toc-tuner__name">Private channels</span></a></li>
       <li><a class="toc-tuner__st" href="#s6"><b>§6</b><span class="toc-tuner__name">Wallet &amp; billing</span></a></li>
       <li><a class="toc-tuner__st" href="#s7"><b>§7</b><span class="toc-tuner__name">Earnings &amp; payouts</span></a></li>
@@ -1360,6 +1361,50 @@
               thin OpenAI front) so <code>share</code> can detect it as an stt band; Kokoro
               and most Whisper servers are picked up as-is.
             </div>
+          </section>
+
+          <!-- ============== §S SEARCH ============== -->
+          <section class="man-sec" id="sSearch">
+            <span class="man-sec__no">§S · Search (share a search engine)</span>
+            <h2>Put your search on the air</h2>
+            <p class="man-lead">A search station is a search engine on the market: your own
+              Brave key, a SearXNG you run, or your own index (a shop's products, a parts
+              catalog, your docs). Callers send one query to <code>POST /v1/search</code>,
+              one station answers, and the caller pays that station's price for one query.
+              It needs roger <b>7.2.0 or later</b> and a signed-in owner.</p>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger login
+<span class="code-block__prompt" aria-hidden="true">$</span> roger share --search brave --price-per-1k 5                       <span class="code-block__comment"># your own Brave key</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger share --search searxng --upstream http://127.0.0.1:8888      <span class="code-block__comment"># a SearXNG you run</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger share --search native --upstream http://127.0.0.1:9000 --scope "Products on my shop"</pre></div>
+
+            <h3 id="search-own">Your own index</h3>
+            <p>roger runs on any machine that can reach your search; the search itself does
+              not need to be public. In front of it, add one small endpoint that answers
+              <code>POST /v1/search</code>: it takes <code>&#123;"query": "red shoes", "count": 5&#125;</code>
+              and returns <code>&#123;"results": [&#123;"title", "url", "snippet"&#125;]&#125;</code>, within 10
+              seconds and under 512 KiB. Test it until every check passes, then share it:</p>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger search check --upstream http://127.0.0.1:9000   <span class="code-block__comment"># the search/1 checks, nothing goes on air</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger share --search native --upstream http://127.0.0.1:9000 --scope "Products on my shop" --price-per-1k 1</pre></div>
+            <p>Before going on air roger sends one test query, "weather". A focused index with
+              nothing for it still passes, as long as the reply is well formed. The
+              <code>--scope</code> line says what your index covers, up to 120 characters.
+              The full contract and a 20-line example service are in the
+              <a href="https://github.com/rogerai-fm/roger/blob/main/docs/search-providers.md">search provider guide</a>.</p>
+
+            <h3>Price, payouts and private stations</h3>
+            <p>You set a price in dollars per 1,000 queries with <code>--price-per-1k</code>
+              (0 is free; the ceiling is $50). To be paid, run <code>roger payout onboard</code>
+              once; searches settle like everything else (<a href="#s7">§7</a>). Add
+              <code>--private</code> to keep the station off every listing: roger prints its
+              frequency code once, on your screen, and only requests carrying it in the
+              <code>X-Roger-Freq</code> header reach it.</p>
+            <div class="man-note">
+              <span class="man-note__tag">your promise</span>
+              Do not log, keep or sell the queries you receive, and do not try to identify
+              who sent them. Brave and SearXNG providers answer for those engines' terms.
+            </div>
+            <p><code>roger search --kind search</code> lists the search stations on air, with
+              their engine, price and scope.</p>
           </section>
 
           <!-- ============== §5 PRIVATE CHANNELS ============== -->
