@@ -2,7 +2,7 @@
  100.0%  rogerai.fm/roger/v7/cmd/roger-tower-local
   91.1%  rogerai.fm/roger/v7/cmd/rogerai
  100.0%  rogerai.fm/roger/v7/internal/about
-  93.4%  rogerai.fm/roger/v7/internal/agent
+  93.3%  rogerai.fm/roger/v7/internal/agent
   90.3%  rogerai.fm/roger/v7/internal/audio
   93.2%  rogerai.fm/roger/v7/internal/bddrun
   96.7%  rogerai.fm/roger/v7/internal/brief
@@ -51,14 +51,14 @@
   97.2%  rogerai.fm/roger/v7/internal/searchengine
  100.0%  rogerai.fm/roger/v7/internal/servedfile
   90.6%  rogerai.fm/roger/v7/internal/session
-  92.5%  rogerai.fm/roger/v7/internal/station
+  92.1%  rogerai.fm/roger/v7/internal/station
   91.5%  rogerai.fm/roger/v7/internal/store
  100.0%  rogerai.fm/roger/v7/internal/structural
   90.6%  rogerai.fm/roger/v7/internal/tower
   93.4%  rogerai.fm/roger/v7/internal/toweradmin
   93.8%  rogerai.fm/roger/v7/internal/towercli
   90.5%  rogerai.fm/roger/v7/internal/towercore/cert
-  90.4%  rogerai.fm/roger/v7/internal/towercore/dispatch
+  90.7%  rogerai.fm/roger/v7/internal/towercore/dispatch
   91.5%  rogerai.fm/roger/v7/internal/towercore/envelope
   95.0%  rogerai.fm/roger/v7/internal/towercore/inv
   96.2%  rogerai.fm/roger/v7/internal/towercore/link
