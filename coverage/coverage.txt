@@ -502,7 +502,7 @@ rogerai.fm/roger/v7/cmd/rogerai/edgetrouble.go:34:			cmdEdgeTrouble				91.7%
 rogerai.fm/roger/v7/cmd/rogerai/edgetrouble.go:69:			edgePrintTroubleFeed			100.0%
 rogerai.fm/roger/v7/cmd/rogerai/edgetrouble.go:185:			edgeWatchTrouble			86.4%
 rogerai.fm/roger/v7/cmd/rogerai/filelock.go:20:				fileLockConfig				90.0%
-rogerai.fm/roger/v7/cmd/rogerai/filelock.go:67:				staleLock				87.5%
+rogerai.fm/roger/v7/cmd/rogerai/filelock.go:67:				staleLock				100.0%
 rogerai.fm/roger/v7/cmd/rogerai/filelock.go:85:				takeOverStaleLock			100.0%
 rogerai.fm/roger/v7/cmd/rogerai/filelock.go:102:			lockToken				100.0%
 rogerai.fm/roger/v7/cmd/rogerai/grant.go:20:				cmdGrant				100.0%
@@ -991,7 +991,7 @@ rogerai.fm/roger/v7/internal/agent/agent.go:262:			Link					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:266:			setLink					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:293:			newReregistrar				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:302:			curToken				100.0%
-rogerai.fm/roger/v7/internal/agent/agent.go:316:			recover					96.0%
+rogerai.fm/roger/v7/internal/agent/agent.go:316:			recover					100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:420:			reregReason				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:430:			backoffFor				100.0%
 rogerai.fm/roger/v7/internal/agent/agent.go:442:			finishBusy				100.0%
@@ -1072,7 +1072,7 @@ rogerai.fm/roger/v7/internal/agent/leave.go:88:				sendLeave				94.7%
 rogerai.fm/roger/v7/internal/agent/leave.go:124:			StopAttaching				100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:24:			idFromPriv				100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:32:			NodeID					100.0%
-rogerai.fm/roger/v7/internal/agent/localtower.go:48:			ServeLocalTower				84.2%
+rogerai.fm/roger/v7/internal/agent/localtower.go:48:			ServeLocalTower				81.6%
 rogerai.fm/roger/v7/internal/agent/localtower.go:122:			forJob					87.5%
 rogerai.fm/roger/v7/internal/agent/localtower.go:150:			localPollBackoff			100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:171:			pollLocalJob				93.5%
@@ -5449,7 +5449,7 @@ rogerai.fm/roger/v7/internal/tui/tui.go:4784:				atOnAirLimit				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4788:				hasSchedule				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4796:				pilotLamp				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4815:				marquee					91.7%
-rogerai.fm/roger/v7/internal/tui/tui.go:4836:				editorLivePreview			96.0%
+rogerai.fm/roger/v7/internal/tui/tui.go:4836:				editorLivePreview			92.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4885:				maskKey					100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4901:				modalFooter				100.0%
 rogerai.fm/roger/v7/internal/tui/tui.go:4922:				footer					92.3%
