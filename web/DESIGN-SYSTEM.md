@@ -370,7 +370,7 @@ it shows its first item, and the needle starts on that item so the two agree (on
 the training row starts on Step 0). No-JS: the complete static list, no control.
 `data-scrub-auto` (2026-11-14): the list plays itself while it is in view, one item every 2.8 s,
 so a figure tells its story without a drag; the reader's first pointer, key or swipe stops it for
-good. Off under reduced motion. The custom-tuning figures 1, 2 and 5 use it.
+good. Off under reduced motion. The custom-tuning figures 1, 2 and 5 use it. `data-scrub-ms="6500"` sets the autoplay's pace for a figure with more to read on each stop (default 2800).
 
 ### Drawn-in figure and comets
 A figure marked `data-draw` draws itself in the first time it scrolls into view: `draw.js`
@@ -862,3 +862,58 @@ of it. What was found and where it went:
 - **Playbox** (playbox, wave-patch, wave-factory sheets): self-contained games with their
   own palettes; 310 of the remaining colour literals.
 - **/models and /voices**: the text-label copy pill written by hand.
+
+## The recorded timelapse (`Replay.svelte`, `replay.css`, `src/js/replay.js`, lead `.rp`)
+
+One reusable figure for showing models at work on a real recording, as a timelapse. Its first use is the
+fire timelapse on the Wave Nano page (`FireReplay.svelte`). Another page (oil and gas, the wildfire page)
+reuses it by supplying its own data file and its own drawing.
+
+Top to bottom, the feed first:
+
+- **The feed** (the hero): the sensor's own recorded frames, one per interval, with a clock, the time since
+  the event's start, the state as a label beside the clock, and one sentence (at most 12 words) at each moment that matters, set on the feed like
+  a subtitle. Where a model looked closer is outlined, in the model's colour once it answers yes.
+- **The time axis**: the reading as a trace against its line, a playhead, and a native range that scrubs it.
+- **The strip** (about a third of the feed): the page's drawing, in the isometric hand. For fire it is the
+  unit as designed: a camera on a mast, a Wave Pico and a Wave Nano inside, a line to a person's phone, a far
+  dashed rack for Wave Micro. Its labels show what each part said at the playhead, and the drawing itself
+  changes with the film (smoke, readout, state lamp, the line to the phone).
+- **Scenarios** are separate, one button each. Two stories are never mixed in one run.
+
+How it runs: every frame is in the page with its own state as data attributes. `replay.js` is a clock that
+shows a frame: it turns the frame on, writes the clock, reading and answers into the labels, and sets the
+figure's attributes (`data-state`, `data-close`, `data-told`, `data-smoke`, `data-over`, `data-air`, `data-asked`), which the drawing's
+sheet reads. Nothing loops and nothing is keyframed. It plays once when most of the feed is in view, pauses
+off screen, and rests on the last frame. Under reduced motion it never plays by itself and the button steps
+to the next captioned moment. With no script the still is the frame the data names, and "Read it as text"
+lists every moment.
+
+Two pages use it. The fire timelapse (`FireReplay.svelte`, `fire-replay.json`, `fire-replay.css`) is a recorded
+camera sequence. The oil and gas timelapse (`OilGasReplay.svelte`, `oilgas-replay.json`, `oilgas-replay.css`) is a
+simulated night at a valve site, with illustration frames from three cameras and three traces on the axis.
+
+To use it on a page:
+
+1. Record the example and write a data file in `src/data/` with the schema of `fire-replay.json` (`chips`,
+   `scenarios` with `frames`, `traces`, `lines` and `events`, `still`, `feed`, `parts`, `words`, `ladder`, `chat`,
+   `controls`, `unit`, `note`, `credit`, `caption`). A frame carries its picture, clock, camera name (`view`),
+   caption, state, `alert`, an axis note, what each part says (`says`), and the drawing's own states (`attrs`,
+   set on the figure as `data-<name>`). Generate it with an exporter that asserts each caption
+   against the record; do not type values by hand.
+2. Draw the strip with a generator on `isolib.py` (see `fig_fire_film_gen.py` in the lab). It also writes the
+   label anchors into the drawing's sheet.
+3. Make a thin wrapper like `FireReplay.svelte`: `<Replay {data} {fig} kind="xx">` with the drawing as its
+   `scene` snippet (an `.iso__stage` between its iso markers).
+4. List `replay.css` and the drawing's sheet in the page's `siteHead` css and import `src/js/replay.js` from
+   the page's own module.
+5. Add the page's data file to its tests (see `test/replay.test.mjs` for the contract).
+
+Rules: a value is recorded, or its part is tagged simulated; when simulated inputs change what a model
+answers, the model is really asked with them and the note says so; nothing is presented as live; a model in
+training is drawn dashed, and what it shows is a simulated example tagged as one, never an answer from it; the drawing is a design unless the page can say
+otherwise; the alert red is only a reading over its line, an alert state and a person told.
+
+A timelapse lives once, on its use-case page (fire on the wildfire page at `#timelapse`, oil and gas at
+`#theft-timelapse`). A model page does not repeat it: it carries `ReplayLinks.svelte`, two picture cards
+(`.wm-doors`) that lead there, with the camera frame shown whole and credited under the cards.

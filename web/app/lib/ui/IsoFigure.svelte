@@ -7,16 +7,17 @@
   // The step list is the one scrub.js plays (data-scrub, data-scrub-auto); it marks this figure
   // data-step="n", which the figure's own sheet reads. A step is { name, note }: numbered steps render
   // <b><i>n</i>name</b><span>note</span>, unnumbered ones <b>name</b><span>note</span>. No steps, no list.
+  // `pace` is the autoplay's milliseconds per stop, for a figure with more to read on each (default 2.8 s).
   // Any other attribute (data-report, data-keyed ...) passes through to the <figure>.
   /**
    * @type {{
    *   lead: string, fig: number|string, caption: string, extra?: string,
    *   steps?: { name: string, note: string }[], stepsClass?: string, stepsLabel?: string,
-   *   numbered?: boolean, start?: number, draw?: boolean,
+   *   numbered?: boolean, start?: number, pace?: number, draw?: boolean,
    *   children: import('svelte').Snippet, between?: import('svelte').Snippet, [attr: string]: unknown
    * }}
    */
-  let { lead, fig, caption, extra = "", steps = [], stepsClass = "", stepsLabel = "", numbered = true, start,
+  let { lead, fig, caption, extra = "", steps = [], stepsClass = "", stepsLabel = "", numbered = true, start, pace,
         draw = true, children, between, ...attrs } = $props();
   const id = $derived(`${lead}-cap-${fig}`);
 </script>
@@ -25,7 +26,7 @@
   {@render children()}
   {@render between?.()}
   {#if steps.length}
-    <ol class={stepsClass} data-scrub data-scrub-auto data-scrub-start={start} aria-label={stepsLabel}>
+    <ol class={stepsClass} data-scrub data-scrub-auto data-scrub-start={start} data-scrub-ms={pace} aria-label={stepsLabel}>
       {#each steps as s, i}
         <li><b>{#if numbered}<i>{i + 1}</i>{/if}{s.name}</b><span>{s.note}</span></li>
       {/each}

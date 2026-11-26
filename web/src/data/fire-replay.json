@@ -1,0 +1,1953 @@
+{
+ "_about": "The fire timelapse (FireReplay.svelte, played by the shared Replay.svelte). Written by computer-scientist/article/fire_replay_export.py from the record; do not edit by hand. Build input only. The schema is Replay.svelte's: any page can supply its own file.",
+ "chips": [
+  "Recorded timelapse",
+  "Not live"
+ ],
+ "scenarios": [
+  {
+   "id": "fire",
+   "title": "A fire starts",
+   "date": "2025-06-12",
+   "frames": [
+    {
+     "src": "assets/fire-replay/a00.webp",
+     "clock": "08:32",
+     "plus": "",
+     "reading": "−1.45",
+     "over": false,
+     "x": 0.0,
+     "y": 79.32,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 9,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −1.45 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−1.45",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 9",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": "A calm morning. Every reading sits under its line.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a01.webp",
+     "clock": "08:33",
+     "plus": "",
+     "reading": "−2.59",
+     "over": false,
+     "x": 2.17,
+     "y": 84.5,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 12,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −2.59 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−2.59",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 12",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a02.webp",
+     "clock": "08:34",
+     "plus": "",
+     "reading": "−2.55",
+     "over": false,
+     "x": 4.35,
+     "y": 84.32,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 11,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −2.55 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−2.55",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 11",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a03.webp",
+     "clock": "08:35",
+     "plus": "",
+     "reading": "−1.17",
+     "over": false,
+     "x": 6.52,
+     "y": 78.05,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 10,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −1.17 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−1.17",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 10",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": "Wave Pico reads the air each minute. Simulated here: clean.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a04.webp",
+     "clock": "08:36",
+     "plus": "",
+     "reading": "−0.70",
+     "over": false,
+     "x": 8.66,
+     "y": 75.91,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 9,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −0.70 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−0.70",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 9",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a05.webp",
+     "clock": "08:37",
+     "plus": "",
+     "reading": "−1.38",
+     "over": false,
+     "x": 10.87,
+     "y": 79.0,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 12,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −1.38 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−1.38",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 12",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a06.webp",
+     "clock": "08:38",
+     "plus": "",
+     "reading": "−3.40",
+     "over": false,
+     "x": 13.05,
+     "y": 88.18,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 11,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −3.40 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−3.40",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 11",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a07.webp",
+     "clock": "08:39",
+     "plus": "start",
+     "reading": "−2.81",
+     "over": false,
+     "x": 15.22,
+     "y": 85.5,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 10,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −2.81 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−2.81",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 10",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": "08:39. The archive marks the fire’s start here.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a08.webp",
+     "clock": "08:40",
+     "plus": "+1 min",
+     "reading": "−2.88",
+     "over": false,
+     "x": 17.4,
+     "y": 85.82,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 9,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −2.88 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−2.88",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 9",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a09.webp",
+     "clock": "08:41",
+     "plus": "+2 min",
+     "reading": "−2.01",
+     "over": false,
+     "x": 19.57,
+     "y": 81.86,
+     "close": "yes",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 12,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": true,
+     "view": "",
+     "axis": "Reading −2.01 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "−2.01",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 12",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 1,
+     "caption": "Two minutes in. Up close, Wave Nano sees smoke.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a10.webp",
+     "clock": "08:42",
+     "plus": "+3 min",
+     "reading": "+0.07",
+     "over": false,
+     "x": 21.71,
+     "y": 72.41,
+     "close": "yes",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 11,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": true,
+     "view": "",
+     "axis": "Reading +0.07 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+0.07",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 11",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 1,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a11.webp",
+     "clock": "08:43",
+     "plus": "+4 min",
+     "reading": "+1.48",
+     "over": true,
+     "x": 23.92,
+     "y": 66.0,
+     "close": "yes",
+     "whole": "no",
+     "state": "watch",
+     "told": true,
+     "by": "camera",
+     "pm25": 10,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": true,
+     "view": "",
+     "axis": "Reading +1.48 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+1.48",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 10",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 1,
+     "caption": "Four minutes in. The reading crosses its line. A person is told.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a12.webp",
+     "clock": "08:44",
+     "plus": "+5 min",
+     "reading": "+6.12",
+     "over": true,
+     "x": 26.1,
+     "y": 44.91,
+     "close": "yes",
+     "whole": "no",
+     "state": "elevated",
+     "told": true,
+     "by": "camera",
+     "pm25": 9,
+     "air": 0,
+     "asked": true,
+     "chat": 0,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +6.12 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 0,
+      "asked": 1,
+      "chat": 0,
+      "smoke": 2
+     },
+     "says": {
+      "camera": "+6.12",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 9",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 2,
+     "caption": "Five minutes in. It holds for a second frame. Elevated.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a13.webp",
+     "clock": "08:45",
+     "plus": "+6 min",
+     "reading": "+5.60",
+     "over": true,
+     "x": 28.27,
+     "y": 47.27,
+     "close": "yes",
+     "whole": "no",
+     "state": "elevated",
+     "told": true,
+     "by": "camera",
+     "pm25": 14,
+     "air": 1,
+     "asked": true,
+     "chat": 1,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +5.60 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 1,
+      "asked": 1,
+      "chat": 1,
+      "smoke": 2
+     },
+     "says": {
+      "camera": "+5.60",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 14",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 2,
+     "caption": "A person asks Wave Micro about the site. Simulated here.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a14.webp",
+     "clock": "08:46",
+     "plus": "+7 min",
+     "reading": "+8.55",
+     "over": true,
+     "x": 30.45,
+     "y": 33.86,
+     "close": "yes",
+     "whole": "no",
+     "state": "elevated",
+     "told": true,
+     "by": "camera",
+     "pm25": 18,
+     "air": 1,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +8.55 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 1,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 2
+     },
+     "says": {
+      "camera": "+8.55",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 18",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 2,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a15.webp",
+     "clock": "08:47",
+     "plus": "+8 min",
+     "reading": "+9.12",
+     "over": true,
+     "x": 32.62,
+     "y": 31.27,
+     "close": "yes",
+     "whole": "no",
+     "state": "elevated",
+     "told": true,
+     "by": "camera",
+     "pm25": 24,
+     "air": 1,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +9.12 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 1,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 2
+     },
+     "says": {
+      "camera": "+9.12",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 24",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 2,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a16.webp",
+     "clock": "08:48",
+     "plus": "+9 min",
+     "reading": "+9.82",
+     "over": true,
+     "x": 34.8,
+     "y": 28.09,
+     "close": "yes",
+     "whole": "no",
+     "state": "elevated",
+     "told": true,
+     "by": "camera",
+     "pm25": 31,
+     "air": 1,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +9.82 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 1,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 2
+     },
+     "says": {
+      "camera": "+9.82",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 31",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 2,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a17.webp",
+     "clock": "08:49",
+     "plus": "+10 min",
+     "reading": "+11.61",
+     "over": true,
+     "x": 36.97,
+     "y": 19.95,
+     "close": "yes",
+     "whole": "yes",
+     "state": "elevated",
+     "told": true,
+     "by": "camera",
+     "pm25": 40,
+     "air": 1,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +11.61 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 1,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 3
+     },
+     "says": {
+      "camera": "+11.61",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 40",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 3,
+     "caption": "Ten minutes in. Smoke on the whole frame too.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a18.webp",
+     "clock": "08:50",
+     "plus": "+11 min",
+     "reading": "+12.55",
+     "over": true,
+     "x": 39.14,
+     "y": 15.68,
+     "close": "yes",
+     "whole": "yes",
+     "state": "elevated",
+     "told": true,
+     "by": "camera",
+     "pm25": 52,
+     "air": 1,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +12.55 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 1,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 3
+     },
+     "says": {
+      "camera": "+12.55",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 52",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 3,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a19.webp",
+     "clock": "08:51",
+     "plus": "+12 min",
+     "reading": "+13.15",
+     "over": true,
+     "x": 41.36,
+     "y": 12.95,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 66,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +13.15 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+13.15",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 66",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": "Twelve minutes in. The simulated air agrees with the camera. Threat.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/a20.webp",
+     "clock": "08:52",
+     "plus": "+13 min",
+     "reading": "+11.69",
+     "over": true,
+     "x": 43.49,
+     "y": 19.59,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 80,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +11.69 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+11.69",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 80",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a21.webp",
+     "clock": "08:53",
+     "plus": "+14 min",
+     "reading": "+12.58",
+     "over": true,
+     "x": 45.67,
+     "y": 15.55,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 95,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +12.58 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+12.58",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 95",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a22.webp",
+     "clock": "08:54",
+     "plus": "+15 min",
+     "reading": "+13.50",
+     "over": true,
+     "x": 47.84,
+     "y": 11.36,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 110,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +13.50 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+13.50",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 110",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a23.webp",
+     "clock": "08:59",
+     "plus": "+20 min",
+     "reading": "+11.24",
+     "over": true,
+     "x": 58.72,
+     "y": 21.64,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 140,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +11.24 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+11.24",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 140",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a24.webp",
+     "clock": "09:04",
+     "plus": "+25 min",
+     "reading": "+13.12",
+     "over": true,
+     "x": 69.59,
+     "y": 13.09,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 165,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +13.12 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+13.12",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 165",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a25.webp",
+     "clock": "09:09",
+     "plus": "+30 min",
+     "reading": "+13.85",
+     "over": true,
+     "x": 80.46,
+     "y": 9.77,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 178,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +13.85 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+13.85",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 178",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a26.webp",
+     "clock": "09:14",
+     "plus": "+35 min",
+     "reading": "+14.34",
+     "over": true,
+     "x": 91.34,
+     "y": 7.55,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 184,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +14.34 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+14.34",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 184",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/a27.webp",
+     "clock": "09:18",
+     "plus": "+39 min",
+     "reading": "+14.44",
+     "over": true,
+     "x": 100.0,
+     "y": 7.09,
+     "close": "yes",
+     "whole": "yes",
+     "state": "threat",
+     "told": true,
+     "by": "camera+chemistry",
+     "pm25": 188,
+     "air": 2,
+     "asked": true,
+     "chat": 2,
+     "alert": true,
+     "look": true,
+     "view": "",
+     "axis": "Reading +14.44 · its line: 0.7",
+     "attrs": {
+      "close": "yes",
+      "told": 1,
+      "air": 2,
+      "asked": 1,
+      "chat": 2,
+      "smoke": 1
+     },
+     "says": {
+      "camera": "+14.44",
+      "nano": "Smoke: yes",
+      "pico": "PM2.5 188",
+      "micro": "",
+      "person": "Escalated"
+     },
+     "smoke": 1,
+     "caption": "39 minutes in. A clear column.",
+     "ms": 3600
+    }
+   ],
+   "traces": [
+    {
+     "id": "reading",
+     "label": "",
+     "tone": null,
+     "points": [
+      [
+       0.0,
+       79.32
+      ],
+      [
+       2.17,
+       84.5
+      ],
+      [
+       4.35,
+       84.32
+      ],
+      [
+       6.52,
+       78.05
+      ],
+      [
+       8.66,
+       75.91
+      ],
+      [
+       10.87,
+       79.0
+      ],
+      [
+       13.05,
+       88.18
+      ],
+      [
+       15.22,
+       85.5
+      ],
+      [
+       17.4,
+       85.82
+      ],
+      [
+       19.57,
+       81.86
+      ],
+      [
+       21.71,
+       72.41
+      ],
+      [
+       23.92,
+       66.0
+      ],
+      [
+       26.1,
+       44.91
+      ],
+      [
+       28.27,
+       47.27
+      ],
+      [
+       30.45,
+       33.86
+      ],
+      [
+       32.62,
+       31.27
+      ],
+      [
+       34.8,
+       28.09
+      ],
+      [
+       36.97,
+       19.95
+      ],
+      [
+       39.14,
+       15.68
+      ],
+      [
+       41.36,
+       12.95
+      ],
+      [
+       43.49,
+       19.59
+      ],
+      [
+       45.67,
+       15.55
+      ],
+      [
+       47.84,
+       11.36
+      ],
+      [
+       58.72,
+       21.64
+      ],
+      [
+       69.59,
+       13.09
+      ],
+      [
+       80.46,
+       9.77
+      ],
+      [
+       91.34,
+       7.55
+      ],
+      [
+       100.0,
+       7.09
+      ]
+     ]
+    }
+   ],
+   "lines": [
+    69.55
+   ],
+   "events": [
+    {
+     "k": 0,
+     "clock": "08:32",
+     "state": "quiet"
+    },
+    {
+     "k": 3,
+     "clock": "08:35",
+     "state": "quiet"
+    },
+    {
+     "k": 7,
+     "clock": "08:39",
+     "state": "quiet"
+    },
+    {
+     "k": 9,
+     "clock": "08:41",
+     "state": "quiet"
+    },
+    {
+     "k": 11,
+     "clock": "08:43",
+     "state": "watch"
+    },
+    {
+     "k": 12,
+     "clock": "08:44",
+     "state": "elevated"
+    },
+    {
+     "k": 13,
+     "clock": "08:45",
+     "state": "elevated"
+    },
+    {
+     "k": 17,
+     "clock": "08:49",
+     "state": "elevated"
+    },
+    {
+     "k": 19,
+     "clock": "08:51",
+     "state": "threat"
+    },
+    {
+     "k": 27,
+     "clock": "09:18",
+     "state": "threat"
+    }
+   ],
+   "ms": 48600
+  },
+  {
+   "id": "false_alarm",
+   "title": "A false alarm",
+   "date": "2025-05-14",
+   "frames": [
+    {
+     "src": "assets/fire-replay/b00.webp",
+     "clock": "10:19",
+     "plus": "",
+     "reading": "−2.92",
+     "over": false,
+     "x": 0.0,
+     "y": 86.0,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 9,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −2.92 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−2.92",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 9",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": "A clear morning. Nothing is burning. The simulated air is clean.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/b01.webp",
+     "clock": "10:20",
+     "plus": "",
+     "reading": "−3.70",
+     "over": false,
+     "x": 10.0,
+     "y": 89.55,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 12,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −3.70 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−3.70",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 12",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/b02.webp",
+     "clock": "10:21",
+     "plus": "",
+     "reading": "−4.14",
+     "over": false,
+     "x": 20.0,
+     "y": 91.55,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 11,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −4.14 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−4.14",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 11",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/b03.webp",
+     "clock": "10:22",
+     "plus": "",
+     "reading": "−3.81",
+     "over": false,
+     "x": 30.0,
+     "y": 90.05,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 10,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −3.81 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−3.81",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 10",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/b04.webp",
+     "clock": "10:23",
+     "plus": "",
+     "reading": "+1.20",
+     "over": true,
+     "x": 40.0,
+     "y": 67.27,
+     "close": "no",
+     "whole": "no",
+     "state": "watch",
+     "told": true,
+     "by": "camera",
+     "pm25": 9,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading +1.20 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 1,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "+1.20",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 9",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 0,
+     "caption": "The detector jumps. Wave Nano sees no smoke. Watch.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/b05.webp",
+     "clock": "10:24",
+     "plus": "",
+     "reading": "−3.11",
+     "over": false,
+     "x": 50.0,
+     "y": 86.86,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 12,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −3.11 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−3.11",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 12",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": "One minute later, quiet again.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/b06.webp",
+     "clock": "10:25",
+     "plus": "",
+     "reading": "−2.69",
+     "over": false,
+     "x": 60.0,
+     "y": 84.95,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 11,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −2.69 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−2.69",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 11",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/b07.webp",
+     "clock": "10:26",
+     "plus": "",
+     "reading": "+2.94",
+     "over": true,
+     "x": 70.0,
+     "y": 59.36,
+     "close": "no",
+     "whole": "no",
+     "state": "watch",
+     "told": true,
+     "by": "camera",
+     "pm25": 10,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading +2.94 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 1,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "+2.94",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 10",
+      "micro": "",
+      "person": "Told"
+     },
+     "smoke": 0,
+     "caption": "It jumps again. Still no smoke. Watch.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/b08.webp",
+     "clock": "10:27",
+     "plus": "",
+     "reading": "−3.20",
+     "over": false,
+     "x": 80.0,
+     "y": 87.27,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 9,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −3.20 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−3.20",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 9",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": "Quiet again. It never became an alert.",
+     "ms": 3600
+    },
+    {
+     "src": "assets/fire-replay/b09.webp",
+     "clock": "10:28",
+     "plus": "",
+     "reading": "−3.64",
+     "over": false,
+     "x": 90.0,
+     "y": 89.27,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 12,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −3.64 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−3.64",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 12",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    },
+    {
+     "src": "assets/fire-replay/b10.webp",
+     "clock": "10:29",
+     "plus": "",
+     "reading": "−4.25",
+     "over": false,
+     "x": 100.0,
+     "y": 92.05,
+     "close": "no",
+     "whole": "no",
+     "state": "quiet",
+     "told": false,
+     "by": "none",
+     "pm25": 11,
+     "air": 0,
+     "asked": false,
+     "chat": 0,
+     "alert": false,
+     "look": false,
+     "view": "",
+     "axis": "Reading −4.25 · its line: 0.7",
+     "attrs": {
+      "close": "no",
+      "told": 0,
+      "air": 0,
+      "asked": 0,
+      "chat": 0,
+      "smoke": 0
+     },
+     "says": {
+      "camera": "−4.25",
+      "nano": "Smoke: no",
+      "pico": "PM2.5 11",
+      "micro": "",
+      "person": ""
+     },
+     "smoke": 0,
+     "caption": null,
+     "ms": 700
+    }
+   ],
+   "traces": [
+    {
+     "id": "reading",
+     "label": "",
+     "tone": null,
+     "points": [
+      [
+       0.0,
+       86.0
+      ],
+      [
+       10.0,
+       89.55
+      ],
+      [
+       20.0,
+       91.55
+      ],
+      [
+       30.0,
+       90.05
+      ],
+      [
+       40.0,
+       67.27
+      ],
+      [
+       50.0,
+       86.86
+      ],
+      [
+       60.0,
+       84.95
+      ],
+      [
+       70.0,
+       59.36
+      ],
+      [
+       80.0,
+       87.27
+      ],
+      [
+       90.0,
+       89.27
+      ],
+      [
+       100.0,
+       92.05
+      ]
+     ]
+    }
+   ],
+   "lines": [
+    69.55
+   ],
+   "events": [
+    {
+     "k": 0,
+     "clock": "10:19",
+     "state": "quiet"
+    },
+    {
+     "k": 4,
+     "clock": "10:23",
+     "state": "watch"
+    },
+    {
+     "k": 5,
+     "clock": "10:24",
+     "state": "quiet"
+    },
+    {
+     "k": 7,
+     "clock": "10:26",
+     "state": "watch"
+    },
+    {
+     "k": 8,
+     "clock": "10:27",
+     "state": "quiet"
+    }
+   ],
+   "ms": 22200
+  }
+ ],
+ "still": [
+  "fire",
+  12
+ ],
+ "line": 69.55,
+ "lineValue": 0.7,
+ "feed": {
+  "label": "The camera’s view of the valley",
+  "every": "one frame a minute",
+  "look": "Wave Nano: smoke"
+ },
+ "parts": [
+  {
+   "id": "camera",
+   "name": "Camera",
+   "role": "and its smoke detector",
+   "tone": "blue",
+   "tag": null,
+   "readout": "reading"
+  },
+  {
+   "id": "nano",
+   "name": "Wave Nano",
+   "role": "looks closer, then decides",
+   "tone": "nano",
+   "tag": null,
+   "readout": "close",
+   "decides": true
+  },
+  {
+   "id": "pico",
+   "name": "Wave Pico",
+   "role": "air sensors",
+   "tone": "pico",
+   "tag": "simulated",
+   "readout": "air"
+  },
+  {
+   "id": "micro",
+   "name": "Wave Micro",
+   "role": "site context, over an API",
+   "tone": "micro",
+   "tag": "in training",
+   "readout": null
+  },
+  {
+   "id": "person",
+   "name": "A person",
+   "role": "",
+   "tone": null,
+   "tag": null,
+   "readout": "told"
+  }
+ ],
+ "words": {
+  "question": "Is there smoke in this picture? Answer yes or no.",
+  "yes": "Smoke: yes",
+  "no": "Smoke: no",
+  "told": "Told",
+  "notTold": "",
+  "states": {
+   "quiet": "Quiet",
+   "watch": "Watch",
+   "elevated": "Elevated",
+   "threat": "Threat"
+  },
+  "reading": "Reading",
+  "line": "its line"
+ },
+ "ladder": [
+  {
+   "key": "quiet",
+   "label": "Quiet"
+  },
+  {
+   "key": "watch",
+   "label": "Watch"
+  },
+  {
+   "key": "elevated",
+   "label": "Elevated",
+   "alert": true
+  },
+  {
+   "key": "threat",
+   "label": "Threat",
+   "alert": true
+  }
+ ],
+ "chat": {
+  "who": "A person asks",
+  "q": "What do we know around the site right now?",
+  "by": "Wave Micro",
+  "a": "A red flag warning is in effect. The wind is toward structures.",
+  "tag": "simulated example"
+ },
+ "micro": {
+  "rule": "Site context can add support. It can never lower a decision."
+ },
+ "controls": {
+  "play": "Play",
+  "pause": "Pause",
+  "replay": "Replay",
+  "script": "Read it as text"
+ },
+ "unit": "The unit, as designed",
+ "note": "Both mornings are held-out recordings of one camera, one frame a minute. The reading is the camera detector’s, against its own line. Wave Nano’s fire vision and fire controller, both on air, were asked at every frame through the market on 2026-11-26. Wave Pico’s air readings and the wind are simulated, and the controller was asked with them. Wave Micro is in training: the question and its reply are a simulated example of what it will do, not an answer from the model, and site context can never lower a decision. The drawing shows the unit as designed; a person or an owner-armed rule decides what happens next.",
+ "credit": "Data courtesy of HPWREN, University of California San Diego. FIgLib: Dewangan et al. (2022), Remote Sensing 14(4), 1007. HPWREN data are not intended for decision-making.",
+ "caption": "Fire early warning, a recorded timelapse."
+}

@@ -9,6 +9,7 @@
   import Nav from "#lib/ui/Nav.svelte";
   import OnAir from "#lib/ui/OnAir.svelte";
   import Rail from "#lib/ui/Rail.svelte";
+  import ReplayLinks from "#lib/ui/ReplayLinks.svelte";
   import WaveFirewatch from "#lib/ui/WaveFirewatch.svelte";
   const facts = content('research-wave-nano.html');
   const head = siteHead({
@@ -140,16 +141,12 @@ Orange County, California.</pre></div>
           <h2>Fire models on air.</h2>
           <p>Wave Nano&rsquo;s fire controller and fire vision module
              are on the RogerAI market behind market guards, as specialized models. Their bands are <code>wave-nano-fire-controller</code> and
-             <code>wave-nano-fire-vision</code>. Nano&rsquo;s weights are not published. The CLI shows what is on air
-             today, Wave Pico included. A caller of the fire controller writes each tick in one
-             fixed key order (&sect;6).</p>
-          <p>The fire controller, read through its guard on 1,200 ticks of recorded camera
-             readings from one field site: {@html facts.card('nano.market-controller')}
-             <span class="wm-ref">{@html facts.cardRef('nano.market-controller')}</span>.</p>
-          <p>The fire vision module, read through its guard on 1,129 held-out frames from the
-             camera network it learned on: AUC {@html facts.card('nano.market-vision')}
-             <span class="wm-ref">{@html facts.cardRef('nano.market-vision')}</span>.</p>
+             <code>wave-nano-fire-vision</code>. To run the models offline or on your own site,
+             <a data-lets-talk aria-expanded="false" href="mailto:labs@rogerai.fm?subject=Wave%20Nano%20on%20site">contact us</a>.</p>
         </div>
+
+        <ReplayLinks />
+
         <div class="wm-run">
           <div class="install">
             <span class="fig mono">1 &middot; Install the CLI</span>
@@ -169,6 +166,14 @@ Orange County, California.</pre></div>
             <b>{@html facts.card('nano.gguf')}</b> <span class="wm-ref">{@html facts.cardRef('nano.gguf')}</span></p>
           <figcaption class="fig mono" id="wm-runs-cap">FIG. 1 - Where the release build runs. A filled lamp runs today; a ring is owed. Served through llama.cpp, the Q6_K build reads {@html facts.card('nano.gguf-agree')} ({@html facts.cardRef('nano.gguf-agree')}).</figcaption>
         </figure>
+
+        <!-- the market reads, with their test sets and source: the small print of this section (founder 2026-11-26) -->
+        <p class="wm-read">The fire controller, read through its guard on 1,200 ticks of recorded camera
+           readings from one field site: {@html facts.card('nano.market-controller')}
+           <span class="wm-ref">{@html facts.cardRef('nano.market-controller')}</span>.
+           The fire vision module, read through its guard on 1,129 held-out frames from the
+           camera network it learned on: AUC {@html facts.card('nano.market-vision')}
+           <span class="wm-ref">{@html facts.cardRef('nano.market-vision')}</span>.</p>
       </div>
     </section>
 

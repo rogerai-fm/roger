@@ -274,8 +274,8 @@
   ]
  },
  "research-oil-gas.html": {
-  "sha": "e4a70703df732b5ce6f46d89be83b436ed8f313285f0e4238ed3654a60fd236e",
-  "length": 7884,
+  "sha": "65f6021844ef9b5e49b9e872aa9cff1823a4da2e760844d0bfd6f5926d4c69b7",
+  "length": 10585,
   "hrefs": [
    "/research-industry.html",
    "/research-custom-tuning.html",
@@ -305,13 +305,16 @@
   ]
  },
  "research-wave-nano.html": {
-  "sha": "251b8421d5690e99a1cf618e144e9b047f34ad2193733621a284279a48109c51",
-  "length": 16141,
+  "sha": "6933ef07cd270f3417422a1410639a915fd19bd6fe86416715a5adc01f4ea870",
+  "length": 16361,
   "hrefs": [
    "/research-models.html",
    "#measured",
    "#vision",
    "/research-wave-pico.html",
+   "mailto:labs@rogerai.fm?subject=Wave%20Nano%20on%20site",
+   "/research-wildfire.html#timelapse",
+   "/research-oil-gas.html#theft-timelapse",
    "/manual.html#sNano",
    "/manual.html#sNano-vision",
    "/research-wave-pico.html",
@@ -321,13 +324,15 @@
   ]
  },
  "research-wave-pico.html": {
-  "sha": "3d12e2982870d1399e24df9dc7ebd2b8243d4f67cd4f4466e1c21058a0f75acf",
-  "length": 7150,
+  "sha": "0ade484fd3690267d77d19a739ce3eb71ff3cc24393d4939b5544ce1d9321f0a",
+  "length": 7460,
   "hrefs": [
    "/research-models.html",
    "#run",
    "#measured",
    "/research-wave-nano.html",
+   "/research-wildfire.html#timelapse",
+   "/research-oil-gas.html#theft-timelapse",
    "/research-wave-nano.html",
    "/research-wave-family.html",
    "/research-models.html#mesh",
@@ -335,8 +340,8 @@
   ]
  },
  "research-wildfire.html": {
-  "sha": "6bf85ca03985984020e5154a426b508492c409634b1951fb9d1a6543952a35d6",
-  "length": 7866,
+  "sha": "d9f0c3e2726be0dfed2b92cc76c1302e5428ac127bf9615faffe8a49f8fa53b8",
+  "length": 10251,
   "hrefs": [
    "/research-industry.html",
    "/research-custom-tuning.html",

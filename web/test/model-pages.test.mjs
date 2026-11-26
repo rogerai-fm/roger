@@ -348,7 +348,14 @@ test("nano: the vision module carries the data credit and the licence note, and 
   assert.match(credit[0], /Commercial Use Permission/);
   assert.match(credit[0], /not intended for decision-making/i);
   assert.match(credit[0], /fire-decision adapter uses no HPWREN data/i);
-  assert.equal((main(PAGES.nano).match(CREDIT_RE) || []).length, 1, "the credit appears once on the page");
+  // The door to the fire timelapse shows one camera frame and credits it there (2026-11-26); the licence
+  // note stays with the vision module. Both model pages carry that door.
+  const all = (main(PAGES.nano).match(CREDIT_RE) || []).map(visible);
+  assert.equal(all.length, 2, "the vision credit and the one under the timelapse doors, no other");
+  for (const pg of Object.values(PAGES)) {
+    const door = (main(pg).match(/<nav class="wm-doors"[\s\S]*?<\/nav>/) || [""])[0];
+    assert.match(visible(door), /data courtesy of HPWREN, University of California San Diego/i, `${pg}: the frame on the door is credited`);
+  }
 });
 
 test("nano: the card is the release build's, nothing left from the superseded build", () => {

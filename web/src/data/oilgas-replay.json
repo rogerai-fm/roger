@@ -1,0 +1,4066 @@
+{
+ "_about": "The oil and gas timelapse (OilGasReplay.svelte, played by the shared Replay.svelte). Written by computer-scientist/article/oilgas/og_export.py from the record; do not edit by hand. Build input only.",
+ "chips": [
+  "Simulated site",
+  "Not live"
+ ],
+ "boxes": [
+  {
+   "id": "gate-arrive",
+   "label": "Site camera: vehicle"
+  },
+  {
+   "id": "gate-parked",
+   "label": "Site camera: vehicle"
+  },
+  {
+   "id": "gate-leave",
+   "label": "Site camera: vehicle"
+  },
+  {
+   "id": "pipe-hose",
+   "label": "Site camera: object on the pipe"
+  },
+  {
+   "id": "drone-parked",
+   "label": "Site camera: vehicle"
+  }
+ ],
+ "scenarios": [
+  {
+   "id": "tap",
+   "title": "A tap on the line",
+   "date": "simulated",
+   "frames": [
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "13:40",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": "An ordinary afternoon at the valve site. Flow in matches flow out.",
+     "ms": 4200,
+     "x": 0.0,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.4% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.36,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "13:43",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 3.33,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.11,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "13:46",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 6.67,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.2% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.19,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "13:49",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 10.0,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.12,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "13:52",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 13.33,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.12,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "13:55",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 16.67,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.08,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "abstain",
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "13:58",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 20.0,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.07,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "stuck",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "up-press",
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "stuck",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: upstream pressure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "14:01",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 23.33,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.0% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.01,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "stuck"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "14:04",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": "Wave Pico doubts one pressure reading twice. A watch.",
+     "ms": 4200,
+     "x": 26.67,
+     "state": "watch",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [
+      "sensor"
+     ],
+     "gap": 0.05,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "stuck"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-arrive.webp",
+     "clock": "14:07",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": "14:07. A truck drives in. No work order is on file.",
+     "ms": 4200,
+     "x": 30.0,
+     "state": "watch",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.0% · tolerance 1%",
+     "kinds": [
+      "gate"
+     ],
+     "gap": 0.0,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "gate-arrive",
+      "truck": 1,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-parked.webp",
+     "clock": "14:10",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 33.33,
+     "state": "watch",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.2% · tolerance 1%",
+     "kinds": [
+      "gate"
+     ],
+     "gap": 0.16,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "abstain",
+     "attrs": {
+      "img": "gate-parked",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-parked.webp",
+     "clock": "14:13",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 36.67,
+     "state": "watch",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [
+      "gate"
+     ],
+     "gap": -0.05,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "gate-parked",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe-hose.webp",
+     "clock": "14:16",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": "Flow out falls behind flow in. Two records disagree. Flag.",
+     "ms": 4200,
+     "x": 40.0,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +1.1% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap"
+     ],
+     "gap": 1.07,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "drifting",
+      "up-press": "none",
+      "down-press": "drifting"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "pipe-hose",
+      "truck": 2,
+      "gap": 1,
+      "chat": 0,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "drifting",
+      "s-up-press": "ok",
+      "s-down-press": "drifting"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe-hose.webp",
+     "clock": "14:19",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 43.33,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +3.5% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap",
+      "sensor"
+     ],
+     "gap": 3.48,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "drifting",
+      "up-press": "stuck",
+      "down-press": "drifting"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "pipe-hose",
+      "truck": 2,
+      "gap": 1,
+      "chat": 0,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "drifting",
+      "s-up-press": "stuck",
+      "s-down-press": "drifting"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe-hose.webp",
+     "clock": "14:22",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": "A pressure reading goes flat. Wave Pico calls it stuck.",
+     "ms": 4200,
+     "x": 46.67,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +4.9% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap",
+      "sensor"
+     ],
+     "gap": 4.87,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "drifting",
+      "up-press": "stuck",
+      "down-press": "drifting"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "pipe-hose",
+      "truck": 2,
+      "gap": 1,
+      "chat": 0,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "drifting",
+      "s-up-press": "stuck",
+      "s-down-press": "drifting"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe-hose.webp",
+     "clock": "14:25",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": "Wave Nano names the degraded sensor: upstream pressure.",
+     "ms": 4200,
+     "x": 50.0,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +4.9% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap",
+      "sensor"
+     ],
+     "gap": 4.88,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "stuck",
+      "up-press": "stuck",
+      "down-press": "stuck"
+     },
+     "nano": "up-press",
+     "attrs": {
+      "img": "pipe-hose",
+      "truck": 2,
+      "gap": 1,
+      "chat": 0,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "stuck",
+      "s-up-press": "stuck",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Degraded: upstream pressure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe-hose.webp",
+     "clock": "14:28",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 53.33,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +4.9% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap",
+      "sensor"
+     ],
+     "gap": 4.88,
+     "pico": {
+      "head-flow": "stuck",
+      "tail-flow": "stuck",
+      "up-press": "stuck",
+      "down-press": "stuck"
+     },
+     "nano": "up-press",
+     "attrs": {
+      "img": "pipe-hose",
+      "truck": 2,
+      "gap": 1,
+      "chat": 0,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "stuck",
+      "s-tail-flow": "stuck",
+      "s-up-press": "stuck",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Degraded: upstream pressure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/drone-parked.webp",
+     "clock": "14:31",
+     "plus": "",
+     "view": "Drone",
+     "caption": "The operator asks Wave Micro what changed. Simulated here.",
+     "ms": 4200,
+     "x": 56.67,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +5.0% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap",
+      "sensor"
+     ],
+     "gap": 4.99,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "stuck",
+      "up-press": "stuck",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "drone-parked",
+      "truck": 2,
+      "gap": 1,
+      "chat": 1,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "stuck",
+      "s-up-press": "stuck",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/drone-parked.webp",
+     "clock": "14:34",
+     "plus": "",
+     "view": "Drone",
+     "caption": null,
+     "ms": 1100,
+     "x": 60.0,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +5.0% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap",
+      "sensor"
+     ],
+     "gap": 4.97,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "stuck",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "drone-parked",
+      "truck": 2,
+      "gap": 1,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "stuck",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/drone-parked.webp",
+     "clock": "14:37",
+     "plus": "",
+     "view": "Drone",
+     "caption": null,
+     "ms": 1100,
+     "x": 63.33,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +4.9% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap",
+      "sensor"
+     ],
+     "gap": 4.93,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "stuck",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "drone-parked",
+      "truck": 2,
+      "gap": 1,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "stuck",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/drone-parked.webp",
+     "clock": "14:40",
+     "plus": "",
+     "view": "Drone",
+     "caption": null,
+     "ms": 1100,
+     "x": 66.67,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +5.0% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap",
+      "sensor"
+     ],
+     "gap": 4.98,
+     "pico": {
+      "head-flow": "stuck",
+      "tail-flow": "none",
+      "up-press": "stuck",
+      "down-press": "none"
+     },
+     "nano": "abstain",
+     "attrs": {
+      "img": "drone-parked",
+      "truck": 2,
+      "gap": 1,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "stuck",
+      "s-tail-flow": "ok",
+      "s-up-press": "stuck",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/drone-parked.webp",
+     "clock": "14:43",
+     "plus": "",
+     "view": "Drone",
+     "caption": null,
+     "ms": 1100,
+     "x": 70.0,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +5.0% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap"
+     ],
+     "gap": 5.04,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "drone-parked",
+      "truck": 2,
+      "gap": 1,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/drone-parked.webp",
+     "clock": "14:46",
+     "plus": "",
+     "view": "Drone",
+     "caption": null,
+     "ms": 1100,
+     "x": 73.33,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +5.0% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap"
+     ],
+     "gap": 4.99,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "abstain",
+     "attrs": {
+      "img": "drone-parked",
+      "truck": 2,
+      "gap": 1,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/drone-parked.webp",
+     "clock": "14:49",
+     "plus": "",
+     "view": "Drone",
+     "caption": null,
+     "ms": 1100,
+     "x": 76.67,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +5.0% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap"
+     ],
+     "gap": 4.97,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "drone-parked",
+      "truck": 2,
+      "gap": 1,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/drone-parked.webp",
+     "clock": "14:52",
+     "plus": "",
+     "view": "Drone",
+     "caption": null,
+     "ms": 1100,
+     "x": 80.0,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +5.3% · tolerance 1%",
+     "kinds": [
+      "gate",
+      "gap"
+     ],
+     "gap": 5.27,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "abstain",
+     "attrs": {
+      "img": "drone-parked",
+      "truck": 2,
+      "gap": 1,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "Vehicle inside, no work order",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-leave.webp",
+     "clock": "14:55",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": "14:55. The truck leaves. The gap starts to close.",
+     "ms": 4200,
+     "x": 83.33,
+     "state": "flag",
+     "alert": true,
+     "over": true,
+     "look": false,
+     "axis": "Flow gap +3.5% · tolerance 1%",
+     "kinds": [
+      "gap"
+     ],
+     "gap": 3.54,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "drifting",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate-leave",
+      "truck": 3,
+      "gap": 1,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "drifting",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "14:58",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 86.67,
+     "state": "flag",
+     "alert": true,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +1.0% · tolerance 1%",
+     "kinds": [
+      "sensor"
+     ],
+     "gap": 0.98,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "drifting",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 3,
+      "gap": 0,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "drifting",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "15:01",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 90.0,
+     "state": "flag",
+     "alert": true,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [
+      "sensor"
+     ],
+     "gap": -0.11,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "drifting",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 3,
+      "gap": 0,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "drifting",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "15:04",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 93.33,
+     "state": "flag",
+     "alert": true,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.3% · tolerance 1%",
+     "kinds": [
+      "sensor"
+     ],
+     "gap": -0.28,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "drifting",
+      "up-press": "none",
+      "down-press": "stuck"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 3,
+      "gap": 0,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "drifting",
+      "s-up-press": "ok",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "15:07",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 96.67,
+     "state": "flag",
+     "alert": true,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.12,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "stuck",
+      "up-press": "stuck",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 3,
+      "gap": 0,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "stuck",
+      "s-up-press": "stuck",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: stuck",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": "Told"
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "15:10",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": "The flag stays open. A person goes and looks.",
+     "ms": 4200,
+     "x": 100.0,
+     "state": "flag",
+     "alert": true,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [
+      "sensor"
+     ],
+     "gap": -0.05,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "stuck",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "abstain",
+     "attrs": {
+      "img": "gate",
+      "truck": 3,
+      "gap": 0,
+      "chat": 2,
+      "told": 1,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "stuck",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": "Told"
+     }
+    }
+   ],
+   "traces": [
+    {
+     "id": "in",
+     "label": "Flow in",
+     "tone": "blue",
+     "points": [
+      [
+       0.0,
+       34.83
+      ],
+      [
+       1.12,
+       29.8
+      ],
+      [
+       2.25,
+       36.16
+      ],
+      [
+       3.37,
+       33.99
+      ],
+      [
+       4.49,
+       36.14
+      ],
+      [
+       5.62,
+       32.3
+      ],
+      [
+       6.74,
+       42.33
+      ],
+      [
+       7.87,
+       30.6
+      ],
+      [
+       8.99,
+       33.15
+      ],
+      [
+       10.11,
+       34.17
+      ],
+      [
+       11.24,
+       32.21
+      ],
+      [
+       12.36,
+       33.44
+      ],
+      [
+       13.48,
+       34.69
+      ],
+      [
+       14.61,
+       32.04
+      ],
+      [
+       15.73,
+       34.86
+      ],
+      [
+       16.85,
+       34.56
+      ],
+      [
+       17.98,
+       33.39
+      ],
+      [
+       19.1,
+       29.83
+      ],
+      [
+       20.22,
+       36.22
+      ],
+      [
+       21.35,
+       35.4
+      ],
+      [
+       22.47,
+       29.98
+      ],
+      [
+       23.6,
+       35.04
+      ],
+      [
+       24.72,
+       33.41
+      ],
+      [
+       25.84,
+       36.18
+      ],
+      [
+       26.97,
+       34.28
+      ],
+      [
+       28.09,
+       35.08
+      ],
+      [
+       29.21,
+       37.23
+      ],
+      [
+       30.34,
+       33.32
+      ],
+      [
+       31.46,
+       31.91
+      ],
+      [
+       32.58,
+       34.83
+      ],
+      [
+       33.71,
+       30.57
+      ],
+      [
+       34.83,
+       33.52
+      ],
+      [
+       35.96,
+       33.48
+      ],
+      [
+       37.08,
+       32.39
+      ],
+      [
+       38.2,
+       30.37
+      ],
+      [
+       39.33,
+       33.95
+      ],
+      [
+       40.45,
+       32.88
+      ],
+      [
+       41.57,
+       37.49
+      ],
+      [
+       42.7,
+       32.29
+      ],
+      [
+       43.82,
+       33.63
+      ],
+      [
+       44.94,
+       32.23
+      ],
+      [
+       46.07,
+       34.61
+      ],
+      [
+       47.19,
+       33.17
+      ],
+      [
+       48.31,
+       36.53
+      ],
+      [
+       49.44,
+       32.68
+      ],
+      [
+       50.56,
+       39.92
+      ],
+      [
+       51.69,
+       34.39
+      ],
+      [
+       52.81,
+       34.92
+      ],
+      [
+       53.93,
+       31.21
+      ],
+      [
+       55.06,
+       35.21
+      ],
+      [
+       56.18,
+       33.44
+      ],
+      [
+       57.3,
+       34.21
+      ],
+      [
+       58.43,
+       32.01
+      ],
+      [
+       59.55,
+       36.22
+      ],
+      [
+       60.67,
+       37.87
+      ],
+      [
+       61.8,
+       37.29
+      ],
+      [
+       62.92,
+       31.03
+      ],
+      [
+       64.04,
+       37.41
+      ],
+      [
+       65.17,
+       34.35
+      ],
+      [
+       66.29,
+       33.23
+      ],
+      [
+       67.42,
+       35.94
+      ],
+      [
+       68.54,
+       35.9
+      ],
+      [
+       69.66,
+       34.96
+      ],
+      [
+       70.79,
+       32.73
+      ],
+      [
+       71.91,
+       34.06
+      ],
+      [
+       73.03,
+       35.55
+      ],
+      [
+       74.16,
+       37.81
+      ],
+      [
+       75.28,
+       35.63
+      ],
+      [
+       76.4,
+       35.53
+      ],
+      [
+       77.53,
+       31.33
+      ],
+      [
+       78.65,
+       32.67
+      ],
+      [
+       79.78,
+       35.71
+      ],
+      [
+       80.9,
+       33.94
+      ],
+      [
+       82.02,
+       40.11
+      ],
+      [
+       83.15,
+       33.98
+      ],
+      [
+       84.27,
+       31.29
+      ],
+      [
+       85.39,
+       32.84
+      ],
+      [
+       86.52,
+       30.69
+      ],
+      [
+       87.64,
+       37.33
+      ],
+      [
+       88.76,
+       36.46
+      ],
+      [
+       89.89,
+       32.25
+      ],
+      [
+       91.01,
+       37.64
+      ],
+      [
+       92.13,
+       38.48
+      ],
+      [
+       93.26,
+       33.28
+      ],
+      [
+       94.38,
+       37.83
+      ],
+      [
+       95.51,
+       32.03
+      ],
+      [
+       96.63,
+       33.89
+      ],
+      [
+       97.75,
+       35.15
+      ],
+      [
+       98.88,
+       38.44
+      ],
+      [
+       100.0,
+       30.29
+      ]
+     ]
+    },
+    {
+     "id": "out",
+     "label": "Flow out",
+     "tone": "pico",
+     "points": [
+      [
+       0.0,
+       36.87
+      ],
+      [
+       1.12,
+       36.94
+      ],
+      [
+       2.25,
+       37.02
+      ],
+      [
+       3.37,
+       34.0
+      ],
+      [
+       4.49,
+       28.61
+      ],
+      [
+       5.62,
+       38.65
+      ],
+      [
+       6.74,
+       38.6
+      ],
+      [
+       7.87,
+       34.83
+      ],
+      [
+       8.99,
+       34.26
+      ],
+      [
+       10.11,
+       37.54
+      ],
+      [
+       11.24,
+       38.44
+      ],
+      [
+       12.36,
+       35.62
+      ],
+      [
+       13.48,
+       36.1
+      ],
+      [
+       14.61,
+       36.43
+      ],
+      [
+       15.73,
+       36.75
+      ],
+      [
+       16.85,
+       35.61
+      ],
+      [
+       17.98,
+       31.6
+      ],
+      [
+       19.1,
+       31.9
+      ],
+      [
+       20.22,
+       37.08
+      ],
+      [
+       21.35,
+       33.55
+      ],
+      [
+       22.47,
+       34.23
+      ],
+      [
+       23.6,
+       36.01
+      ],
+      [
+       24.72,
+       39.49
+      ],
+      [
+       25.84,
+       35.34
+      ],
+      [
+       26.97,
+       31.85
+      ],
+      [
+       28.09,
+       38.7
+      ],
+      [
+       29.21,
+       36.41
+      ],
+      [
+       30.34,
+       31.58
+      ],
+      [
+       31.46,
+       34.19
+      ],
+      [
+       32.58,
+       33.88
+      ],
+      [
+       33.71,
+       34.28
+      ],
+      [
+       34.83,
+       33.7
+      ],
+      [
+       35.96,
+       35.77
+      ],
+      [
+       37.08,
+       39.49
+      ],
+      [
+       38.2,
+       41.34
+      ],
+      [
+       39.33,
+       39.31
+      ],
+      [
+       40.45,
+       47.16
+      ],
+      [
+       41.57,
+       53.64
+      ],
+      [
+       42.7,
+       54.79
+      ],
+      [
+       43.82,
+       54.92
+      ],
+      [
+       44.94,
+       54.76
+      ],
+      [
+       46.07,
+       57.47
+      ],
+      [
+       47.19,
+       56.59
+      ],
+      [
+       48.31,
+       50.73
+      ],
+      [
+       49.44,
+       52.25
+      ],
+      [
+       50.56,
+       50.45
+      ],
+      [
+       51.69,
+       59.39
+      ],
+      [
+       52.81,
+       55.42
+      ],
+      [
+       53.93,
+       53.79
+      ],
+      [
+       55.06,
+       52.75
+      ],
+      [
+       56.18,
+       53.3
+      ],
+      [
+       57.3,
+       50.1
+      ],
+      [
+       58.43,
+       53.01
+      ],
+      [
+       59.55,
+       57.38
+      ],
+      [
+       60.67,
+       50.93
+      ],
+      [
+       61.8,
+       53.08
+      ],
+      [
+       62.92,
+       52.95
+      ],
+      [
+       64.04,
+       51.41
+      ],
+      [
+       65.17,
+       53.1
+      ],
+      [
+       66.29,
+       54.2
+      ],
+      [
+       67.42,
+       58.45
+      ],
+      [
+       68.54,
+       56.66
+      ],
+      [
+       69.66,
+       54.16
+      ],
+      [
+       70.79,
+       53.16
+      ],
+      [
+       71.91,
+       50.61
+      ],
+      [
+       73.03,
+       52.56
+      ],
+      [
+       74.16,
+       51.03
+      ],
+      [
+       75.28,
+       55.69
+      ],
+      [
+       76.4,
+       55.01
+      ],
+      [
+       77.53,
+       51.25
+      ],
+      [
+       78.65,
+       53.84
+      ],
+      [
+       79.78,
+       55.59
+      ],
+      [
+       80.9,
+       52.81
+      ],
+      [
+       82.02,
+       48.43
+      ],
+      [
+       83.15,
+       41.85
+      ],
+      [
+       84.27,
+       36.05
+      ],
+      [
+       85.39,
+       33.85
+      ],
+      [
+       86.52,
+       34.98
+      ],
+      [
+       87.64,
+       34.25
+      ],
+      [
+       88.76,
+       40.92
+      ],
+      [
+       89.89,
+       39.29
+      ],
+      [
+       91.01,
+       32.43
+      ],
+      [
+       92.13,
+       33.26
+      ],
+      [
+       93.26,
+       33.97
+      ],
+      [
+       94.38,
+       35.36
+      ],
+      [
+       95.51,
+       33.76
+      ],
+      [
+       96.63,
+       34.72
+      ],
+      [
+       97.75,
+       34.69
+      ],
+      [
+       98.88,
+       34.91
+      ],
+      [
+       100.0,
+       35.53
+      ]
+     ]
+    },
+    {
+     "id": "press",
+     "label": "Upstream pressure",
+     "tone": "nano",
+     "points": [
+      [
+       0.0,
+       85.72
+      ],
+      [
+       1.12,
+       89.78
+      ],
+      [
+       2.25,
+       93.26
+      ],
+      [
+       3.37,
+       87.27
+      ],
+      [
+       4.49,
+       85.25
+      ],
+      [
+       5.62,
+       93.95
+      ],
+      [
+       6.74,
+       89.53
+      ],
+      [
+       7.87,
+       87.85
+      ],
+      [
+       8.99,
+       86.3
+      ],
+      [
+       10.11,
+       93.81
+      ],
+      [
+       11.24,
+       94.28
+      ],
+      [
+       12.36,
+       95.71
+      ],
+      [
+       13.48,
+       89.67
+      ],
+      [
+       14.61,
+       93.23
+      ],
+      [
+       15.73,
+       87.21
+      ],
+      [
+       16.85,
+       87.02
+      ],
+      [
+       17.98,
+       85.69
+      ],
+      [
+       19.1,
+       89.7
+      ],
+      [
+       20.22,
+       90.19
+      ],
+      [
+       21.35,
+       90.66
+      ],
+      [
+       22.47,
+       88.92
+      ],
+      [
+       23.6,
+       94.39
+      ],
+      [
+       24.72,
+       87.85
+      ],
+      [
+       25.84,
+       91.77
+      ],
+      [
+       26.97,
+       87.65
+      ],
+      [
+       28.09,
+       93.62
+      ],
+      [
+       29.21,
+       93.75
+      ],
+      [
+       30.34,
+       85.64
+      ],
+      [
+       31.46,
+       90.33
+      ],
+      [
+       32.58,
+       87.38
+      ],
+      [
+       33.71,
+       91.16
+      ],
+      [
+       34.83,
+       85.58
+      ],
+      [
+       35.96,
+       89.56
+      ],
+      [
+       37.08,
+       87.85
+      ],
+      [
+       38.2,
+       87.57
+      ],
+      [
+       39.33,
+       89.48
+      ],
+      [
+       40.45,
+       90.8
+      ],
+      [
+       41.57,
+       86.16
+      ],
+      [
+       42.7,
+       87.63
+      ],
+      [
+       43.82,
+       89.78
+      ],
+      [
+       44.94,
+       89.78
+      ],
+      [
+       46.07,
+       89.78
+      ],
+      [
+       47.19,
+       89.78
+      ],
+      [
+       48.31,
+       89.78
+      ],
+      [
+       49.44,
+       89.78
+      ],
+      [
+       50.56,
+       89.78
+      ],
+      [
+       51.69,
+       89.78
+      ],
+      [
+       52.81,
+       89.78
+      ],
+      [
+       53.93,
+       89.78
+      ],
+      [
+       55.06,
+       89.78
+      ],
+      [
+       56.18,
+       89.78
+      ],
+      [
+       57.3,
+       88.1
+      ],
+      [
+       58.43,
+       90.94
+      ],
+      [
+       59.55,
+       93.92
+      ],
+      [
+       60.67,
+       92.68
+      ],
+      [
+       61.8,
+       84.97
+      ],
+      [
+       62.92,
+       84.29
+      ],
+      [
+       64.04,
+       91.02
+      ],
+      [
+       65.17,
+       91.02
+      ],
+      [
+       66.29,
+       90.14
+      ],
+      [
+       67.42,
+       91.93
+      ],
+      [
+       68.54,
+       89.81
+      ],
+      [
+       69.66,
+       86.35
+      ],
+      [
+       70.79,
+       86.93
+      ],
+      [
+       71.91,
+       94.06
+      ],
+      [
+       73.03,
+       86.05
+      ],
+      [
+       74.16,
+       88.37
+      ],
+      [
+       75.28,
+       88.65
+      ],
+      [
+       76.4,
+       89.83
+      ],
+      [
+       77.53,
+       91.55
+      ],
+      [
+       78.65,
+       88.51
+      ],
+      [
+       79.78,
+       87.13
+      ],
+      [
+       80.9,
+       88.84
+      ],
+      [
+       82.02,
+       87.57
+      ],
+      [
+       83.15,
+       90.22
+      ],
+      [
+       84.27,
+       86.13
+      ],
+      [
+       85.39,
+       87.13
+      ],
+      [
+       86.52,
+       91.69
+      ],
+      [
+       87.64,
+       89.14
+      ],
+      [
+       88.76,
+       85.55
+      ],
+      [
+       89.89,
+       91.13
+      ],
+      [
+       91.01,
+       89.01
+      ],
+      [
+       92.13,
+       87.46
+      ],
+      [
+       93.26,
+       90.06
+      ],
+      [
+       94.38,
+       89.83
+      ],
+      [
+       95.51,
+       91.71
+      ],
+      [
+       96.63,
+       95.44
+      ],
+      [
+       97.75,
+       93.29
+      ],
+      [
+       98.88,
+       88.1
+      ],
+      [
+       100.0,
+       93.59
+      ]
+     ]
+    }
+   ],
+   "lines": [],
+   "events": [
+    {
+     "k": 0,
+     "clock": "13:40",
+     "state": "quiet"
+    },
+    {
+     "k": 8,
+     "clock": "14:04",
+     "state": "watch"
+    },
+    {
+     "k": 9,
+     "clock": "14:07",
+     "state": "watch"
+    },
+    {
+     "k": 12,
+     "clock": "14:16",
+     "state": "flag"
+    },
+    {
+     "k": 14,
+     "clock": "14:22",
+     "state": "flag"
+    },
+    {
+     "k": 15,
+     "clock": "14:25",
+     "state": "flag"
+    },
+    {
+     "k": 17,
+     "clock": "14:31",
+     "state": "flag"
+    },
+    {
+     "k": 25,
+     "clock": "14:55",
+     "state": "flag"
+    },
+    {
+     "k": 30,
+     "clock": "15:10",
+     "state": "flag"
+    }
+   ],
+   "ms": 62000
+  },
+  {
+   "id": "job",
+   "title": "A planned job",
+   "date": "simulated",
+   "frames": [
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "09:10",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": "Another day. A work order is on file for a valve test.",
+     "ms": 4200,
+     "x": 0.0,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.2% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.21,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "09:13",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 5.88,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.0% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.02,
+     "pico": {
+      "head-flow": "stuck",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "up-press",
+     "attrs": {
+      "img": "gate",
+      "truck": 0,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "stuck",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: upstream pressure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-arrive.webp",
+     "clock": "09:16",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": "09:16. A truck drives in. The work order covers it.",
+     "ms": 4200,
+     "x": 11.76,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.07,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate-arrive",
+      "truck": 1,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-parked.webp",
+     "clock": "09:19",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 17.65,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.12,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate-parked",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-parked.webp",
+     "clock": "09:22",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 23.53,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.2% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.16,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "gate-parked",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-parked.webp",
+     "clock": "09:25",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 29.41,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.3% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.28,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "gate-parked",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-parked.webp",
+     "clock": "09:28",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 35.29,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.12,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "gate-parked",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe.webp",
+     "clock": "09:31",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": "The upstream sensor is out of service, as the work order says.",
+     "ms": 4200,
+     "x": 41.18,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.07,
+     "pico": {
+      "head-flow": "drifting",
+      "tail-flow": "drifting",
+      "up-press": null,
+      "down-press": "drifting"
+     },
+     "nano": "down-press",
+     "attrs": {
+      "img": "pipe",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "drifting",
+      "s-tail-flow": "drifting",
+      "s-up-press": "off",
+      "s-down-press": "drifting"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: out of service",
+      "nano": "Degraded: downstream pressure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe.webp",
+     "clock": "09:34",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": "Both flows dip together. No gap between them.",
+     "ms": 4200,
+     "x": 47.06,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.05,
+     "pico": {
+      "head-flow": "drifting",
+      "tail-flow": "drifting",
+      "up-press": null,
+      "down-press": "drifting"
+     },
+     "nano": "down-press",
+     "attrs": {
+      "img": "pipe",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "drifting",
+      "s-tail-flow": "drifting",
+      "s-up-press": "off",
+      "s-down-press": "drifting"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: out of service",
+      "nano": "Degraded: downstream pressure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe.webp",
+     "clock": "09:37",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 52.94,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.2% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.22,
+     "pico": {
+      "head-flow": "drifting",
+      "tail-flow": "drifting",
+      "up-press": null,
+      "down-press": "drifting"
+     },
+     "nano": "down-press",
+     "attrs": {
+      "img": "pipe",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "drifting",
+      "s-tail-flow": "drifting",
+      "s-up-press": "off",
+      "s-down-press": "drifting"
+     },
+     "says": {
+      "pico-flow": "Flow out: drifting",
+      "pico-press": "Upstream pressure: out of service",
+      "nano": "Degraded: downstream pressure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe.webp",
+     "clock": "09:40",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 58.82,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.2% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.17,
+     "pico": {
+      "head-flow": "stuck",
+      "tail-flow": "stuck",
+      "up-press": null,
+      "down-press": "stuck"
+     },
+     "nano": "down-press",
+     "attrs": {
+      "img": "pipe",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "stuck",
+      "s-tail-flow": "stuck",
+      "s-up-press": "off",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: out of service",
+      "nano": "Degraded: downstream pressure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe.webp",
+     "clock": "09:43",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 64.71,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.0% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.02,
+     "pico": {
+      "head-flow": "stuck",
+      "tail-flow": "stuck",
+      "up-press": null,
+      "down-press": "stuck"
+     },
+     "nano": "down-press",
+     "attrs": {
+      "img": "pipe",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "stuck",
+      "s-tail-flow": "stuck",
+      "s-up-press": "off",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: out of service",
+      "nano": "Degraded: downstream pressure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe.webp",
+     "clock": "09:46",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 70.59,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.12,
+     "pico": {
+      "head-flow": "stuck",
+      "tail-flow": "stuck",
+      "up-press": null,
+      "down-press": "stuck"
+     },
+     "nano": "down-press",
+     "attrs": {
+      "img": "pipe",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "stuck",
+      "s-tail-flow": "stuck",
+      "s-up-press": "off",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: out of service",
+      "nano": "Degraded: downstream pressure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/pipe.webp",
+     "clock": "09:49",
+     "plus": "",
+     "view": "Pipe camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 76.47,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap +0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": 0.06,
+     "pico": {
+      "head-flow": "stuck",
+      "tail-flow": "stuck",
+      "up-press": "none",
+      "down-press": "stuck"
+     },
+     "nano": "up-press",
+     "attrs": {
+      "img": "pipe",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "stuck",
+      "s-tail-flow": "stuck",
+      "s-up-press": "ok",
+      "s-down-press": "stuck"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: upstream pressure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-parked.webp",
+     "clock": "09:52",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 82.35,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.0% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.01,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "abstain",
+     "attrs": {
+      "img": "gate-parked",
+      "truck": 2,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 1,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "Work order on file",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate-leave.webp",
+     "clock": "09:55",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": "The job ends. Nothing was flagged.",
+     "ms": 4200,
+     "x": 88.24,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.11,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "none",
+     "attrs": {
+      "img": "gate-leave",
+      "truck": 3,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: none",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "09:58",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 94.12,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.06,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "stuck",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": "up-press",
+     "attrs": {
+      "img": "gate",
+      "truck": 3,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "stuck",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: stuck",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Degraded: upstream pressure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    },
+    {
+     "src": "assets/oilgas-replay/gate.webp",
+     "clock": "10:01",
+     "plus": "",
+     "view": "Gate camera",
+     "caption": null,
+     "ms": 1100,
+     "x": 100.0,
+     "state": "quiet",
+     "alert": false,
+     "over": false,
+     "look": false,
+     "axis": "Flow gap −0.1% · tolerance 1%",
+     "kinds": [],
+     "gap": -0.08,
+     "pico": {
+      "head-flow": "none",
+      "tail-flow": "none",
+      "up-press": "none",
+      "down-press": "none"
+     },
+     "nano": null,
+     "attrs": {
+      "img": "gate",
+      "truck": 3,
+      "gap": 0,
+      "chat": 0,
+      "told": 0,
+      "wo": 0,
+      "s-head-flow": "ok",
+      "s-tail-flow": "ok",
+      "s-up-press": "ok",
+      "s-down-press": "ok"
+     },
+     "says": {
+      "pico-flow": "Flow out: healthy",
+      "pico-press": "Upstream pressure: healthy",
+      "nano": "Not sure",
+      "gate": "",
+      "micro": "",
+      "person": ""
+     }
+    }
+   ],
+   "traces": [
+    {
+     "id": "in",
+     "label": "Flow in",
+     "tone": "blue",
+     "points": [
+      [
+       0.0,
+       30.69
+      ],
+      [
+       2.0,
+       26.47
+      ],
+      [
+       4.0,
+       32.21
+      ],
+      [
+       6.0,
+       32.96
+      ],
+      [
+       8.0,
+       31.17
+      ],
+      [
+       10.0,
+       32.97
+      ],
+      [
+       12.0,
+       32.35
+      ],
+      [
+       14.0,
+       29.81
+      ],
+      [
+       16.0,
+       31.98
+      ],
+      [
+       18.0,
+       33.01
+      ],
+      [
+       20.0,
+       32.19
+      ],
+      [
+       22.0,
+       30.0
+      ],
+      [
+       24.0,
+       34.62
+      ],
+      [
+       26.0,
+       32.63
+      ],
+      [
+       28.0,
+       31.86
+      ],
+      [
+       30.0,
+       31.63
+      ],
+      [
+       32.0,
+       33.91
+      ],
+      [
+       34.0,
+       30.36
+      ],
+      [
+       36.0,
+       29.84
+      ],
+      [
+       38.0,
+       44.64
+      ],
+      [
+       40.0,
+       59.54
+      ],
+      [
+       42.0,
+       61.53
+      ],
+      [
+       44.0,
+       59.17
+      ],
+      [
+       46.0,
+       47.69
+      ],
+      [
+       48.0,
+       27.61
+      ],
+      [
+       50.0,
+       33.27
+      ],
+      [
+       52.0,
+       28.82
+      ],
+      [
+       54.0,
+       37.34
+      ],
+      [
+       56.0,
+       32.0
+      ],
+      [
+       58.0,
+       29.54
+      ],
+      [
+       60.0,
+       30.6
+      ],
+      [
+       62.0,
+       31.1
+      ],
+      [
+       64.0,
+       30.79
+      ],
+      [
+       66.0,
+       33.4
+      ],
+      [
+       68.0,
+       30.59
+      ],
+      [
+       70.0,
+       33.04
+      ],
+      [
+       72.0,
+       29.45
+      ],
+      [
+       74.0,
+       31.76
+      ],
+      [
+       76.0,
+       31.17
+      ],
+      [
+       78.0,
+       28.79
+      ],
+      [
+       80.0,
+       31.11
+      ],
+      [
+       82.0,
+       30.29
+      ],
+      [
+       84.0,
+       32.43
+      ],
+      [
+       86.0,
+       31.02
+      ],
+      [
+       88.0,
+       28.06
+      ],
+      [
+       90.0,
+       31.44
+      ],
+      [
+       92.0,
+       30.71
+      ],
+      [
+       94.0,
+       35.42
+      ],
+      [
+       96.0,
+       31.68
+      ],
+      [
+       98.0,
+       31.73
+      ],
+      [
+       100.0,
+       28.71
+      ]
+     ]
+    },
+    {
+     "id": "out",
+     "label": "Flow out",
+     "tone": "pico",
+     "points": [
+      [
+       0.0,
+       31.23
+      ],
+      [
+       2.0,
+       29.97
+      ],
+      [
+       4.0,
+       29.96
+      ],
+      [
+       6.0,
+       31.42
+      ],
+      [
+       8.0,
+       28.78
+      ],
+      [
+       10.0,
+       29.62
+      ],
+      [
+       12.0,
+       31.02
+      ],
+      [
+       14.0,
+       28.75
+      ],
+      [
+       16.0,
+       31.77
+      ],
+      [
+       18.0,
+       30.87
+      ],
+      [
+       20.0,
+       30.64
+      ],
+      [
+       22.0,
+       32.34
+      ],
+      [
+       24.0,
+       32.19
+      ],
+      [
+       26.0,
+       31.24
+      ],
+      [
+       28.0,
+       32.04
+      ],
+      [
+       30.0,
+       31.17
+      ],
+      [
+       32.0,
+       31.24
+      ],
+      [
+       34.0,
+       29.7
+      ],
+      [
+       36.0,
+       31.09
+      ],
+      [
+       38.0,
+       42.81
+      ],
+      [
+       40.0,
+       59.58
+      ],
+      [
+       42.0,
+       61.46
+      ],
+      [
+       44.0,
+       56.62
+      ],
+      [
+       46.0,
+       47.34
+      ],
+      [
+       48.0,
+       33.11
+      ],
+      [
+       50.0,
+       31.34
+      ],
+      [
+       52.0,
+       32.5
+      ],
+      [
+       54.0,
+       30.16
+      ],
+      [
+       56.0,
+       33.58
+      ],
+      [
+       58.0,
+       29.03
+      ],
+      [
+       60.0,
+       29.59
+      ],
+      [
+       62.0,
+       29.43
+      ],
+      [
+       64.0,
+       30.21
+      ],
+      [
+       66.0,
+       33.85
+      ],
+      [
+       68.0,
+       31.19
+      ],
+      [
+       70.0,
+       31.24
+      ],
+      [
+       72.0,
+       29.44
+      ],
+      [
+       74.0,
+       32.78
+      ],
+      [
+       76.0,
+       30.28
+      ],
+      [
+       78.0,
+       32.32
+      ],
+      [
+       80.0,
+       30.05
+      ],
+      [
+       82.0,
+       29.39
+      ],
+      [
+       84.0,
+       31.13
+      ],
+      [
+       86.0,
+       31.48
+      ],
+      [
+       88.0,
+       31.91
+      ],
+      [
+       90.0,
+       29.43
+      ],
+      [
+       92.0,
+       30.22
+      ],
+      [
+       94.0,
+       31.95
+      ],
+      [
+       96.0,
+       31.43
+      ],
+      [
+       98.0,
+       32.52
+      ],
+      [
+       100.0,
+       31.33
+      ]
+     ]
+    },
+    {
+     "id": "press",
+     "label": "Upstream pressure",
+     "tone": "nano",
+     "points": [
+      [
+       0.0,
+       88.44
+      ],
+      [
+       2.0,
+       89.05
+      ],
+      [
+       4.0,
+       86.88
+      ],
+      [
+       6.0,
+       92.23
+      ],
+      [
+       8.0,
+       88.41
+      ],
+      [
+       10.0,
+       93.35
+      ],
+      [
+       12.0,
+       95.63
+      ],
+      [
+       14.0,
+       84.37
+      ],
+      [
+       16.0,
+       92.12
+      ],
+      [
+       18.0,
+       92.62
+      ],
+      [
+       20.0,
+       93.29
+      ],
+      [
+       22.0,
+       86.12
+      ],
+      [
+       60.0,
+       89.92
+      ],
+      [
+       62.0,
+       89.11
+      ],
+      [
+       64.0,
+       90.08
+      ],
+      [
+       66.0,
+       94.94
+      ],
+      [
+       68.0,
+       87.66
+      ],
+      [
+       70.0,
+       89.02
+      ],
+      [
+       72.0,
+       89.27
+      ],
+      [
+       74.0,
+       89.05
+      ],
+      [
+       76.0,
+       91.06
+      ],
+      [
+       78.0,
+       89.33
+      ],
+      [
+       80.0,
+       88.41
+      ],
+      [
+       82.0,
+       89.5
+      ],
+      [
+       84.0,
+       87.16
+      ],
+      [
+       86.0,
+       86.21
+      ],
+      [
+       88.0,
+       85.93
+      ],
+      [
+       90.0,
+       89.08
+      ],
+      [
+       92.0,
+       89.89
+      ],
+      [
+       94.0,
+       90.28
+      ],
+      [
+       96.0,
+       90.59
+      ],
+      [
+       98.0,
+       85.56
+      ],
+      [
+       100.0,
+       88.77
+      ]
+     ]
+    }
+   ],
+   "lines": [],
+   "events": [
+    {
+     "k": 0,
+     "clock": "09:10",
+     "state": "quiet"
+    },
+    {
+     "k": 2,
+     "clock": "09:16",
+     "state": "quiet"
+    },
+    {
+     "k": 7,
+     "clock": "09:31",
+     "state": "quiet"
+    },
+    {
+     "k": 8,
+     "clock": "09:34",
+     "state": "quiet"
+    },
+    {
+     "k": 15,
+     "clock": "09:55",
+     "state": "quiet"
+    }
+   ],
+   "ms": 35300
+  }
+ ],
+ "still": [
+  "tap",
+  15
+ ],
+ "feed": {
+  "label": "illustration",
+  "every": "",
+  "size": [
+   960,
+   578
+  ]
+ },
+ "parts": [
+  {
+   "id": "pico-flow",
+   "name": "Wave Pico",
+   "role": "on the flow meter",
+   "tone": "pico",
+   "tag": null,
+   "readout": "pico-flow"
+  },
+  {
+   "id": "pico-press",
+   "name": "Wave Pico",
+   "role": "on the pressure sensor",
+   "tone": "pico",
+   "tag": null,
+   "readout": "pico-press"
+  },
+  {
+   "id": "nano",
+   "name": "Wave Nano",
+   "role": "on the mast: reads the sensors together",
+   "tone": "nano",
+   "tag": null,
+   "readout": "nano",
+   "decides": false
+  },
+  {
+   "id": "gate",
+   "name": "Gate log",
+   "role": "the site’s own record",
+   "tone": "blue",
+   "tag": null,
+   "readout": "gate"
+  },
+  {
+   "id": "micro",
+   "name": "Wave Micro",
+   "role": "in the control centre",
+   "tone": "micro",
+   "tag": "in training",
+   "readout": null
+  },
+  {
+   "id": "person",
+   "name": "A person",
+   "role": "",
+   "tone": null,
+   "tag": null,
+   "readout": "person"
+  }
+ ],
+ "words": {
+  "states": {
+   "quiet": "Quiet",
+   "watch": "Watch",
+   "flag": "Flag"
+  }
+ },
+ "ladder": [
+  {
+   "key": "quiet",
+   "label": "Quiet"
+  },
+  {
+   "key": "watch",
+   "label": "Watch"
+  },
+  {
+   "key": "flag",
+   "label": "Flag",
+   "alert": true
+  }
+ ],
+ "chat": {
+  "who": "The operator asks",
+  "q": "What changed on this line since 14:00?",
+  "by": "Wave Micro",
+  "a": "A truck entered at 14:07 with no work order. Flow out fell behind flow in. One pressure reading went flat. Nothing here says who. Someone should go and look.",
+  "tag": "simulated example"
+ },
+ "micro": {
+  "rule": "A flag is a question for a person. It never names anyone and never changes a bill."
+ },
+ "controls": {
+  "play": "Play",
+  "pause": "Pause",
+  "replay": "Replay",
+  "script": "Read it as text"
+ },
+ "unit": "The site, as designed",
+ "note": "The sensor readings and the gate and work-order entries are simulated, with the same sensor model our models are trained on. Wave Pico's and Wave Nano's answers are real: each was asked at every frame, read the way our benchmark reads them. The state is a site rule, not a model: a vehicle inside with no work order, a flow gap over the meters' tolerance, or the same sensor fault two frames running each count as one record out of line; one is a watch, two at once is a flag. Wave Micro is in training: its reply is a simulated example. The pictures are illustrations of no real site, and the boxes on them are the site camera system's own detections, simulated: no Wave model recognises a vehicle. A flag is a question for a person; it never names anyone and never changes a bill.",
+ "credit": null,
+ "caption": "Theft and tampering, a simulated afternoon. A person goes and looks."
+}

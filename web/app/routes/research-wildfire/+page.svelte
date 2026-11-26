@@ -18,13 +18,14 @@
   import OnAir from "#lib/ui/OnAir.svelte";
   import Rail from "#lib/ui/Rail.svelte";
   import FireScene from "#lib/ui/FireScene.svelte";
+  import FireReplay from "#lib/ui/FireReplay.svelte";
   import WaveFirewatch from "#lib/ui/WaveFirewatch.svelte";
   const nano = content('research-wave-nano.html');
   const head = siteHead({
     title: 'Wildfire mitigation: an early-warning watch on site - RogerAI',
     desc: 'A wildfire early-warning watch that smells first and looks second: smoke chemistry, heat and wind against a baseline, a camera frame to confirm, and a warning with its reason. On its own battery, around power lines, homes, hillsides, unattended land, a portable unit and factories. Advisory, never a fire alarm.',
     og: { type: 'website', title: 'RogerAI - wildfire early warning, on site', desc: 'Power lines, homes, hillsides, unattended land, a portable unit, factories. Smell first, look second, tell a person why.', url: 'https://rogerai.fm/research-wildfire.html', image: 'https://rogerai.fm/og-research.png' },
-    css: [...CSS_SHARED, 'research.css', 'wave-model.css', 'wildfire.css'],
+    css: [...CSS_SHARED, 'research.css', 'wave-model.css', 'wildfire.css', 'replay.css', 'fire-replay.css'],
     scripts: [{ runtime: true }, { page: "research-wildfire" }],
   });
   const TUNING = "/research-custom-tuning.html";
@@ -90,6 +91,7 @@
           <p><b>Where it runs.</b> On the mast, on its own battery, with no network required. A link,
             when there is one, carries the warning out.</p>
         </div>
+        <div id="timelapse"><FireReplay fig={2} /></div>
       </div>
     </section>
 
@@ -248,7 +250,7 @@
       </div>
     </section>
 
-    <WaveFirewatch no='9' fig='2' />
+    <WaveFirewatch no='9' fig='3' />
 
     <section class="section research-closing">
       <div class="wrap">

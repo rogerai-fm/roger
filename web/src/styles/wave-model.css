@@ -258,3 +258,22 @@
   .wm-readouts--decision .wm-readout > .wm-meter { grid-row: 3; }
   .wm-readouts--decision .wm-readout > .wm-ref { grid-column: 1 / -1; grid-row: 4; }
 }
+
+/* a section's small print: the reads behind it, at the foot of the section */
+.wm-read { max-width: 90ch; margin: var(--s-6) 0 0; font-size: var(--t-xs); line-height: var(--lh-body); color: var(--ink-500); }
+
+/* the doors to the timelapses (ReplayLinks.svelte): a frame of each film, a play mark, a few words; the whole card is the link */
+.wm-doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-5); margin: var(--s-8) 0 0; }
+.wm-door { display: grid; align-content: start; gap: var(--s-1); padding: var(--s-3); border: 1px solid var(--hairline-2); border-radius: var(--r-md); background: var(--paper); color: inherit; text-decoration: none; transition: border-color var(--d-2), transform var(--d-3) var(--ease-out-quint); }
+.wm-door:hover { border-color: var(--ink-900); transform: translateY(-2px); }
+.wm-door:focus-visible { outline: 2px solid var(--live); outline-offset: 2px; }
+.wm-door__shot { position: relative; display: block; aspect-ratio: 800 / 486; overflow: hidden; border-radius: var(--r-sm); margin-bottom: var(--s-2); background: var(--paper-2); }
+.wm-door__shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wm-door__shot i { position: absolute; left: var(--s-3); bottom: var(--s-3); width: 40px; height: 40px; border-radius: 50%; background: var(--paper); box-shadow: var(--e-2); }
+.wm-door__shot i::after { content: ""; position: absolute; left: 16px; top: 12px; border-style: solid; border-width: 8px 0 8px 13px; border-color: transparent transparent transparent var(--ink-900); }
+.wm-door__kicker { font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-500); }
+.wm-door b { font-size: var(--t-h3); letter-spacing: var(--tracking-h3); color: var(--ink-900); }
+.wm-door__line { font-size: var(--t-sm); line-height: var(--lh-snug); color: var(--ink-700); }
+.wm-doors .wm-credit { grid-column: 1 / -1; max-width: none; margin: 0; font-size: var(--t-micro); color: var(--ink-400); }
+@media (max-width: 640px) { .wm-doors { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); } }
+@media (prefers-reduced-motion: reduce) { .wm-door:hover { transform: none; } }

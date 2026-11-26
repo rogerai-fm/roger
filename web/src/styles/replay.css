@@ -1,0 +1,143 @@
+/* =====================================================================
+   The recorded timelapse (2026-11-26) - Replay.svelte, lead .rp
+   The feed is the hero: one recorded frame a minute, its clock, and one sentence at each moment
+   that matters. Under it the time axis (the reading as a trace against its line, a playhead, the
+   range that scrubs it), then a drawing a third of the size: the page's scene, whose labels show
+   what each part said at the playhead (the scene's own sheet sits beside this one).
+   The state is the figure's attributes (data-scn, data-state, data-close, data-told, data-smoke,
+   data-over) and the frame that is on; src/js/replay.js is the clock. Nothing loops.
+   Every colour a token: a part's tone is a tier token (--c); the alert red (--live) is only a
+   reading over its line, an alert state and a person told. Transitions use the --d-N scale.
+   With no script the still is the frame the data names.
+   ===================================================================== */
+.rp { color: var(--ink-700); --c: var(--ink-700); }
+.rp [data-tone="blue"] { --c: var(--ping-blue); }
+.rp [data-tone="nano"] { --c: var(--tier-nano); }
+.rp [data-tone="pico"] { --c: var(--tier-pico); }
+.rp [data-tone="micro"] { --c: var(--tier-micro); }
+
+.rp__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); margin: 0 0 var(--s-3); }
+.rp__chips { display: flex; gap: var(--s-2); margin: 0 auto 0 0; }
+.rp__chip {
+  font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label);
+  text-transform: uppercase; padding: var(--s-1) var(--s-2); border-radius: var(--r-xs); background: var(--ink-900); color: var(--paper);
+}
+.rp__chip--plain { background: none; color: var(--ink-500); border: 1px solid var(--hairline-2); }
+/* the scenarios: one story at a time */
+.rp__tabs { display: inline-flex; border: 1px solid var(--ink-900); border-radius: var(--r-pill); overflow: hidden; }
+.rp__tab { min-height: 32px; padding: var(--s-1) var(--s-4); border: 0; background: var(--paper); color: var(--ink-900); font-family: var(--font-ui); font-size: var(--t-sm); cursor: pointer; }
+.rp__tab + .rp__tab { border-left: 1px solid var(--ink-900); }
+.rp__tab[aria-pressed="true"] { background: var(--ink-900); color: var(--paper); }
+.rp__play {
+  min-width: 84px; min-height: 32px; padding: var(--s-1) var(--s-3); border: 1px solid var(--ink-900); border-radius: var(--r-pill);
+  background: var(--paper); color: var(--ink-900); font-family: var(--font-ui); font-size: var(--t-sm); font-weight: var(--weight-medium); cursor: pointer;
+}
+.rp__play:hover { background: var(--ink-900); color: var(--paper); }
+:is(.rp__play, .rp__tab):focus-visible { outline: 2px solid var(--live); outline-offset: 2px; }
+.rp:not(.is-ready) :is(.rp__play, .rp__tabs) { visibility: hidden; }
+
+/* ---------- the feed ---------- */
+.rp__feed { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--hairline-2); }
+.rp__frame { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity var(--d-4) var(--ease-standard); }
+.rp__frame.is-on { opacity: 1; }
+.rp__clock { position: absolute; left: var(--s-3); top: var(--s-3); margin: 0; display: flex; align-items: baseline; gap: var(--s-2); padding: var(--s-1) var(--s-3); border-radius: var(--r-xs); background: var(--paper); color: var(--ink-900); box-shadow: var(--e-1); }
+.rp__time { font-family: var(--font-mono); font-size: var(--t-h3); font-weight: var(--weight-semi); font-variant-numeric: tabular-nums; }
+.rp__plus { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-500); min-width: 6ch; }
+.rp__feedlabel { position: absolute; right: var(--s-3); top: var(--s-3); margin: 0; padding: 2px var(--s-2); border-radius: var(--r-xs); background: var(--paper); color: var(--ink-500); font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: var(--tracking-label); text-transform: uppercase; }
+/* where a model looked closer: a quiet outline, in the model's colour once it answers yes (the scene's sheet places it) */
+.rp__look { position: absolute; margin: 0; border: 1px dashed color-mix(in srgb, var(--paper) 55%, transparent); border-radius: var(--r-xs); opacity: 0; transition: opacity var(--d-4), border-color var(--d-3); pointer-events: none; }
+.rp__look b { position: absolute; left: -1px; top: 0; transform: translateY(-100%); padding: 1px var(--s-2); border-radius: var(--r-xs) var(--r-xs) 0 0; background: var(--c); color: var(--paper); font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; white-space: nowrap; }
+.rp[data-look="1"] .rp__look { opacity: 1; border: 2px solid var(--c); }
+/* a detection box on the feed: what a camera system picked out in this frame (the scene's sheet places it and says when it shows) */
+.rp__box { position: absolute; margin: 0; border: 2px solid var(--c); border-radius: 2px; opacity: 0; pointer-events: none; transition: opacity var(--d-4) var(--ease-standard); }
+.rp__box b { position: absolute; left: -2px; bottom: 100%; padding: 1px var(--s-2); background: var(--c); color: var(--paper); font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; white-space: nowrap; }
+/* the one sentence, set on the feed like a subtitle */
+.rp__caption { position: absolute; left: 0; right: 0; bottom: var(--s-4); margin: 0; display: flex; justify-content: center; padding: 0 var(--s-3); pointer-events: none; }
+.rp__cap { max-width: 44ch; padding: var(--s-2) var(--s-4); border-radius: var(--r-sm); background: var(--paper); color: var(--ink-900); box-shadow: var(--e-2); font-size: var(--t-lead); line-height: var(--lh-snug); font-weight: var(--weight-medium); text-align: center; transition: opacity var(--d-3); }
+.rp__cap:empty { opacity: 0; }
+
+/* ---------- the time axis: the reading, its line, the playhead ---------- */
+.rp__axis { position: relative; height: 64px; margin: var(--s-2) 0 0; }
+.rp__trace { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; opacity: 0; transition: opacity var(--d-3); }
+.rp__trace.is-on { opacity: 1; }
+.rp__trace * { vector-effect: non-scaling-stroke; }
+.rp__line { stroke: var(--live); stroke-width: 1; stroke-dasharray: 3 3; opacity: .7; }
+.rp__path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.rp__path[data-tone] { stroke: var(--c); }
+.rp__viewname:not(:empty) { margin-right: var(--s-2); padding-right: var(--s-2); border-right: 1px solid var(--hairline-2); color: var(--ink-900); font-weight: var(--weight-semi); }
+.rp__key { margin-left: var(--s-3); display: inline-flex; align-items: center; gap: var(--s-1); }
+.rp__key i { width: 12px; height: 2px; background: var(--c); }
+.rp__flag { stroke: currentColor; stroke-width: 1; opacity: .18; }
+.rp__flag:not([data-state="quiet"]) { opacity: .4; }
+.rp__head-mark { position: absolute; top: -4px; bottom: -4px; left: 0; width: 2px; margin-left: -1px; background: var(--ink-900); border-radius: 1px; transition: left var(--d-3) linear; }
+.rp[data-over="1"] .rp__head-mark { background: var(--live); }
+.rp__range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.rp__range:focus-visible + .rp__axisnote { outline: 2px solid var(--live); outline-offset: 2px; }
+.rp__axisnote { position: absolute; left: 0; top: 0; margin: 0; padding: 0 var(--s-1); font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: .04em; color: var(--ink-500); background: var(--paper-2); border-radius: var(--r-xs); pointer-events: none; }
+.rp__axistext { color: var(--ink-900); font-variant-numeric: tabular-nums; }
+.rp[data-over="1"] .rp__axistext { color: var(--live-text); }
+
+/* ---------- the strip: the scene, a third of the feed, and what each part says ---------- */
+.rp__strip { margin: var(--s-3) 0 0; padding-top: var(--s-3); border-top: 1px solid var(--hairline-2); }
+.rp__scene { position: relative; max-width: 860px; margin: 0 auto; }
+.rp__draw { position: relative; }   /* the labels and the exchange are anchored to the drawing alone */
+.rp__scene .iso__stage { max-width: none; padding: 0; margin: 0; }
+.rp__part { position: absolute; margin: 0; display: grid; gap: 1px; justify-items: start; pointer-events: none; max-width: 150px; }
+.rp__part > b { font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; white-space: nowrap; color: var(--c); }
+.rp__out { font-size: var(--t-sm); font-weight: var(--weight-semi); color: var(--ink-900); white-space: nowrap; min-height: 1.3em; }
+.rp__tagd { font-style: normal; font-size: var(--t-micro); line-height: 1.3; color: var(--ink-500); }
+.rp__statew { margin-top: 1px; padding: 0 var(--s-1); border: 1px solid currentColor; border-radius: var(--r-xs); font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-500); transition: color var(--d-3), background var(--d-3), border-color var(--d-3); }
+.rp[data-alert="1"] .rp__statew { color: var(--live-text); }
+.rp[data-state="watch"] .rp__statew { color: var(--ink-900); }
+/* the same state on the feed, beside the clock: the label a reader sees first */
+.rp__statew--feed { align-self: center; margin: 0 0 0 var(--s-1); padding: 2px var(--s-2); font-size: var(--t-xs); min-width: 9ch; text-align: center; }
+.rp[data-state="watch"] .rp__statew--feed { background: var(--ink-900); border-color: var(--ink-900); color: var(--paper); }
+.rp[data-alert="1"] .rp__statew--feed { background: var(--live); border-color: var(--live); color: var(--white, var(--paper)); }
+/* a short exchange with a model, under its place in the drawing: the question, then the reply; each arrives once */
+.rp__chat { position: absolute; right: 0; width: 232px; display: grid; gap: var(--s-2); pointer-events: none; }
+.rp__chat p { margin: 0; display: grid; gap: 1px; padding: var(--s-2) var(--s-3); border-radius: var(--r-md); font-size: var(--t-xs); line-height: var(--lh-snug); opacity: 0; transform: translateY(6px); transition: opacity var(--d-4) var(--ease-out-quint), transform var(--d-4) var(--ease-out-quint); }
+.rp__chat b { font-family: var(--font-mono); font-size: var(--t-micro); font-weight: var(--weight-semi); letter-spacing: var(--tracking-label); text-transform: uppercase; }
+.rp__q { justify-self: end; max-width: 88%; background: var(--ink-900); color: var(--paper); border-bottom-right-radius: var(--r-xs); }
+.rp__q b { color: color-mix(in srgb, var(--paper) 70%, transparent); }
+.rp__a { justify-self: start; max-width: 94%; background: var(--paper); color: var(--ink-900); border: 1px dashed var(--c); border-bottom-left-radius: var(--r-xs); }
+.rp__a b { color: var(--c); }
+.rp__a .rp__tagd { font-family: var(--font-ui); font-size: var(--t-micro); letter-spacing: 0; text-transform: none; font-weight: var(--weight-regular); }
+.rp:is([data-chat="1"], [data-chat="2"]) .rp__q, .rp[data-chat="2"] .rp__a { opacity: 1; transform: none; }
+/* a model in training, in any scene: a dashed outline in its tone, never a solid part */
+.rp__ghost { fill: color-mix(in srgb, var(--c) 8%, transparent); stroke: var(--c); stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; stroke-linejoin: round; transition: fill var(--d-4); }
+.rp__ghostln { fill: none; stroke: var(--c); stroke-dasharray: 2 3; stroke-opacity: .7; vector-effect: non-scaling-stroke; }
+.rp__unit { position: absolute; left: 0; bottom: 0; margin: 0; font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: .04em; color: var(--ink-400); }
+.rp__rows { display: none; }
+
+.rp__script { margin: var(--s-3) 0 0; font-size: var(--t-xs); color: var(--ink-500); }
+.rp__script summary { cursor: pointer; width: fit-content; }
+.rp__script h3 { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--ink-900); }
+.rp__script ol { margin: var(--s-1) 0; padding-left: 1.4em; display: grid; gap: 2px; color: var(--ink-700); }
+.rp__note { margin: var(--s-3) 0 0; font-size: var(--t-xs); line-height: var(--lh-snug); color: var(--ink-500); max-width: 100ch; }
+.rp .wm-credit { max-width: none; margin: var(--s-2) 0 0; font-size: var(--t-micro); line-height: 1.5; color: var(--ink-400); }
+
+/* a seek lands at once */
+.rp.is-seek * { transition: none !important; }
+
+@media (max-width: 700px) {
+  .rp__chips { flex-basis: 100%; }
+  .rp__tab { padding: var(--s-1) var(--s-3); font-size: var(--t-xs); }
+  .rp__time { font-size: var(--t-body); }
+  .rp__clock { left: var(--s-2); top: var(--s-2); padding: 2px var(--s-2); }
+  .rp__feedlabel { display: none; }
+  .rp__caption { bottom: var(--s-2); padding: 0 var(--s-2); }
+  .rp__cap { font-size: var(--t-sm); padding: var(--s-1) var(--s-2); }
+  .rp__axis { height: 48px; }
+  /* too narrow for labels on the drawing: the readouts that change stay, the rest is a list under it */
+  .rp__part, .rp__unit { display: none; }   /* the drawing alone; what each part says is in the list under it */
+  .rp .rp__chat { position: static; width: auto; margin-top: var(--s-2); }   /* the exchange follows the drawing */
+  .rp__statew--feed { font-size: var(--t-micro); min-width: 0; }
+  .rp__rows { display: grid; gap: 2px; list-style: none; margin: var(--s-2) 0 0; padding: 0; font-size: var(--t-micro); line-height: 1.4; color: var(--ink-500); }
+  .rp__rows li { display: grid; grid-template-columns: 10px auto 1fr; gap: 0 var(--s-1); align-items: baseline; }
+  .rp__rows em { grid-column: 2 / -1; font-style: normal; font-size: var(--t-xs); font-weight: var(--weight-semi); color: var(--ink-900); min-height: 1.3em; }
+  .rp__rows i { width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
+  .rp__rows b { color: var(--ink-900); font-weight: var(--weight-semi); }
+}
+
+/* a link from another page lands on the figure, under the nav */
+div[id]:has(> .rp) { scroll-margin-top: 72px; }

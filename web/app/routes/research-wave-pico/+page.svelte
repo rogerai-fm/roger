@@ -1,4 +1,5 @@
 <script>
+  import ReplayLinks from "#lib/ui/ReplayLinks.svelte";
   import TocTuner from "#lib/ui/TocTuner.svelte";
   // Wave Pico - a sensor reader that refuses what it cannot read
   // Ported from web/src/research-wave-pico.html (2026-10-29); copy updated 2026-11-19 (founder review).
@@ -102,6 +103,7 @@
             <ul class="wm-list wm-list--uses">{@html facts.cardList('pico.uses')}</ul>
           </div>
         </div>
+        <ReplayLinks />
       </div>
     </section>
 

@@ -24,11 +24,12 @@
   import PipeFigure from "#lib/ui/PipeFigure.svelte";
   import CrossCheckFigure from "#lib/ui/CrossCheckFigure.svelte";
   import FieldFigure from "#lib/ui/FieldFigure.svelte";
+  import OilGasReplay from "#lib/ui/OilGasReplay.svelte";
   const head = siteHead({
     title: 'Oil and gas: specialized Wave models on site - RogerAI',
     desc: 'Specialized Wave models inside an oil and gas site, reading records the site already keeps: the whole field read together, machines and sensors explained, pipeline inspections compared, theft flagged, sites compared, manuals answered. Advisory, on site, never in the control loop.',
     og: { type: 'website', title: 'RogerAI - specialized Wave models on oil and gas sites', desc: 'The field, machines, pipelines, theft, sites, manuals. Read from the records a site already keeps, answered on site, never in the control loop.', url: 'https://rogerai.fm/research-oil-gas.html', image: 'https://rogerai.fm/og-research.png' },
-    css: [...CSS_SHARED, 'research.css', 'oil-gas.css'],
+    css: [...CSS_SHARED, 'research.css', 'oil-gas.css', 'replay.css', 'oilgas-replay.css'],
     scripts: [{ runtime: true }, { page: "research-oil-gas" }],
   });
   const TUNING = "/research-custom-tuning.html";
@@ -157,6 +158,7 @@
             small differences and alert you to possible theft or tampering.</p>
         </div>
         <CrossCheckFigure fig={4} />
+        <div id="theft-timelapse"><OilGasReplay fig={5} /></div>
         <div class="device-contract">
           <p><b>What goes in.</b> Head and tail flow, tank levels, the custody reconciliation,
             the leak system&rsquo;s event log, what a camera flagged, and the timestamps.</p>

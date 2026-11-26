@@ -17,7 +17,8 @@
    tunes the item that comes to rest in the middle.
    data-scrub-auto (2026-11-14): the list plays itself while it is in view, one
    item every 2.8 s, so a figure tells its story without a drag; the first
-   pointer, key or swipe from the reader stops it for good. Off under
+   pointer, key or swipe from the reader stops it for good. A figure with more
+   to read on each stop names its own pace, data-scrub-ms (2026-11-25). Off under
    prefers-reduced-motion and without IntersectionObserver.
    Markup contract: web/DESIGN-SYSTEM.md.
    ===================================================================== */
@@ -99,7 +100,8 @@
       var timer = null, stopped = false;
       function stop() { stopped = true; clearInterval(timer); timer = null; }
       function step() { tune((Number(range.value) + 1) % items.length); center(Number(range.value)); }
-      function play() { if (!stopped && !timer) timer = setInterval(step, 2800); }
+      var ms = Number(list.getAttribute("data-scrub-ms")) || 2800;
+      function play() { if (!stopped && !timer) timer = setInterval(step, ms); }
       function pause() { clearInterval(timer); timer = null; }
       ["pointerdown", "keydown", "touchstart"].forEach(function (ev) {
         range.addEventListener(ev, stop, { passive: true });
