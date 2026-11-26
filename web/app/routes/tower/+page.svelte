@@ -597,6 +597,14 @@
            and cashes out the same way. Traffic through any one Tower is early, so expect
            that figure to start at zero and follow demand rather than the day you install.</p>
 
+        <p class="run__note"><b>Every joined Tower is reviewed and approved by RogerAI before it carries public traffic</b>,
+           and again after a suspension or a lapse. Until then it waits in quarantine and carries
+           nothing, and that is the gate working, not a fault. <code class="inline">roger tower status</code>
+           says where yours stands, who has to act and what to do next; quote the tower id it shows
+           when you ask us anything. A standalone Tower needs no approval.</p>
+        <p class="run__note">Questions about your Tower: email <a href="mailto:labs@rogerai.fm">labs@rogerai.fm</a>
+           and quote the tower id that <code class="inline">roger tower status</code> shows.</p>
+
         <!-- Standalone. The page above is entirely about joining the public network, which
              left the other half of what this binary does undocumented here: a Tower that
              joins nothing. It is the answer to "can I use this on my own machines" and it

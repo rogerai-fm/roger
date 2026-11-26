@@ -58,7 +58,7 @@ usage: roger tower <command> [flags]
               joined: the link and the sealed hub [--hub :8444 --relay-public HOST:PORT --hub-tls]
   login     mark a Tower directory as signed in (roger login plus the directory marker; joined only): --dir DIR
   logout    remove the directory's sign-in marker (roger stays signed in): --dir DIR
-  register  submit a joined Tower for admission (after login): --dir DIR
+  register  submit a joined Tower for RogerAI's approval (after login): --dir DIR
   earnings  what this account has earned
   probe     drive the edge path as a consumer: --model NAME [--broker URL]
   station   station revoke: the kill switch for a Station under a joined Tower
@@ -249,8 +249,10 @@ func cmdInit(args []string, out io.Writer) error {
 		// Not the id to quote: Core allocates that at registration (see cmdStatus).
 		fmt.Fprintf(out, "local id: %s\n", st.TowerID)
 		fmt.Fprint(out, "RogerAI assigns this Tower's id when you run `roger tower register`; `roger tower status` shows it.\n")
+		fmt.Fprintln(out, wrapPlain(approvalLine))
 	} else {
 		fmt.Fprintf(out, "tower id: %s\n", st.TowerID)
+		fmt.Fprintln(out, wrapPlain(standaloneLine))
 	}
 	if st.LocalNetworkID != "" {
 		fmt.Fprintf(out, "local network: %s (separate from the public RogerAI network)\n", st.LocalNetworkID)
@@ -435,8 +437,23 @@ func printCoreStatus(st *tower.State, out io.Writer) error {
 		if adm.TowerID != "" && tw.TowerID != adm.TowerID {
 			continue
 		}
-		fmt.Fprint(out, "\nRoger Core says:\n")
-		fmt.Fprintf(out, "  state:         %s\n", tw.State)
+		fmt.Fprint(out, "\nRogerAI says:\n")
+		// The same words serve uses for the state (tower_operator_guidance.feature): who has
+		// to act, and what to do next.
+		state := tw.State
+		since := tw.StateSince
+		if lapsed := tw.LeaseExpires > 0 && time.Now().Unix() > tw.LeaseExpires; lapsed &&
+			state != "suspended" && state != "revoked" {
+			state, since = "lease_lapsed", tw.LeaseExpires
+		}
+		if g, ok := guideFor(state, tw.StateReason, adm.TowerID); ok {
+			writeGuide(out, "  ", g)
+		} else {
+			fmt.Fprintf(out, "  state:     %s\n", tw.State)
+		}
+		if since > 0 {
+			fmt.Fprintf(out, "  %s\n", sinceWords(state, time.Unix(since, 0), time.Now()))
+		}
 		fmt.Fprintf(out, "  may take work: %t\n", tw.MayTakeWork)
 		fmt.Fprintf(out, "  link live:     %t\n", tw.LinkLive)
 		if tw.InventoryRevision > 0 {
@@ -711,8 +728,24 @@ func cmdRegister(args []string, out io.Writer) error {
 	}
 	defer release()
 	acct, _ := towerjoin.LoadAccount(st.Dir())
-	return towerjoin.Register(st, acct)
+	if err := registerFn(st, acct); err != nil {
+		return err
+	}
+	// Registering is the start of a wait, not the end of setup: say who acts next, which id to
+	// quote, and how to check (tower_operator_guidance.feature).
+	fmt.Fprintln(out, wrapPlain(approvalLine))
+	waiting := "This Tower is now waiting for that approval."
+	if adm, ok := towerjoin.LoadAdmission(st.Dir()); ok && adm.TowerID != "" {
+		waiting += " Tower id to quote: " + adm.TowerID + "."
+	}
+	fmt.Fprintln(out, wrapPlain(waiting))
+	fmt.Fprintf(out, "Check where it stands: roger tower status --dir %s\n", *dir)
+	return nil
 }
+
+// registerFn submits the Tower for admission. A variable so a test can stand in for Core's
+// enrollment without a broker.
+var registerFn = towerjoin.Register
 
 func envOr(k, def string) string {
 	if v := os.Getenv(k); v != "" {

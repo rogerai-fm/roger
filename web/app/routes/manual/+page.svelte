@@ -1056,6 +1056,14 @@
               in; it is the one the approval names. Once admitted, <code>status</code> also
               shows the Tower's trust stage and what the next stage needs.</p>
             <div class="man-note">
+              <span class="man-note__tag">approval</span>
+              Every joined Tower is reviewed and approved by RogerAI before it carries public traffic,
+              and again after a suspension or a lapse. After <code>register</code> it waits in
+              <b>quarantine</b>; keep <code>serve</code> running and approval switches it on by itself.
+              <code>status</code> and <code>serve</code> say where it stands, who has to act and the next
+              step, and show the tower id to quote. A standalone Tower needs no approval.
+            </div>
+            <div class="man-note">
               <span class="man-note__tag">--mode is not optional</span>
               A data directory is initialized as <b>one mode for life</b>. To change mode you
               initialize a <b>new</b> directory: nothing is copied, because an identity, trust

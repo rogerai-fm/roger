@@ -68,8 +68,9 @@ func TestStatusReportsCoresViewOfAJoinedTower(t *testing.T) {
 
 	out, err := runCLI(t, "status", "--dir", dir)
 	require.NoError(t, err)
-	require.Contains(t, out, "Roger Core says")
-	require.Contains(t, out, "state:         active")
+	require.Contains(t, out, "RogerAI says")
+	// tower_operator_guidance.feature: Core's state, in the words serve uses for it.
+	require.Contains(t, out, "state:     ACTIVE - approved and carrying traffic")
 	require.Contains(t, out, "may take work: true")
 	require.Contains(t, out, "revision 3")
 	require.Contains(t, out, "st-9 m1")
@@ -128,7 +129,7 @@ func TestStatusOnAStandaloneTowerReachesNothing(t *testing.T) {
 	out, err := runCLI(t, "status", "--dir", dir)
 	require.NoError(t, err)
 	require.Contains(t, out, "local network:")
-	require.NotContains(t, out, "Roger Core says")
+	require.NotContains(t, out, "RogerAI says")
 	require.Zero(t, core.reached())
 }
 

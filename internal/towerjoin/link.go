@@ -320,11 +320,11 @@ func towerPostAs(ctx context.Context, st *tower.State, path string, body []byte,
 		// and an operator sent to check their Tower's lifecycle because they mistyped an
 		// invitation secret is an operator debugging the wrong thing. The canned line is the
 		// fallback for a 403 that carries nothing, not the answer to all of them.
-		state := envelopeTowerState(raw)
+		state, reason := envelopeTowerState(raw)
 		if msg, ok := envelopeMessage(raw); ok {
-			return resp.StatusCode, &Refusal{Status: resp.StatusCode, State: state, err: fmt.Errorf("%w: %s", ErrRefused, msg)}
+			return resp.StatusCode, &Refusal{Status: resp.StatusCode, State: state, Reason: reason, err: fmt.Errorf("%w: %s", ErrRefused, msg)}
 		}
-		return resp.StatusCode, &Refusal{Status: resp.StatusCode, State: state,
+		return resp.StatusCode, &Refusal{Status: resp.StatusCode, State: state, Reason: reason,
 			err: fmt.Errorf("%w: this Tower may not hold a link right now (suspended, revoked, or its lease lapsed)", ErrRefused)}
 	case resp.StatusCode < 200 || resp.StatusCode >= 300:
 		return resp.StatusCode, &Refusal{Status: resp.StatusCode, err: fmt.Errorf("%w: %s", ErrRefused, bandOrRawError(raw))}
@@ -348,6 +348,9 @@ func towerPostAs(ctx context.Context, st *tower.State, path string, body []byte,
 type Refusal struct {
 	Status int
 	State  string
+	// Reason is error.metadata.tower_reason: for a suspension, the allow-listed reason code Core
+	// also shows in status. Empty otherwise.
+	Reason string
 	err    error
 }
 
@@ -364,19 +367,21 @@ func (r *Refusal) Unwrap() error {
 	return r.err
 }
 
-// envelopeTowerState is error.metadata.tower_state from Core's error envelope, or "".
-func envelopeTowerState(raw []byte) string {
+// envelopeTowerState is error.metadata.tower_state and tower_reason from Core's error envelope,
+// or "" for each that is absent.
+func envelopeTowerState(raw []byte) (state, reason string) {
 	var env struct {
 		Error struct {
 			Metadata struct {
-				TowerState string `json:"tower_state"`
+				TowerState  string `json:"tower_state"`
+				TowerReason string `json:"tower_reason"`
 			} `json:"metadata"`
 		} `json:"error"`
 	}
 	if json.Unmarshal(raw, &env) != nil {
-		return ""
+		return "", ""
 	}
-	return env.Error.Metadata.TowerState
+	return env.Error.Metadata.TowerState, env.Error.Metadata.TowerReason
 }
 
 // envelopeMessage pulls the sentence Core wrote out of its {"error":{"message":...}}

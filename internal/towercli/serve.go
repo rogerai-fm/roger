@@ -158,9 +158,11 @@ func startHub(st *tower.State, hub hubOptions, out io.Writer, stop <-chan struct
 		case errors.Is(err, errGrantKey):
 			if !said {
 				said = true
-				fmt.Fprintf(out, "could not get RogerAI's grant key (%v), so the hub cannot check work yet. "+
-					"This Tower stays up and asks again (every 30 s, backing off to 15 min); the hub starts "+
-					"on its own once RogerAI answers.\n", strings.TrimPrefix(err.Error(), errGrantKey.Error()+": "))
+				fmt.Fprintln(out, refusalWords(stateGuide{label: "WAITING",
+					meaning: "could not reach RogerAI for its grant key, which the hub checks work with (" +
+						strings.TrimPrefix(err.Error(), errGrantKey.Error()+": ") + ")",
+					next: "keep this running; it asks again every 30 s, backing off to 15 min; " +
+						"the hub starts by itself once RogerAI answers"}))
 			}
 			select {
 			case <-stop:
@@ -168,8 +170,9 @@ func startHub(st *tower.State, hub hubOptions, out io.Writer, stop <-chan struct
 			case <-serveWait(linkBackoff(attempt)):
 			}
 		case strings.Contains(err.Error(), "cannot listen on"):
-			return nil, terminalError{msg: fmt.Sprintf("the hub cannot bind %s: another process is probably "+
-				"using that address. Free it or pass a different --hub, then start again.\n  %v", hub.Addr, err), cause: err}
+			return nil, terminalError{msg: refusalWords(stateGuide{label: "STOPPED",
+				meaning: fmt.Sprintf("the hub cannot bind %s; another process is probably using that address", hub.Addr),
+				next:    "free that address or pass a different --hub; then start again"}) + "\n  " + err.Error(), cause: err}
 		default:
 			return nil, terminalError{msg: fmt.Sprintf("the hub could not start: %v", err), cause: err}
 		}
@@ -218,6 +221,11 @@ func runLinkWith(st *tower.State, out io.Writer, stop <-chan struct{}, ticker fu
 	sessOpen, pushRefused, linkedSaid := false, false, false
 	said := map[string]bool{}
 	lastState := ""
+	// The id the operator quotes to RogerAI, said in every next step.
+	towerID := ""
+	if adm, ok := towerjoin.LoadAdmission(st.Dir()); ok {
+		towerID = adm.TowerID
+	}
 
 	// connect opens a session and pushes the inventory when Core needs it (always on the first
 	// connect: we only ever have everything). One step for the retry, because a refusal of the
@@ -241,7 +249,7 @@ func runLinkWith(st *tower.State, out io.Writer, stop <-chan struct{}, ticker fu
 			fmt.Fprintf(out, "linked to RogerAI as %s (session %s)\n", sess.TowerID, sess.SessionID)
 		}
 		box.set(sess.SessionID)
-		announceState(out, &lastState, sess.State)
+		announceStateFor(out, &lastState, sess.State, towerID)
 		if first || sess.NeedFullInventory {
 			revision, head, err = pushInventory(st, out, revision, head)
 			// Only the FIRST push's session is closed before a retry: that session never carried
@@ -250,7 +258,7 @@ func runLinkWith(st *tower.State, out io.Writer, stop <-chan struct{}, ticker fu
 		}
 		return err
 	}
-	if err := untilLinked(out, stop, said, func() error { return connect(true) }); err != nil {
+	if err := untilLinked(out, stop, said, towerID, func() error { return connect(true) }); err != nil {
 		if errors.Is(err, errStoppedWaiting) {
 			fmt.Fprintln(out, "\nstopping")
 			return nil
@@ -305,7 +313,7 @@ func runLinkWith(st *tower.State, out io.Writer, stop <-chan struct{}, ticker fu
 			revision, head = next, nextHead
 		case <-beats:
 			if state, err := sess.SendHeartbeat(st); err == nil {
-				announceState(out, &lastState, state)
+				announceStateFor(out, &lastState, state, towerID)
 				continue
 			} else if errors.Is(err, towerjoin.ErrUnreachable) {
 				// Transport, not refusal: the freshness window is several heartbeats wide, so
@@ -316,7 +324,7 @@ func runLinkWith(st *tower.State, out io.Writer, stop <-chan struct{}, ticker fu
 			// Refused: the session is gone (Core restarted, or our lease lapsed). Re-open and
 			// find out which, rather than heartbeating into nothing.
 			fmt.Fprintln(out, "the session was refused - re-opening")
-			if err := untilLinked(out, stop, said, func() error { return connect(false) }); err != nil {
+			if err := untilLinked(out, stop, said, towerID, func() error { return connect(false) }); err != nil {
 				if errors.Is(err, errStoppedWaiting) {
 					fmt.Fprintln(out, "\nstopping")
 					return nil
@@ -384,7 +392,7 @@ func linkBackoff(attempt int) time.Duration {
 // an older Core sends it for every refusal, and a single answer is not enough to give up on.
 //
 // A success clears said, so a state that comes back after the link was restored is told again.
-func untilLinked(out io.Writer, stop <-chan struct{}, said map[string]bool, step func() error) error {
+func untilLinked(out io.Writer, stop <-chan struct{}, said map[string]bool, towerID string, step func() error) error {
 	var statelessSince time.Time
 	for attempt := 0; ; attempt++ {
 		err := step()
@@ -392,7 +400,7 @@ func untilLinked(out io.Writer, stop <-chan struct{}, said map[string]bool, step
 			clear(said)
 			return nil
 		}
-		kind, words := classifyRefusal(err)
+		kind, words := classifyRefusal(err, towerID)
 		switch kind {
 		case refusalTerminal:
 			return terminalBecause(words, err)
@@ -403,8 +411,8 @@ func untilLinked(out io.Writer, stop <-chan struct{}, said map[string]bool, step
 				statelessSince = serveNow()
 			}
 			if serveNow().Sub(statelessSince) >= statelessRefusalLimit {
-				return terminalBecause("RogerAI has refused this Tower without saying why for 24 hours. "+
-					"Check --dir and `roger tower status`, or enroll again with `roger tower register`.", err)
+				return terminalBecause(refusalWords(stateGuide{label: "REFUSED", meaning: "RogerAI has refused this Tower without saying why for 24 hours, so this Tower stops asking",
+					next: "check --dir and `roger tower status`; if RogerAI no longer knows this Tower, enroll again with `roger tower register`; " + quoteID(towerID)}), err)
 			}
 		default:
 			statelessSince = time.Time{}
@@ -435,45 +443,50 @@ var serveNow = time.Now
 const statelessRefusalLimit = 24 * time.Hour
 
 // classifyRefusal sorts an error from the link into recoverable, terminal or neither, with the
-// plain words the operator is told.
-func classifyRefusal(err error) (int, string) {
-	const waiting = " This Tower stays up and asks again (every 30 s, backing off to 15 min); " +
-		"it carries work again on its own once that changes."
+// plain words the operator is told: for a state, the same lines `status` prints
+// (tower_operator_guidance.feature), so the two commands never describe one state two ways.
+func classifyRefusal(err error, towerID string) (int, string) {
+	waiting := wrapPlain("This Tower stays up and asks again (every 30 s, backing off to 15 min), " +
+		"and carries work again on its own once that changes.")
 	if errors.Is(err, towerjoin.ErrUnreachable) {
-		return refusalRecoverable, "could not reach RogerAI." + waiting
+		return refusalRecoverable, refusalWords(stateGuide{label: "UNREACHABLE", meaning: "could not reach RogerAI",
+			next: "keep this running; check this machine's network if it lasts"}) + "\n" + waiting
 	}
 	var rf *towerjoin.Refusal
 	if !errors.As(err, &rf) {
 		return refusalOther, ""
 	}
+	guided := func(state string) string {
+		g, _ := guideFor(state, rf.Reason, towerID)
+		return refusalWords(g)
+	}
 	switch {
 	case rf.State == "state_suspended":
-		return refusalRecoverable, "RogerAI has suspended this Tower: it takes no work pending review by " +
-			"the network admin. Contact RogerAI if you do not know why." + waiting
+		return refusalRecoverable, guided("suspended") + "\n" + waiting
 	case rf.State == "lease_lapsed":
-		return refusalRecoverable, "this Tower's lease has lapsed, so RogerAI will not let it hold a link. " +
-			"An administrator can restore it." + waiting
+		return refusalRecoverable, guided("lease_lapsed") + "\n" + waiting
 	case rf.State == "state_revoked":
-		return refusalTerminal, "RogerAI has revoked this Tower permanently. It will not be let back on: " +
-			"to relay again, enroll a new Tower with `roger tower register`."
+		return refusalTerminal, guided("revoked")
 	case rf.State == "cert_revoked":
-		return refusalTerminal, "RogerAI has revoked this Tower's certificate. It will not be let back on: " +
-			"to relay again, enroll a new Tower with `roger tower register`."
+		return refusalTerminal, refusalWords(stateGuide{label: "REVOKED", meaning: "RogerAI has revoked this Tower's certificate, so it will not be let back on",
+			next: "enroll a new Tower with `roger tower register` if you want to run one again"})
 	case rf.State == "state_expired":
-		return refusalTerminal, "this Tower's enrollment expired before it was admitted. Enroll again with " +
-			"`roger tower register`."
+		return refusalTerminal, refusalWords(stateGuide{label: "EXPIRED", meaning: "this Tower's enrollment expired before RogerAI approved it",
+			next: "enroll again with `roger tower register`"})
 	case rf.State != "":
-		return refusalRecoverable, fmt.Sprintf("RogerAI is not letting this Tower hold a link right now (%s).",
-			strings.TrimPrefix(rf.State, "state_")) + waiting
+		return refusalRecoverable, refusalWords(stateGuide{label: strings.ToUpper(strings.TrimPrefix(rf.State, "state_")),
+			meaning: "RogerAI is not letting this Tower hold a link right now",
+			next:    "keep this running; questions: " + towerPage + ", " + quoteID(towerID)}) + "\n" + waiting
 	case rf.Status == http.StatusForbidden:
-		return refusalStateless, "RogerAI refused this Tower without saying why: it may not know this " +
-			"Tower id, the key in this directory may not be the one the Tower enrolled with, or Core may " +
-			"be older than this Tower. Check --dir. This Tower keeps asking (every 30 s, backing off to " +
-			"15 min) and stops if the refusal lasts 24 hours."
+		return refusalStateless, refusalWords(stateGuide{label: "REFUSED", meaning: "RogerAI refused this Tower without saying why",
+			next: "check --dir: RogerAI may not know this Tower id, or this directory's key may not be the one it enrolled with; " + quoteID(towerID)}) +
+			"\n" + wrapPlain("This Tower keeps asking (every 30 s, backing off to 15 min) and stops if the refusal lasts 24 hours.")
 	case rf.Status == http.StatusTooManyRequests:
-		return refusalRecoverable, "RogerAI asked this Tower to slow down." + waiting
+		return refusalRecoverable, refusalWords(stateGuide{label: "SLOWED", meaning: "RogerAI asked this Tower to slow down",
+			next: "nothing to do"}) + "\n" + waiting
 	case rf.Status >= 500:
-		return refusalRecoverable, fmt.Sprintf("RogerAI answered %d.", rf.Status) + waiting
+		return refusalRecoverable, refusalWords(stateGuide{label: "UNAVAILABLE", meaning: fmt.Sprintf("RogerAI is having trouble right now (error %d)", rf.Status),
+			next: "keep this running"}) + "\n" + waiting
 	}
 	return refusalOther, ""
 }
@@ -851,33 +864,28 @@ func fsSet(fs *flag.FlagSet, name string) bool {
 	return found
 }
 
-// announceState prints the admission state when it CHANGES, in the operator's language.
-// Quarantine is the state every Tower is admitted into, so it reads as the waiting room
-// it is, not as a fault; approval reads as the green light it is; anything this binary
-// does not recognise is shown verbatim rather than hidden, because an old CLI meeting a
-// new Core should say something true.
-func announceState(out io.Writer, last *string, state string) {
+// announceState prints the admission state when it CHANGES, in the operator's language, with
+// no tower id to quote.
+func announceState(out io.Writer, last *string, state string) { announceStateFor(out, last, state, "") }
+
+// announceStateFor prints the admission state when it CHANGES, in the words `status` uses for
+// it (tower_operator_guidance.feature): who has to act and what to do next. Quarantine is the
+// state every Tower is admitted into, so it reads as the waiting room it is, not as a fault.
+// A state this binary does not recognise is shown verbatim rather than hidden, because an old
+// CLI meeting a new Core should say something true.
+func announceStateFor(out io.Writer, last *string, state, towerID string) {
 	if state == "" || state == *last {
 		return
 	}
 	*last = state
-	switch state {
-	case "quarantine":
-		fmt.Fprint(out, "state: QUARANTINE - pending approval by the network admin.\n"+
-			"  Nothing is broken: every new Tower waits here, and approval flips this\n"+
-			"  automatically - this terminal will announce it. Meanwhile the link stays up\n"+
-			"  and `roger tower status` shows the same answer. Learn more: https://rogerai.fm/tower\n")
-	case "active":
-		fmt.Fprint(out, "state: ACTIVE - approved and ready to carry traffic.\n"+
-			"  Stations can now attach, and every carried job will print here as it settles.\n")
-	case "draining":
-		fmt.Fprint(out, "state: DRAINING - taking no new work; existing jobs finish.\n")
-	case "suspended":
-		fmt.Fprint(out, "state: SUSPENDED - taking no work pending review by the network admin.\n")
-	case "revoked":
-		fmt.Fprint(out, "state: REVOKED - this Tower's credential has been permanently retired.\n")
-	default:
-		fmt.Fprintf(out, "state: %s\n", state)
+	g, ok := guideFor(state, "", towerID)
+	if !ok {
+		fmt.Fprintf(out, "state:     %s\n", state)
+		return
+	}
+	writeGuide(out, "", g)
+	if g.also != "" {
+		fmt.Fprintln(out, strings.Join(wrap("  ", g.also, "    "), "\n"))
 	}
 }
 

@@ -62,7 +62,7 @@ func TestAStatelessRefusalIsWaitedOutForADay(t *testing.T) {
 		time.Sleep(5 * time.Millisecond)
 	}
 	require.NotZero(t, core.called("/tower/inventory"), "serve never linked after the refusals ended:\n%s", out.String())
-	require.Contains(t, out.String(), "24 hours", "the operator was not told how long serve keeps trying")
+	require.Contains(t, wrappedJoin(out.String()), "24 hours", "the operator was not told how long serve keeps trying")
 	close(stop)
 	require.NoError(t, <-done)
 }
@@ -106,11 +106,11 @@ func TestOnlyANamedTerminalStateIsTerminalAtOnce(t *testing.T) {
 		{errors.New("something else"), refusalOther},
 	}
 	for _, c := range cases {
-		kind, words := classifyRefusal(c.err)
+		kind, words := classifyRefusal(c.err, "")
 		require.Equal(t, c.want, kind, "%v (%s)", c.err, words)
 	}
-	_, w := classifyRefusal(&towerjoin.Refusal{Status: 403})
-	require.True(t, strings.Contains(w, "24 hours"), w)
+	_, w := classifyRefusal(&towerjoin.Refusal{Status: 403}, "")
+	require.True(t, strings.Contains(wrappedJoin(w), "24 hours"), w)
 }
 
 // S6: a suspension that comes back after the link was restored is announced again.
@@ -160,7 +160,7 @@ func TestASecondSuspensionIsAnnouncedAgain(t *testing.T) {
 	}
 	close(stop)
 	require.NoError(t, <-done)
-	require.Equal(t, 2, strings.Count(out.String(), "RogerAI has suspended this Tower"),
+	require.Equal(t, 2, strings.Count(wrappedJoin(out.String()), "RogerAI has suspended this Tower"),
 		"suspend -> restore -> suspend should be announced twice:\n%s", out.String())
 }
 
@@ -310,7 +310,8 @@ func TestEveryGrantKeyFailureIsWaitedOut(t *testing.T) {
 			require.Contains(t, err.Error(), "revoked", "serve ended on the grant key, not the link:\n%s", out.String())
 			require.Equal(t, 3, core.called("/tower/dispatch/key"))
 			require.Equal(t, 1, core.sessionCount(), "the hub never started")
-			require.Contains(t, out.String(), "could not get RogerAI's grant key (", out.String())
+			require.Contains(t, out.String(), "WAITING - could not reach RogerAI for its grant key", out.String())
+			require.Contains(t, out.String(), "checks work with (", "the operator line lost the reason:\n%s", out.String())
 			require.NotContains(t, out.String(), "<nil>", "the operator line lost the reason")
 		})
 	}

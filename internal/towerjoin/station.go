@@ -43,6 +43,10 @@ type TowerStatus struct {
 	LinkLive          bool   `json:"link_live"`
 	LeaseExpires      int64  `json:"lease_expires"`
 	InventoryRevision int64  `json:"inventory_revision"`
+	// StateSince is when the Tower entered its state (unix seconds), and StateReason why, for a
+	// suspension only. Absent from an older Core.
+	StateSince  int64  `json:"state_since,omitempty"`
+	StateReason string `json:"state_reason,omitempty"`
 	// CarriesTraffic is Core saying whether Tower-backed routing is shipped. False is
 	// INFORMATION, not a fault: it is the difference between "my Station is broken" and
 	// "this part is not built yet", and an operator who cannot tell those apart will spend

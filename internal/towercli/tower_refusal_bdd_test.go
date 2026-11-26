@@ -203,7 +203,7 @@ func (s *refusalState) phrase() string {
 	case "state_suspended":
 		return "RogerAI has suspended this Tower"
 	case "lease_lapsed":
-		return "this Tower's lease has lapsed"
+		return "this Tower's approval has lapsed"
 	case "Core unreachable":
 		return "could not reach RogerAI"
 	}
@@ -211,7 +211,7 @@ func (s *refusalState) phrase() string {
 }
 
 func (s *refusalState) printsOnce() error {
-	out := s.out.String()
+	out := wrappedJoin(s.out.String())
 	if n := strings.Count(out, s.phrase()); n != 1 {
 		return fmt.Errorf("%q printed %d times:\n%s", s.phrase(), n, out)
 	}
@@ -318,7 +318,7 @@ func (s *refusalState) printsReason() error {
 		"a request signed by the wrong key": "without saying why for 24 hours",
 		"a joined Tower started in standalone mode, or the reverse": "this Tower is standalone",
 	}[s.refusal]
-	if !strings.Contains(s.err.Error(), want) {
+	if !strings.Contains(wrappedJoin(s.err.Error()), want) {
 		return fmt.Errorf("serve said %q, want it to say %q", s.err, want)
 	}
 	stateless := s.refusal == "unknown_tower" || s.refusal == "a request signed by the wrong key"

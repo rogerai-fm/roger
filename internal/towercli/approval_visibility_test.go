@@ -19,9 +19,11 @@ func TestAnnounceStateSpeaksOperator(t *testing.T) {
 	last := ""
 
 	announceState(&out, &last, "quarantine")
-	first := out.String()
-	require.Contains(t, first, "pending approval", "the waiting room says it is one")
-	require.Contains(t, first, "automatic", "and that the flip needs no action here")
+	// tower_operator_guidance.feature words: the waiting room names who approves, that approval
+	// switches it on by itself, and where to learn more.
+	first := wrappedJoin(out.String())
+	require.Contains(t, first, "waiting for RogerAI to approve", "the waiting room says it is one")
+	require.Contains(t, first, "switches it on by itself", "and that the flip needs no action here")
 	require.Contains(t, first, "https://rogerai.fm/tower", "and where to learn more")
 	require.Contains(t, first, "Nothing is broken", "it must not read as a fault")
 
@@ -33,7 +35,7 @@ func TestAnnounceStateSpeaksOperator(t *testing.T) {
 
 	// The approval announces itself the moment it lands.
 	announceState(&out, &last, "active")
-	require.Contains(t, out.String(), "approved and ready to carry traffic")
+	require.Contains(t, out.String(), "approved and carrying traffic")
 
 	// A state this binary has never heard of is shown verbatim, never hidden: an old CLI
 	// meeting a new Core should say something true.
