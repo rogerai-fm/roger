@@ -321,10 +321,10 @@ func TestChatPickerOnlyOffersWhatIsOnline(t *testing.T) {
 		t.Error("the market half of the picker must filter on `online` - an off-air band is a 504 with extra steps")
 	}
 	// The local half must be routable AND able to hold a conversation.
-	if !strings.Contains(js, "return r.model && r.upstream && !chatCannotTalk(r.modality)") {
+	if !strings.Contains(js, "return r.model && r.upstream && !chatCannotTalk(r.modality, chatRowInteraction(r))") {
 		t.Error("a local row with no upstream (nothing to send to) or a voice or search modality (cannot chat) must not be offered")
 	}
-	if !strings.Contains(js, "o.online === true && !chatCannotTalk(o.modality)") {
+	if !strings.Contains(js, "o.online === true && !chatCannotTalk(o.modality, o.interaction)") {
 		t.Error("a voice or search band on the market feed must not be offered as chat")
 	}
 	// A search station answers on /v1/search and is priced per query: a chat turn to it can only fail.

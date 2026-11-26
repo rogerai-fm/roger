@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -65,6 +66,35 @@ func isSearchOffer(o offer) bool { return o.Modality == protocol.ModalitySearch 
 // groups it into the Voices section and diverts its selection to the preview instead of chat.
 func (b band) isVoice() bool {
 	return b.modality == protocol.ModalityTTS || b.modality == protocol.ModalitySTT
+}
+
+// bandInteraction is the broker's fold of a band's interaction (protocol.FoldInteraction):
+// online stations vote, the majority wins, a tie is chat.
+func bandInteraction(offers []offer) string {
+	ballots := make([]protocol.Ballot, 0, len(offers))
+	for _, o := range offers {
+		ballots = append(ballots, protocol.Ballot{T: o.Taxonomy, Online: o.Online})
+	}
+	return client.FoldInteraction(ballots)
+}
+
+// chatPartner reports whether the band can be offered as a general chat partner: not a voice
+// and not a one-job (single_turn) model (market_listing_kinds.feature K9).
+func (b band) chatPartner() bool { return !b.isVoice() && !b.specialized }
+
+// specializedFootnote is one dim line under THE BAND naming the one-job models on air, which
+// the dial sets aside: they take one input of a fixed shape, not a conversation.
+func (m model) specializedFootnote() string {
+	var names []string
+	for _, b := range m.bands {
+		if b.specialized && b.online && !slices.Contains(names, b.model) {
+			names = append(names, b.model)
+		}
+	}
+	if len(names) == 0 {
+		return ""
+	}
+	return "  " + stDim.Render("also on air: "+plural(len(names), "one-job model")+" (not for chat; `roger search` lists them with an example)")
 }
 
 // isTTS / isSTT distinguish the two voice sub-kinds for the preview flow (tts synthesizes a

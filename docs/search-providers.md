@@ -6,6 +6,22 @@ check your station before it goes on the air.
 
 Callers' side of the same API: [search-api.md](search-api.md).
 
+## Before you start
+
+- **roger 7.2.0 or later.** Older copies do not have `roger share --search` or
+  `roger search check`. Install or upgrade with:
+
+  ```
+  curl -fsSL https://rogerai.fm/install.sh | sh
+  ```
+
+  or `brew upgrade roger` if you installed it with Homebrew. `roger --version` shows the version.
+- **A signed-in owner.** Every search station, free or paid, needs `roger login` first.
+- **To be paid,** finish payout onboarding once with `roger payout onboard` (identity check
+  through Stripe). `roger payout status` shows what you have earned and when it pays out.
+
+`roger share --search <engine> --help` lists every flag.
+
 ## Three routes
 
 | route | what answers | you need |
@@ -47,10 +63,17 @@ roger share --search native --upstream http://127.0.0.1:9000 --scope "Go module 
 A native station is any service that answers the search/1 contract. It can sit in front of
 Meilisearch, Typesense, OpenSearch or Elasticsearch, a YaCy peer, or a crawler you wrote.
 `--scope` is one line saying what your index covers, so callers can tell a general web index
-from a focused one.
+from a focused one. It is cut to 120 characters, and the content screen can remove it: if it
+does, your station still goes on air without a scope line.
 
 `roger search check` is the first step for a native provider: run it against your service
 until every check passes, then share it.
+
+Before going on air, `roger share --search` sends your engine one fixed test query,
+"weather". A focused index (a shop's products, a parts catalog) may have nothing for it: a
+well-formed reply with an empty `results` array passes, and roger says
+`check passed: 0 results for "weather" (fine for a focused index)`. A reply whose results all
+lack an http or https link fails.
 
 ## The search/1 contract
 
@@ -145,12 +168,15 @@ without building it, run SearXNG.
 You set your price in dollars per 1,000 queries with `--price-per-1k`. The ceiling is $50 per
 1,000. A search with no station named only reaches stations at or under $10 per 1,000 unless
 the caller raises its cap. Searches settle on the same ledger as everything else: the standard
-platform fee, then the standard payout hold, minimum and schedule (`roger payout status`).
+platform fee, then the standard payout hold, minimum and schedule: a 30-day hold with 10% held to day 90, a $25 minimum, paid
+monthly (`roger payout onboard` once, then `roger payout status`).
 Every search station needs a signed-in owner, free or paid: run `roger login` before `roger share --search`.
 
 Add `--private` to keep the station off every public listing. roger prints a frequency code
-once. Only requests that carry it in the `X-Roger-Freq` header reach the station, and a paid
-private station still charges the caller's wallet.
+once, on your screen only; it is never shown again (if you lose it, `roger bands new-code` gives
+the band a new one). Only requests that carry it in the `X-Roger-Freq` header reach the
+station, and a paid private station still charges the caller's wallet. The free plan allows
+one private band per account; a second private share is refused until you release the first.
 
 A failed search, a reply the broker cannot use, or results the content screen withholds pay
 nothing. A well-formed reply with zero results is paid.

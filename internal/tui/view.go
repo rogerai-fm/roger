@@ -815,6 +815,9 @@ func (m model) browseView(w int) string {
 		if foot := m.voiceFootnote(); foot != "" {
 			b.WriteString(foot + "\n")
 		}
+		if foot := m.specializedFootnote(); foot != "" {
+			b.WriteString(foot + "\n")
+		}
 		// BASE STATION footnote (below voices): your private side of the dial. A live remote
 		// session earns the one red ◉ (it IS the LLM chat product); otherwise fully dim.
 		if foot := m.privateFootnote(); foot != "" {

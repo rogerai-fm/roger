@@ -55,14 +55,17 @@ type band struct {
 	// groupBands sets it. isVoice() (tts/stt) drives BOTH the separate "Voices" section in the
 	// browser AND the preview-instead-of-chat divert in connect().
 	modality string
-	stations int     // online stations serving it
-	minIn    float64 // cheapest active in-price now (the headline $/1M in, mirrors the web)
-	minOut   float64 // cheapest active out-price now
-	maxOut   float64 // priciest active out-price now
-	cheapest *offer  // the station at minOut (broker's default route)
-	online   bool    // any station on air
-	free     bool    // any station FREE now
-	lineage  int     // count of confidential/lineage stations
+	// specialized marks a one-job model: a station published interaction "single_turn"
+	// (features/cli/market_listing_kinds.feature K9). It is never offered as a chat partner.
+	specialized bool
+	stations    int     // online stations serving it
+	minIn       float64 // cheapest active in-price now (the headline $/1M in, mirrors the web)
+	minOut      float64 // cheapest active out-price now
+	maxOut      float64 // priciest active out-price now
+	cheapest    *offer  // the station at minOut (broker's default route)
+	online      bool    // any station on air
+	free        bool    // any station FREE now
+	lineage     int     // count of confidential/lineage stations
 	// curated counts the commercial-API proxy stations on this band, and
 	// curatedProvider names the first one's upstream for the row badge. Kept as a COUNT
 	// beside stations (never folded in silently) so "hide curated" can subtract supply
@@ -604,6 +607,7 @@ func groupBands(offers []offer, limits *LimitStore) []band {
 		b := byKey[k]
 		b.tax = foldTaxonomy(b.all) // by the /market rule: online human stations vote
 		b.about, b.tuning, b.base, b.license = foldAbout(b.all)
+		b.specialized = !b.isVoice() && bandInteraction(b.all) == protocol.InteractionSingleTurn
 		out = append(out, *b)
 	}
 	sort.SliceStable(out, func(i, j int) bool {

@@ -2524,7 +2524,7 @@ func (m *model) runAutoTune() tea.Cmd {
 		m.clearFindingBeat()
 		anyOnline := false
 		for _, b := range m.bands {
-			if b.online && !b.isVoice() {
+			if b.online && b.chatPartner() {
 				anyOnline = true
 				break
 			}

@@ -118,6 +118,18 @@ func errBody(reason string) []byte {
 // Search asks the engine once (no retry, ever: a 429 must not be answered by hammering a
 // rate-limited engine) and returns at most req.Count normalized results.
 func (e Engine) Search(ctx context.Context, req Request) ([]Result, error) {
+	rs, _, err := e.search(ctx, req)
+	return rs, err
+}
+
+// Check is Search for the go-live check: it also returns how many results the engine sent
+// before the unusable ones (no http(s) URL) were dropped, so a well-formed empty reply can be
+// told apart from a reply whose every result was unusable.
+func (e Engine) Check(ctx context.Context, req Request) (usable []Result, sent int, err error) {
+	return e.search(ctx, req)
+}
+
+func (e Engine) search(ctx context.Context, req Request) ([]Result, int, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -133,38 +145,38 @@ func (e Engine) Search(ctx context.Context, req Request) ([]Result, error) {
 	case protocol.EngineNative:
 		hreq, err = e.nativeRequest(ctx, req)
 	default:
-		return nil, engineErr{ErrConfig, "unknown search engine"}
+		return nil, 0, engineErr{ErrConfig, "unknown search engine"}
 	}
 	if err != nil {
-		return nil, engineErr{ErrConfig, "bad engine address"}
+		return nil, 0, engineErr{ErrConfig, "bad engine address"}
 	}
 	resp, err := e.client().Do(hreq)
 	if err != nil {
-		return nil, transportErr(ctx, err)
+		return nil, 0, transportErr(ctx, err)
 	}
 	defer resp.Body.Close()
 	switch {
 	case resp.StatusCode == http.StatusTooManyRequests:
-		return nil, fail(ErrRateLimited)
+		return nil, 0, fail(ErrRateLimited)
 	case resp.StatusCode == http.StatusForbidden && e.Kind == protocol.EngineSearXNG:
-		return nil, engineErr{ErrJSONOff, "the engine's JSON output is turned off: add json to search.formats in SearXNG's settings.yml"}
+		return nil, 0, engineErr{ErrJSONOff, "the engine's JSON output is turned off: add json to search.formats in SearXNG's settings.yml"}
 	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
-		return nil, fail(ErrKeyRefused)
+		return nil, 0, fail(ErrKeyRefused)
 	case resp.StatusCode >= 300:
-		return nil, engineErr{ErrStatus, fmt.Sprintf("engine error (status %d)", resp.StatusCode)}
+		return nil, 0, engineErr{ErrStatus, fmt.Sprintf("engine error (status %d)", resp.StatusCode)}
 	}
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, ReplyMax+1))
 	if err != nil {
-		return nil, transportErr(ctx, err)
+		return nil, 0, transportErr(ctx, err)
 	}
 	if len(raw) > ReplyMax {
-		return nil, fail(ErrTooLarge)
+		return nil, 0, fail(ErrTooLarge)
 	}
 	results, err := e.decode(raw)
 	if err != nil {
-		return nil, fail(ErrUnreadable)
+		return nil, 0, fail(ErrUnreadable)
 	}
-	return normalize(results, req.Count), nil
+	return normalize(results, req.Count), len(results), nil
 }
 
 // transportErr names a failure to reach or hear from the engine.

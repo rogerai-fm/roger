@@ -122,6 +122,7 @@ type shareSearchState struct {
 	engineOf string // the engine a Given is about
 	chatUp   *httptest.Server
 	chatCfg  *agent.Config
+	bandCode string // the frequency code the stub broker grants a private band ("" = none)
 }
 
 func (s *shareSearchState) reset() {
@@ -168,13 +169,21 @@ func (s *shareSearchState) io() searchShareIO {
 // share runs `roger share <args>` down the real search-share path with the go-live seam.
 func (s *shareSearchState) share(args string) {
 	origStart, origBlock := agentStart, shareBlock
+	origBand, origWait := bandOf, searchOnAirWait
 	agentStart = func(c agent.Config) (*agent.Session, error) {
 		cc := c
 		s.started = &cc
-		return nil, errStubOnAir
+		return &agent.Session{}, nil // a session the stub broker accepted
 	}
+	bandOf = func(*agent.Session) (string, string, string) {
+		if s.started != nil && s.started.Private && s.bandCode != "" {
+			return "band-1", s.bandCode, "RGR-TEST-****"
+		}
+		return "", "", ""
+	}
+	searchOnAirWait = 0
 	shareBlock = func() {}
-	defer func() { agentStart, shareBlock = origStart, origBlock }()
+	defer func() { agentStart, shareBlock, bandOf, searchOnAirWait = origStart, origBlock, origBand, origWait }()
 	s.runs++
 	s.started = nil
 	s.out.Reset()
@@ -239,6 +248,35 @@ func (s *shareSearchState) scopeIs(scope string) error {
 }
 
 func (s *shareSearchState) searxAnswers() error { return nil }
+
+func (s *shareSearchState) nativeEmpty() error {
+	s.native.reply = func(w http.ResponseWriter, _ *http.Request, _ string) { _, _ = w.Write([]byte(`{"results":[]}`)) }
+	return nil
+}
+
+func (s *shareSearchState) grantsBand(code string) error { s.bandCode = code; return nil }
+
+func (s *shareSearchState) printsCodeOnce(code string) error {
+	if n := strings.Count(s.out.String(), code); n != 1 {
+		return fmt.Errorf("the code is printed %d times, want once:\n%s", n, s.out.String())
+	}
+	return nil
+}
+
+func (s *shareSearchState) saysPrivate() error {
+	out := strings.ToLower(s.out.String())
+	if !strings.Contains(out, "private") || !strings.Contains(out, "only with this code") {
+		return fmt.Errorf("output does not say the band is private and reachable only with the code:\n%s", s.out.String())
+	}
+	return nil
+}
+
+func (s *shareSearchState) noCode() error {
+	if strings.Contains(s.out.String(), "FREQUENCY CODE") {
+		return fmt.Errorf("a public share printed a frequency code:\n%s", s.out.String())
+	}
+	return nil
+}
 func (s *shareSearchState) exactlyOneCheck() error {
 	if n := len(s.searx.queries()); n != 1 {
 		return fmt.Errorf("the engine got %d queries, want exactly one check", n)
@@ -307,6 +345,7 @@ func (s *shareSearchState) notOnAir() error {
 	return nil
 }
 func (s *shareSearchState) printsReason(reason string) error {
+	reason = strings.ReplaceAll(reason, `\"`, `"`)
 	all := s.out.String()
 	if s.err != nil {
 		all += s.err.Error()
@@ -720,6 +759,11 @@ func searchCLISteps(sc *godog.ScenarioContext, s *shareSearchState) {
 	sc.Step(`^the registered offer price is 0$`, s.priceZero)
 	sc.Step(`^the registered offer scope is "([^"]*)"$`, s.scopeIs)
 	sc.Step(`^a SearXNG at http://127.0.0.1:8888 that answers searches$`, s.searxAnswers)
+	sc.Step(`^a native service that answers every search with an empty results array$`, s.nativeEmpty)
+	sc.Step(`^the broker grants a private band with frequency code "([^"]*)"$`, s.grantsBand)
+	sc.Step(`^roger prints the frequency code "([^"]*)" exactly once$`, s.printsCodeOnce)
+	sc.Step(`^the output says the band is private and reachable only with the code$`, s.saysPrivate)
+	sc.Step(`^the output has no frequency code$`, s.noCode)
 	sc.Step(`^roger sends exactly one check query to it$`, s.exactlyOneCheck)
 	sc.Step(`^the search offer goes on air$`, s.goesOnAir)
 	sc.Step(`^roger prints that the check passed with the number of results returned$`, s.checkPassedCount)

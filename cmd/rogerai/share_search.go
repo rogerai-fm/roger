@@ -33,6 +33,36 @@ import (
 // local engine; production never assigns it).
 var braveEndpoint = searchengine.BraveEndpoint
 
+// searchShareUsage is `roger share --search <engine> --help`.
+const searchShareUsage = `roger share --search <engine> - put a search engine on the market (docs/search-providers.md)
+
+  roger share --search brave --price-per-1k 5          Brave, with your own key
+  roger share --search searxng --upstream <url>        a SearXNG you run
+  roger share --search native --upstream <url>         your own index (test it: roger search check)
+
+  --model <id>          the station id (default web-search; native: search)
+  --price-per-1k <$>    dollars per 1,000 queries (0 = free; brave must set one)
+  --scope "<line>"      what your index covers, up to 120 characters
+  --upstream-key <k>    the engine's key (brave: else BRAVE_SEARCH_API_KEY)
+  --private             a private band: never listed, reachable only with its code
+  --accept-engine-terms accept the engine's terms in a script
+
+A search station needs a signed-in owner: run ` + "`roger login`" + ` first.
+`
+
+// searchCheckUsage is `roger search check --help`.
+const searchCheckUsage = `roger search check --upstream <url> [--upstream-key <key>]
+
+Runs the search/1 contract checks against your own search service, without going on air.
+Run it until every check passes, then share it with roger share --search native.
+`
+
+// bandOf reads a session's private band (a seam: a test session has no broker behind it).
+var bandOf = func(s *agent.Session) (id, code, display string) { return s.Band() }
+
+// searchOnAirWait is how long a search share waits to see the broker accept it.
+var searchOnAirWait = 3 * time.Second
+
 // searchCheckQuery is the one fixed query a share sends its engine before going on air (C5).
 const searchCheckQuery = "weather"
 
@@ -97,7 +127,10 @@ func shareSearch(cfg config, args []string, sio searchShareIO) error {
 	fs.String("curated", "", "")
 	fs.Float64("price-in", 0, "")
 	fs.Float64("price-out", 0, "")
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(args); errors.Is(err, flag.ErrHelp) {
+		fmt.Fprint(sio.out, searchShareUsage)
+		return nil
+	} else if err != nil {
 		return err
 	}
 	set := map[string]bool{}
@@ -209,7 +242,11 @@ func shareSearch(cfg config, args []string, sio searchShareIO) error {
 		fmt.Fprintf(sio.out, "check failed: %v\n", err)
 		return fmt.Errorf("search station not on air: %w", err)
 	}
-	fmt.Fprintf(sio.out, "check passed: %d results\n", n)
+	if n == 0 {
+		fmt.Fprintf(sio.out, "check passed: 0 results for %q (fine for a focused index)\n", searchCheckQuery)
+	} else {
+		fmt.Fprintf(sio.out, "check passed: %d results\n", n)
+	}
 
 	station := agentSlugStation(*node)
 	if station != "" {
@@ -233,12 +270,16 @@ func shareSearch(cfg config, args []string, sio searchShareIO) error {
 	if err != nil {
 		return err
 	}
-	waitOnAir(sess, 3*time.Second)
+	waitOnAir(sess, searchOnAirWait)
 	mode := "free"
 	if price > 0 {
 		mode = fmt.Sprintf("$%s per 1,000 queries", trimAmt(price))
 	}
 	fmt.Fprintf(sio.out, "on air: search station %s as @%s (%s, %s)\n", mdl, station, kind, mode)
+	if *private {
+		_, code, display := bandOf(sess)
+		printFrequencyCode(sio.out, mdl, code, display, "POST /v1/search with the header X-Roger-Freq set to the code above")
+	}
 	shareBlock()
 	return nil
 }
@@ -246,7 +287,7 @@ func shareSearch(cfg config, args []string, sio searchShareIO) error {
 // checkSearchShare sends the engine the one fixed check query and explains a failure in the
 // provider's terms.
 func checkSearchShare(ctx context.Context, e searchengine.Engine) (int, error) {
-	rs, err := e.Search(ctx, searchengine.Request{Query: searchCheckQuery, Count: 3})
+	rs, sent, err := e.Check(ctx, searchengine.Request{Query: searchCheckQuery, Count: 3})
 	switch {
 	case errors.Is(err, searchengine.ErrUnreachable):
 		return 0, errors.New("could not reach your search engine at the --upstream address")
@@ -260,7 +301,9 @@ func checkSearchShare(ctx context.Context, e searchengine.Engine) (int, error) {
 		return 0, errors.New("the engine's reply does not match the search contract")
 	case err != nil:
 		return 0, err
-	case len(rs) == 0:
+	case len(rs) == 0 && sent > 0:
+		// Results came back and none was usable (no http(s) URL). A well-formed EMPTY reply
+		// passes: a focused index has nothing for "weather" (founder ruling 2026-11-25).
 		return 0, errors.New("the engine returned no usable results for the check query")
 	}
 	return len(rs), nil
@@ -276,7 +319,10 @@ func cmdSearch(cfg config, args []string, out io.Writer) error {
 	fs.SetOutput(io.Discard)
 	upstream := fs.String("upstream", "", "the search service's address")
 	upKey := fs.String("upstream-key", "", "the service's bearer key, if it needs one")
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(args[1:]); errors.Is(err, flag.ErrHelp) {
+		fmt.Fprint(out, searchCheckUsage)
+		return nil
+	} else if err != nil {
 		return err
 	}
 	if u, err := url.Parse(*upstream); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {

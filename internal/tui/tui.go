@@ -3900,8 +3900,8 @@ func (m model) visibleBands() []band {
 		// (tts/stt) are NOT peers here — they live one drill-in deeper (THE DJ BOOTH), surfaced
 		// only via the dim "also on air: N voices ▸ [v]" footnote. Excluding them keeps THE BAND
 		// pure LLM at full weight, so voice can never sit inline-and-equal to the main event.
-		if b.isVoice() {
-			continue
+		if !b.chatPartner() {
+			continue // a voice lives in the Booth; a one-job model is named in a footnote (K9)
 		}
 		// The name filter matches the QUANT too, so "q4_k_m" narrows the dial to those
 		// rows and "qwen q4" is not needed as separate syntax. Splitting by quant made the
@@ -4216,7 +4216,7 @@ func (m model) curatedBandCount() int {
 func pickAutoBand(bands []band, loggedIn bool) *band {
 	var cands []band
 	for _, b := range bands {
-		if !b.online || b.isVoice() {
+		if !b.online || !b.chatPartner() {
 			continue
 		}
 		if !b.free && !loggedIn {

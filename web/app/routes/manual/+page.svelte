@@ -47,7 +47,7 @@
         </p>
         <div class="man-cover__meta">
           <span>Set: <b>roger</b></span>
-          <span>Version: <b data-cli-version>v7.1.1</b></span>
+          <span>Version: <b data-cli-version>v7.2.0</b></span>
           <span>Broker: <b>broker.rogerai.fm</b></span>
           <span>Protocol: <b>OpenAI-compatible</b></span>
         </div>
@@ -1802,7 +1802,7 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
           <section class="man-sec" id="s9">
             <span class="man-sec__no">§9 · Command reference</span>
             <h2>Every command, every key</h2>
-            <p>The full surface as of <b data-cli-version>v7.1.1</b>: the top-level CLI
+            <p>The full surface as of <b data-cli-version>v7.2.0</b>: the top-level CLI
               commands with their key flags, then the in-app keys and slash commands grouped
               by context. Commands with flag surfaces document <code>--help</code>; advanced
               flags hide behind <code>--advanced</code>. Run <code>roger</code> with no
@@ -1823,7 +1823,7 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
                 <thead><tr><th>Command</th><th>Description &amp; key flags</th></tr></thead>
                 <tbody>
                   <tr><td><code>roger</code></td><td>open the interactive app (browse, tune in, chat); the first launch shows a one-time welcome card</td></tr>
-                  <tr><td><code>search</code></td><td>list models, cheapest first (aliases: <code>discover</code>, <code>models</code>)</td></tr>
+                  <tr><td><code>search</code></td><td>list the market by kind: models, one-job models, voices and search stations, each in its own unit (<code>--kind</code>, <code>--json</code>; aliases: <code>discover</code>, <code>models</code>)</td></tr>
                   <tr><td><code>use &lt;model&gt;</code></td><td>open a local OpenAI endpoint for your bots (aliases: <code>connect</code>, <code>tune</code>). Flags: <code>--max-out $</code> (headline cap, skip stations above this $/1M out) · <code>--yes</code> (skip the connect confirm) · <code>--advanced</code> reveals <code>--port</code> (0 = auto-pick) · <code>--max-in</code> · <code>--min-tps</code> · <code>--confidential</code> · <code>--raw</code> (keep raw model output; skip the reasoning-as-answer fallback) · <code>--market</code> (use the market even when this machine serves the model, §M)</td></tr>
                   <tr><td><code>balance</code></td><td>wallet balance ($). Topping up is <code>topup [usd]</code>; <code>balance --topup [usd]</code> and <code>balance topup [usd]</code> are retained aliases</td></tr>
                   <tr><td><code>topup [usd]</code></td><td>add funds (opens Stripe Checkout); bare <code>topup</code> is $10, minimum $1, whole cents only</td></tr>
@@ -2445,6 +2445,7 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
               Newest first. The set self-updates - <code>roger upgrade</code> pulls the
               latest, <code>roger upgrade --check</code> just reports.</p>
             <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">v7.2.0</span><span class="man-plate__v">Search on the market: <code>roger share --search brave|searxng|native</code> puts a search engine on the air, priced per 1,000 queries, and <code>roger search check</code> tests your own index first. <code>roger search</code> lists each kind in its own section and unit (models, one-job models, voices, search stations; <code>--kind</code>, <code>--json</code>). One-job models such as the fire controller are no longer offered as chat partners in the app, the console or the Playbox.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v7.1.1</span><span class="man-plate__v">Tower follow-ups: each kind of health check keeps its own run of failures, so a passing hub check no longer clears canary failures; a Tower with no approval on record starts at the <b>new</b> stage; one outage seen by two broker instances counts once.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v7.1.0</span><span class="man-plate__v">Tower placement is ranked: Core picks a Tower by distance, health and trust stage instead of first-fit, moves idle Stations between Towers and tells the node where it went in <code>roger share</code>, and ramps a new Tower through <b>new</b>, <b>proving</b> and <b>established</b>. Every Tower admission, approval and retirement is written to a governance record.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v7.0.1</span><span class="man-plate__v"><code>roger tower status</code> names the id RogerAI assigned, the one to quote when you write in, beside the local one. Certificate renewal is signed with the Tower's identity key, so a joined Tower's lease no longer lapses a day after enrolling.</span></div>

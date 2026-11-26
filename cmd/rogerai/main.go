@@ -2,7 +2,7 @@
 // share your own (share). One binary, all OS. The broker (rogerai-broker) is the
 // only separately-deployed component.
 //
-//	roger search                    discover models (cheapest first)
+//	roger search                    list the market by kind (models, voices, search)
 //	roger use <model> [--port N]    open a local OpenAI endpoint via the broker
 //	roger balance                   your wallet balance
 //	roger limit --monthly $X        cap your spend per calendar month (0/off = no cap)
@@ -17,6 +17,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -1277,7 +1278,7 @@ func dispatch(cfg config, args []string) error {
 		if cfg.lan.LAN {
 			return cmdLANSearch(cfg, args[1:])
 		}
-		return client.Search(cfg.Broker)
+		return cmdMarketList(args[0], cfg.Broker, args[1:])
 	case "lan":
 		return cmdLAN(cfg, args[1:])
 	case "join":
@@ -1464,6 +1465,8 @@ const shareUsage = `roger share - go on air as a provider (auto-detects your loc
   roger share <model>               expose a specific model
   roger share --price-out 0.30      EARN: set a price (needs ` + "`roger login`" + `)
   roger share --check               is this machine fast enough? (local, sends nothing)
+  roger share --search brave --price-per-1k 5      put a search engine on the market
+  roger share --search native --upstream <url>     your own index (test it first: roger search check)
   roger login                       link GitHub - only needed to EARN
 
   --model <name>      model to expose (default: first detected)
@@ -1478,6 +1481,10 @@ needs no login. When you earn, payouts are a 30-day hold (10% reserved to day 90
 `
 
 func cmdShare(cfg config, args []string) error {
+	// A search station needs an engine, which only --search sets (market_listing_kinds K10).
+	if modalityArgIs(args, protocol.ModalitySearch) {
+		return errors.New("a search station needs an engine: use --search <engine> (brave, searxng or native), not --modality search")
+	}
 	// `roger share --search <engine>` puts a search engine on the market: its own small path
 	// (no model detection, no context window), the same command (share_search.go).
 	if wantsSearchShare(args) {
@@ -2040,17 +2047,8 @@ func cmdShare(cfg config, args []string) error {
 	if line := confidentialFeedback(sess.RequestedConfidential(), sess.Confidential()); line != "" {
 		fmt.Println(line)
 	}
-	if _, code, _ := sess.Band(); code != "" {
-		// One-time reveal: show the FULL code (with the secret tail). It is shown ONCE and
-		// never retrievable again - the persisted display is masked (lost => revoke + re-mint).
-		fmt.Printf("\n  %s YOUR FREQUENCY CODE (shown once - copy it now)\n", "◉")
-		fmt.Printf("\n      %s\n\n", code)
-		fmt.Println("  share this with whoever should reach your station. They tune in with:")
-		fmt.Printf("      roger use %s --freq %q\n", mdl, code)
-		fmt.Println("  the cosmetic \"MHz\" part is optional - the code after it is what matters.")
-	} else if _, _, display := sess.Band(); display != "" {
-		fmt.Printf("\n  on air on your existing private band: %s (code shown only at first creation)\n", display)
-	}
+	_, code, display := sess.Band()
+	printFrequencyCode(os.Stdout, mdl, code, display, fmt.Sprintf("roger use %s --freq %q", mdl, code))
 	shareBlock() // serve forever (a test seam makes this return)
 	return nil
 }
@@ -2889,7 +2887,9 @@ func usage() {
   roger webui                 the browser console on its own (no terminal app)
   roger --no-webui            open the app WITHOUT the browser console
   roger --ping                full-screen "Ping World" screensaver (or press z in the app)
-  roger search                list models, cheapest first
+  roger search                list the market: models, one-job models, voices, search stations
+                              (--kind models|voices|search · --json)
+  roger search check --upstream <url>   test your own search service before sharing it
   roger use <model>           local OpenAI endpoint for your bots  (alias: connect · --max-out $ caps spend)
   roger voices                list on-air text-to-speech (TTS) models, cheapest first
   roger say --voice <v> "..." speak a line through a TTS model and play it
@@ -2928,3 +2928,78 @@ env: ROGER_BROKER, ROGER_USER override config (%s)
 // towerPlatform is the platform `roger tower` judges itself by (a seam: the tower runner sets it
 // to exercise another platform's refusals from a Linux test process).
 var towerPlatform = func() string { return towercli.Platform }
+
+// modalityArgIs reports whether args carry --modality <want> (or -modality, or the = form).
+func modalityArgIs(args []string, want string) bool {
+	for i, a := range args {
+		name, val, eq := strings.Cut(strings.TrimLeft(a, "-"), "=")
+		if !strings.HasPrefix(a, "-") || name != "modality" {
+			continue
+		}
+		if !eq && i+1 < len(args) {
+			val = args[i+1]
+		}
+		if strings.EqualFold(strings.TrimSpace(val), want) {
+			return true
+		}
+	}
+	return false
+}
+
+// cmdMarketList is `roger search|discover|models [--kind K] [--json]`
+// (features/cli/market_listing_kinds.feature). `roger models` lists models only. Words that
+// are not flags print a one-line hint first (K8, until the founder rules on web search from
+// the CLI), then the market.
+func cmdMarketList(verb, broker string, args []string) error {
+	opt := client.ListOptions{}
+	if verb == "models" {
+		opt.Kind = "models"
+	}
+	var words []string
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		name, val, eq := strings.Cut(strings.TrimLeft(a, "-"), "=")
+		switch {
+		case !strings.HasPrefix(a, "-"):
+			words = append(words, a)
+		case name == "json":
+			opt.JSON = true
+		case name == "kind":
+			if !eq {
+				if i+1 >= len(args) {
+					return client.ErrBadKind
+				}
+				i++
+				val = args[i]
+			}
+			opt.Kind = strings.ToLower(strings.TrimSpace(val))
+			if !client.ValidListKind(opt.Kind) || opt.Kind == "" {
+				return client.ErrBadKind
+			}
+		default:
+			// The listing ignored every argument before, so a script's stray flag is noted, not fatal.
+			fmt.Fprintf(os.Stderr, "roger %s: ignoring %s (flags: --kind models|voices|search, --json)\n", verb, a)
+		}
+	}
+	if len(words) > 0 && !opt.JSON {
+		fmt.Printf("roger %s lists the market; to search the web, send POST /v1/search (docs/search-api.md)\n\n", verb)
+	}
+	return client.Market(broker, opt)
+}
+
+// printFrequencyCode reveals a private band's frequency code ONCE, on the owner's own screen
+// (the full code with its secret tail). It is never listed and never retrievable again: the
+// persisted display is masked (lost => revoke + re-mint). With no new code it names the
+// existing band. howTo is the line that tells the owner how a caller uses the code.
+func printFrequencyCode(w io.Writer, model, code, display, howTo string) {
+	if code != "" {
+		fmt.Fprintf(w, "\n  %s YOUR FREQUENCY CODE (shown once - copy it now)\n", "◉")
+		fmt.Fprintf(w, "\n      %s\n\n", code)
+		fmt.Fprintln(w, "  this band is private: it is never listed, and it is reachable only with this code.")
+		fmt.Fprintln(w, "  share it with whoever should reach your station. They tune in with:")
+		fmt.Fprintf(w, "      %s\n", howTo)
+		fmt.Fprintln(w, "  the cosmetic \"MHz\" part is optional - the code after it is what matters.")
+	} else if display != "" {
+		fmt.Fprintf(w, "\n  on air on your existing private band: %s (code shown only at first creation)\n", display)
+	}
+}

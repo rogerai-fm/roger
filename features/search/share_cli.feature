@@ -131,6 +131,34 @@ Feature: Anyone can become a search provider with one roger share command
       When roger runs the check query
       Then the query is the fixed string "weather"
 
+    # Founder ruling 2026-11-25 (option a): a focused index (a shop's products, industrial parts)
+    # has nothing for "weather". A well-formed reply with no results passes; the contract allows
+    # an empty reply. A reply whose results are all unusable still fails (the outline above).
+    Scenario Outline: A well-formed reply with no results passes the check
+      Given a native service that answers every search with an empty results array
+      When the provider runs "roger share --search native --upstream <upstream>"
+      Then the search offer goes on air
+      And roger prints "check passed: 0 results for \"weather\" (fine for a focused index)"
+
+      Examples:
+        | upstream               |
+        | http://127.0.0.1:9000  |
+
+  Rule: a private search band (founder ruling 2026-11-25)
+
+    # A private band is never listed; its frequency code is the only way in. The owner sees the
+    # code once, on their own screen, the same way a private chat share prints it.
+    Scenario: A private search share prints its frequency code once
+      Given the broker grants a private band with frequency code "RGR-TEST-CODE"
+      When the provider runs "roger share --search native --upstream http://127.0.0.1:9000 --private"
+      Then the search offer goes on air
+      And roger prints the frequency code "RGR-TEST-CODE" exactly once
+      And the output says the band is private and reachable only with the code
+
+    Scenario: A public search share prints no frequency code
+      When the provider runs "roger share --search native --upstream http://127.0.0.1:9000"
+      Then the output has no frequency code
+
   Rule: engine terms (C6)
 
     Scenario Outline: The first share of a relayed engine asks once

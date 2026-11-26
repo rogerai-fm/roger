@@ -864,7 +864,17 @@
 
   function chatIsVoice(modality) { return modality === "tts" || modality === "stt"; }
   // A search station answers on /v1/search and is priced per query, so it cannot chat either.
-  function chatCannotTalk(modality) { return chatIsVoice(modality) || modality === "search"; }
+  // A one-job model (interaction "single_turn") takes one input of a fixed shape, not a
+  // conversation, so it is not offered as a chat partner (market_listing_kinds.feature K9).
+  function chatCannotTalk(modality, interaction) {
+    return chatIsVoice(modality) || modality === "search" || interaction === "single_turn";
+  }
+
+  // A local row carries its interaction under declared (the operator) or inferred
+  // (detection), never at the top level (node.RowView).
+  function chatRowInteraction(r) {
+    return (r.declared && r.declared.interaction) || (r.inferred && r.inferred.interaction) || "";
+  }
 
   // chatLocalRows are this node's own models that a turn can actually be sent to. A row
   // with no upstream has nothing behind it - offering it would trade a broker 504 for a
@@ -872,7 +882,7 @@
   function chatLocalRows() {
     var rows = (lastSnapshot && lastSnapshot.rows) || [];
     return rows.filter(function (r) {
-      return r.model && r.upstream && !chatCannotTalk(r.modality);
+      return r.model && r.upstream && !chatCannotTalk(r.modality, chatRowInteraction(r));
     });
   }
 
@@ -880,7 +890,7 @@
   // it was there all along - nothing else in the feed answers "will this answer me?".
   function chatMarketOffers() {
     return (lastOffers || []).filter(function (o) {
-      return o.model && o.online === true && !chatCannotTalk(o.modality);
+      return o.model && o.online === true && !chatCannotTalk(o.modality, o.interaction);
     });
   }
 

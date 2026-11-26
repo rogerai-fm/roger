@@ -130,11 +130,14 @@
   // A search station rides the same feeds tagged modality "search". It is priced per query
   // and answers on /v1/search, so it is never a model on this page.
   function isSearch(o) { return !!o && o.modality === "search"; }
+  // A one-job model (interaction "single_turn") takes one input of a fixed shape, not a
+  // conversation, so the chat shelf never offers it (market_listing_kinds.feature K9).
+  function isOneJob(o) { return !!o && o.interaction === "single_turn"; }
 
   function bandsFromOffers(offers) {
     var by = {};
     offers.forEach(function (o) {
-      if (!o || !o.model || isSearch(o)) return;
+      if (!o || !o.model || isSearch(o) || isOneJob(o)) return;
       var b = by[o.model] || (by[o.model] = {
         model: o.model, count: 0, free: false, tier: 99, signal: 0, tps: 0, caps: {}, stations: [],
         online: false

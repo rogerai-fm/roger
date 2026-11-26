@@ -372,8 +372,14 @@ func (m model) resolveAgentModel() string {
 func (m model) agentModelCandidates() []string {
 	seen := map[string]bool{}
 	var out []string
+	oneJob := map[string]bool{} // a model whose band is not a chat partner (voice, one-job)
+	for _, b := range m.bands {
+		if !b.chatPartner() {
+			oneJob[b.model] = true
+		}
+	}
 	add := func(s string) {
-		if s == "" || seen[s] {
+		if s == "" || seen[s] || oneJob[s] {
 			return
 		}
 		seen[s] = true
@@ -385,7 +391,7 @@ func (m model) agentModelCandidates() []string {
 		add(mdl) // every model tuned in this session
 	}
 	for _, b := range m.bands {
-		if b.online && !b.isVoice() {
+		if b.online && b.chatPartner() {
 			add(b.model) // any CHAT band currently on air in the discover list
 		}
 	}

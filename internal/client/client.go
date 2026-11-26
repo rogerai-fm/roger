@@ -39,7 +39,6 @@ import (
 
 	"rogerai.fm/roger/v7/internal/glyphs"
 	"rogerai.fm/roger/v7/internal/netbind"
-	"rogerai.fm/roger/v7/internal/pricetier"
 	"rogerai.fm/roger/v7/internal/protocol"
 )
 
@@ -85,62 +84,7 @@ func getJSON(broker, path, user string, out any) error {
 
 // Search prints the live model marketplace (GET /discover), cheapest first, as a
 // table - node, model, in/out price, throughput, context, region, status, flags.
-func Search(broker string) error {
-	var d struct {
-		Offers []struct {
-			NodeID       string  `json:"node_id"`
-			Region       string  `json:"region"`
-			Model        string  `json:"model"`
-			PriceIn      float64 `json:"price_in"`
-			PriceOut     float64 `json:"price_out"`
-			PriceTier    int     `json:"price_tier"` // broker's neutral 0..4 $-tier (0 = FREE/unknown)
-			Ctx          int     `json:"ctx"`
-			Online       bool    `json:"online"`
-			Confidential bool    `json:"confidential"`
-			FreeNow      bool    `json:"free_now"`
-			TPS          float64 `json:"tps"`
-			Signal       int     `json:"signal"`
-			Summary      string  `json:"summary"`
-		} `json:"offers"`
-	}
-	if err := getJSON(broker, "/discover", "", &d); err != nil {
-		return err
-	}
-	if len(d.Offers) == 0 {
-		fmt.Println("no offers yet - run `roger share` on a box with a local model")
-		return nil
-	}
-	// Station rows mirror the TUI band table's instrument language so the piped CLI
-	// reads as a terminal twin of the on-screen one: a ◉ on-air / ○ off-air glyph in
-	// the STATUS cell, a ▁▂▃▄▅▆▇ SIGNAL tower driven by tok/s, the broker's neutral
-	// $-TIER right beside the out-price, and the verified ◆ in FLAGS. Plain text (no
-	// color), so it degrades cleanly under NO_COLOR / a pipe.
-	width := listWidth()
-	fmt.Printf("%-8s %-12s %-22s %-9s %-9s %-13s %-7s %-7s %-7s %-7s %s\n",
-		"STATUS", "SIGNAL", "MODEL", "$/1M in", "$/1M out", "TIER", "TOK/S", "CTX", "REGION", "NODE", "FLAGS")
-	for _, o := range d.Offers {
-		status := glyphOnAir
-		if !o.Online {
-			status = glyphOffAir
-		}
-		tps := "-"
-		if o.TPS > 0 {
-			tps = fmt.Sprintf("%.0f", o.TPS)
-		}
-		flags := ""
-		if o.Confidential {
-			flags += glyphVerify + " verified "
-		}
-		if o.FreeNow {
-			flags += "FREE-now"
-		}
-		row := fmt.Sprintf("%-8s %-12s %-22s %-9.2f %-9.2f %-13s %-7s %-7d %-7s %-7s %s",
-			status, signalTower(o.Signal, o.TPS, o.Online), o.Model, o.PriceIn, o.PriceOut,
-			pricetier.Label(o.PriceTier, o.PriceOut), tps, o.Ctx, o.Region, o.NodeID, flags)
-		fmt.Println(withSummary(row, o.Summary, width))
-	}
-	return nil
-}
+func Search(broker string) error { return Market(broker, ListOptions{}) }
 
 // listWidth is the terminal width a listing may fill: $COLUMNS when set, else the width of a
 // terminal on stdout, else 0 (piped: nothing is added that the plain listing did not have).
