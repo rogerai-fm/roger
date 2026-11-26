@@ -1072,7 +1072,7 @@ rogerai.fm/roger/v7/internal/agent/leave.go:88:				sendLeave				94.7%
 rogerai.fm/roger/v7/internal/agent/leave.go:124:			StopAttaching				100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:24:			idFromPriv				100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:32:			NodeID					100.0%
-rogerai.fm/roger/v7/internal/agent/localtower.go:48:			ServeLocalTower				84.2%
+rogerai.fm/roger/v7/internal/agent/localtower.go:48:			ServeLocalTower				81.6%
 rogerai.fm/roger/v7/internal/agent/localtower.go:122:			forJob					87.5%
 rogerai.fm/roger/v7/internal/agent/localtower.go:150:			localPollBackoff			100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:171:			pollLocalJob				93.5%
