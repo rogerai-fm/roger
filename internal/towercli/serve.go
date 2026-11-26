@@ -24,7 +24,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	randv2 "math/rand/v2"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -59,7 +61,7 @@ func serveJoined(st *tower.State, out io.Writer, relayPublic string, hub hubOpti
 	// rather than the fetch being made conditional. runLink keeps its own check: it is called
 	// directly, and a guarantee this size should hold at both doors.
 	if st.Mode != tower.ModeJoined {
-		return errStandaloneCannotServeJoined
+		return terminalError{msg: errStandaloneCannotServeJoined.Error(), cause: errStandaloneCannotServeJoined}
 	}
 	// THE HUB'S CERTIFICATE IS RESOLVED HERE, BEFORE EITHER THE LISTENER OR THE LINK, because
 	// both halves of the change depend on it and they must not be able to disagree. The
@@ -113,7 +115,12 @@ func serveJoined(st *tower.State, out io.Writer, relayPublic string, hub hubOpti
 	// key cannot be fetched.
 	hub.session = &sessionBox{}
 	if hub.Addr != "" {
-		waitForHub, herr := runHubInBackground(st, hub, out, stopped)
+		waitForHub, herr := startHub(st, hub, out, stopped)
+		if errors.Is(herr, errStoppedWaiting) {
+			windDown()
+			fmt.Fprintln(out, "\nstopping")
+			return nil
+		}
 		if herr != nil {
 			windDown()
 			return herr
@@ -134,6 +141,41 @@ func serveJoined(st *tower.State, out io.Writer, relayPublic string, hub hubOpti
 	return err
 }
 
+// Contract: features/tower/tower_canary_offline_station.feature.
+//
+// startHub starts the hub, waiting out any failure to fetch Core's grant key - unreachable, a 5xx,
+// a 429, a proxy's 404 mid-deploy, a body that is not a key: the endpoint is public, so none of
+// them is a fault here, and a Tower that boots during a Core redeploy must come up when Core
+// does, not exit and stay down. Only a fault on this machine is terminal - an address it cannot bind, TLS asked for
+// with no certificate, an identity or admission it cannot read - and a bind failure says so.
+func startHub(st *tower.State, hub hubOptions, out io.Writer, stop <-chan struct{}) (func(), error) {
+	said := false
+	for attempt := 0; ; attempt++ {
+		waitForHub, err := runHubInBackground(st, hub, out, stop)
+		switch {
+		case err == nil:
+			return waitForHub, nil
+		case errors.Is(err, errGrantKey):
+			if !said {
+				said = true
+				fmt.Fprintf(out, "could not get RogerAI's grant key (%v), so the hub cannot check work yet. "+
+					"This Tower stays up and asks again (every 30 s, backing off to 15 min); the hub starts "+
+					"on its own once RogerAI answers.\n", strings.TrimPrefix(err.Error(), errGrantKey.Error()+": "))
+			}
+			select {
+			case <-stop:
+				return nil, errStoppedWaiting
+			case <-serveWait(linkBackoff(attempt)):
+			}
+		case strings.Contains(err.Error(), "cannot listen on"):
+			return nil, terminalError{msg: fmt.Sprintf("the hub cannot bind %s: another process is probably "+
+				"using that address. Free it or pass a different --hub, then start again.\n  %v", hub.Addr, err), cause: err}
+		default:
+			return nil, terminalError{msg: fmt.Sprintf("the hub could not start: %v", err), cause: err}
+		}
+	}
+}
+
 // errStandaloneCannotServeJoined is the one refusal both doors give, so the two cannot drift
 // into saying different things about the same rule.
 var errStandaloneCannotServeJoined = errors.New(
@@ -152,33 +194,76 @@ func runLink(st *tower.State, out io.Writer, stop <-chan struct{}, ticker func(t
 }
 
 // runLinkWith is runLink publishing each session id to box, which the pulls are bound to.
+//
+// Contract: features/tower/tower_canary_offline_station.feature.
+//
+// A REFUSAL IS EITHER WORTH WAITING OUT OR IT IS NOT. Every refusal used to end the process, and
+// a service manager restarted it every few seconds for as long as the refusal lasted - the house
+// Tower spent 17 hours doing that while suspended. Now a refusal Core may lift (suspended, a
+// lapsed lease, Core unreachable or failing) keeps the process up, says so once per state, and
+// asks again on the node re-attach backoff, so a restore takes effect on the next retry with no
+// restart. A refusal that cannot lift by waiting (revoked, a revoked certificate, a Tower Core
+// does not recognise, the wrong mode) exits with exitTerminal, which the packaged unit tells its
+// service manager not to restart.
 func runLinkWith(st *tower.State, out io.Writer, stop <-chan struct{}, ticker func(time.Duration) (<-chan time.Time, func()), relay link.RelayPlane, box *sessionBox) error {
 	if st.Mode != tower.ModeJoined {
-		return errStandaloneCannotServeJoined
+		return terminalError{msg: errStandaloneCannotServeJoined.Error(), cause: errStandaloneCannotServeJoined}
 	}
 
 	// The head we last had accepted. Quoting it on connect is what lets Core say "resume"
 	// instead of demanding everything - when Core is in step with us.
 	head := towerjoin.Head{}
 	var revision int64
+	var sess towerjoin.Session
+	sessOpen, pushRefused, linkedSaid := false, false, false
+	said := map[string]bool{}
+	lastState := ""
 
-	sess, err := towerjoin.OpenSession(st, head, relay)
-	if err != nil {
+	// connect opens a session and pushes the inventory when Core needs it (always on the first
+	// connect: we only ever have everything). One step for the retry, because a refusal of the
+	// push usually means the session it was pushed on is already gone.
+	connect := func(first bool) error {
+		// A session whose push was refused is closed before another is opened, or Core would
+		// hold one per retry until each aged out. ONLY that one: a session ended by a refused
+		// heartbeat may already be replaced on another instance, and a close is what drops a
+		// Tower's routable fleet, so after a heartbeat refusal the Tower just re-opens.
+		if sessOpen && pushRefused {
+			_ = sess.Close(st)
+			sessOpen = false
+		}
+		s, err := towerjoin.OpenSession(st, head, relay)
+		if err != nil {
+			return err
+		}
+		sess, sessOpen, pushRefused = s, true, false
+		if first && !linkedSaid {
+			linkedSaid = true
+			fmt.Fprintf(out, "linked to RogerAI as %s (session %s)\n", sess.TowerID, sess.SessionID)
+		}
+		box.set(sess.SessionID)
+		announceState(out, &lastState, sess.State)
+		if first || sess.NeedFullInventory {
+			revision, head, err = pushInventory(st, out, revision, head)
+			// Only the FIRST push's session is closed before a retry: that session never carried
+			// anything, so closing it can drop nothing that is serving.
+			pushRefused = err != nil && first
+		}
 		return err
 	}
-	fmt.Fprintf(out, "linked to RogerAI as %s (session %s)\n", sess.TowerID, sess.SessionID)
-	box.set(sess.SessionID)
-
-	// Push once up front. Core told us whether it needs everything; today we only ever have
-	// everything, because deltas need a fleet that changes and we have no Stations yet.
-	revision, head, err = pushInventory(st, out, revision, head)
-	if err != nil {
+	if err := untilLinked(out, stop, said, func() error { return connect(true) }); err != nil {
+		if errors.Is(err, errStoppedWaiting) {
+			fmt.Fprintln(out, "\nstopping")
+			return nil
+		}
 		return err
 	}
 
 	// DRAIN ON THE WAY OUT, on every exit path. Leaving without it means Core keeps offering
 	// this Tower's Stations for a full freshness window after it has gone.
 	defer func() {
+		if !sessOpen {
+			return // closed already, before a re-open that did not land
+		}
 		if cerr := sess.Close(st); cerr != nil {
 			fmt.Fprintf(out, "warning: could not drain cleanly: %v\n", cerr)
 			return
@@ -186,11 +271,6 @@ func runLinkWith(st *tower.State, out io.Writer, stop <-chan struct{}, ticker fu
 		fmt.Fprintln(out, "drained: RogerAI has dropped this Tower's inventory")
 	}()
 
-	// The operator's first question is "am I approved?", and the answer changes without
-	// a restart - so it is printed at link time and announced again the moment a
-	// heartbeat reports a different state.
-	lastState := ""
-	announceState(out, &lastState, sess.State)
 	beat := sess.Heartbeat
 	if beat <= 0 {
 		beat = 60 * time.Second
@@ -236,20 +316,166 @@ func runLinkWith(st *tower.State, out io.Writer, stop <-chan struct{}, ticker fu
 			// Refused: the session is gone (Core restarted, or our lease lapsed). Re-open and
 			// find out which, rather than heartbeating into nothing.
 			fmt.Fprintln(out, "the session was refused - re-opening")
-			sess, err = towerjoin.OpenSession(st, head, relay)
-			if err != nil {
-				return err
-			}
-			box.set(sess.SessionID)
-			announceState(out, &lastState, sess.State)
-			if sess.NeedFullInventory {
-				revision, head, err = pushInventory(st, out, revision, head)
-				if err != nil {
-					return err
+			if err := untilLinked(out, stop, said, func() error { return connect(false) }); err != nil {
+				if errors.Is(err, errStoppedWaiting) {
+					fmt.Fprintln(out, "\nstopping")
+					return nil
 				}
+				return err
 			}
 		}
 	}
+}
+
+// exitTerminal is the exit status of a `roger tower serve` that cannot recover by waiting. The
+// packaged unit (packaging/tower/roger-tower.service) lists it in RestartPreventExitStatus, so a
+// revoked or unrecognised Tower is not restarted in a loop. 78 is EX_CONFIG: what is wrong is the
+// Tower's standing or its configuration, and the operator has to act.
+const exitTerminal = 78
+
+// terminalError ends serve with exitTerminal. It wraps its cause, so errors.Is still finds the
+// refusal underneath (Run maps it to the status).
+type terminalError struct {
+	msg   string
+	cause error
+}
+
+func (e terminalError) Error() string { return e.msg }
+func (e terminalError) Unwrap() error { return e.cause }
+
+// terminal is the error a terminal refusal ends serve with.
+func terminal(msg string) error { return terminalError{msg: msg} }
+
+// terminalBecause is terminal with the refusal that caused it kept, and Core's own sentence
+// said after the operator's plain words.
+func terminalBecause(words string, cause error) error {
+	return terminalError{msg: words + "\n  Roger Core said: " + cause.Error(), cause: cause}
+}
+
+// errStoppedWaiting is ctrl-c arriving while serve waits out a refusal: a clean stop.
+var errStoppedWaiting = errors.New("stopped while waiting")
+
+// serveWait is the wait between asks after a recoverable refusal. A variable so a test can watch
+// the waits without spending them.
+var serveWait = func(d time.Duration) <-chan time.Time { return time.After(d) }
+
+// linkBackoff is the node re-attach backoff (internal/agent reattachDelay): 30 s doubling to a
+// 15-minute cap, with jitter over the upper half so a fleet refused together does not return
+// together.
+func linkBackoff(attempt int) time.Duration {
+	const base, cap = 30 * time.Second, 15 * time.Minute
+	d := base
+	for i := 0; i < attempt && d < cap; i++ {
+		d *= 2
+	}
+	if d > cap {
+		d = cap
+	}
+	half := d / 2
+	return half + time.Duration(randv2.Int64N(int64(half))+1)
+}
+
+// untilLinked runs step until it succeeds, waiting out recoverable refusals on linkBackoff and
+// saying each state once. A terminal refusal comes back as a terminal error; anything it cannot
+// classify comes back as it is.
+//
+// A refusal that names no state is waited out like a recoverable one, and becomes terminal only
+// once it has lasted statelessRefusalLimit: Core sends it for a Tower it does not recognise, but
+// an older Core sends it for every refusal, and a single answer is not enough to give up on.
+//
+// A success clears said, so a state that comes back after the link was restored is told again.
+func untilLinked(out io.Writer, stop <-chan struct{}, said map[string]bool, step func() error) error {
+	var statelessSince time.Time
+	for attempt := 0; ; attempt++ {
+		err := step()
+		if err == nil {
+			clear(said)
+			return nil
+		}
+		kind, words := classifyRefusal(err)
+		switch kind {
+		case refusalTerminal:
+			return terminalBecause(words, err)
+		case refusalOther:
+			return err
+		case refusalStateless:
+			if statelessSince.IsZero() {
+				statelessSince = serveNow()
+			}
+			if serveNow().Sub(statelessSince) >= statelessRefusalLimit {
+				return terminalBecause("RogerAI has refused this Tower without saying why for 24 hours. "+
+					"Check --dir and `roger tower status`, or enroll again with `roger tower register`.", err)
+			}
+		default:
+			statelessSince = time.Time{}
+		}
+		if !said[words] {
+			said[words] = true
+			fmt.Fprintln(out, words)
+		}
+		select {
+		case <-stop:
+			return errStoppedWaiting
+		case <-serveWait(linkBackoff(attempt)):
+		}
+	}
+}
+
+const (
+	refusalOther = iota
+	refusalRecoverable
+	refusalTerminal
+	refusalStateless
+)
+
+// serveNow is the clock serve measures a lasting refusal by. A variable so a test can run a day.
+var serveNow = time.Now
+
+// statelessRefusalLimit is how long serve keeps asking through a refusal that names no state.
+const statelessRefusalLimit = 24 * time.Hour
+
+// classifyRefusal sorts an error from the link into recoverable, terminal or neither, with the
+// plain words the operator is told.
+func classifyRefusal(err error) (int, string) {
+	const waiting = " This Tower stays up and asks again (every 30 s, backing off to 15 min); " +
+		"it carries work again on its own once that changes."
+	if errors.Is(err, towerjoin.ErrUnreachable) {
+		return refusalRecoverable, "could not reach RogerAI." + waiting
+	}
+	var rf *towerjoin.Refusal
+	if !errors.As(err, &rf) {
+		return refusalOther, ""
+	}
+	switch {
+	case rf.State == "state_suspended":
+		return refusalRecoverable, "RogerAI has suspended this Tower: it takes no work pending review by " +
+			"the network admin. Contact RogerAI if you do not know why." + waiting
+	case rf.State == "lease_lapsed":
+		return refusalRecoverable, "this Tower's lease has lapsed, so RogerAI will not let it hold a link. " +
+			"An administrator can restore it." + waiting
+	case rf.State == "state_revoked":
+		return refusalTerminal, "RogerAI has revoked this Tower permanently. It will not be let back on: " +
+			"to relay again, enroll a new Tower with `roger tower register`."
+	case rf.State == "cert_revoked":
+		return refusalTerminal, "RogerAI has revoked this Tower's certificate. It will not be let back on: " +
+			"to relay again, enroll a new Tower with `roger tower register`."
+	case rf.State == "state_expired":
+		return refusalTerminal, "this Tower's enrollment expired before it was admitted. Enroll again with " +
+			"`roger tower register`."
+	case rf.State != "":
+		return refusalRecoverable, fmt.Sprintf("RogerAI is not letting this Tower hold a link right now (%s).",
+			strings.TrimPrefix(rf.State, "state_")) + waiting
+	case rf.Status == http.StatusForbidden:
+		return refusalStateless, "RogerAI refused this Tower without saying why: it may not know this " +
+			"Tower id, the key in this directory may not be the one the Tower enrolled with, or Core may " +
+			"be older than this Tower. Check --dir. This Tower keeps asking (every 30 s, backing off to " +
+			"15 min) and stops if the refusal lasts 24 hours."
+	case rf.Status == http.StatusTooManyRequests:
+		return refusalRecoverable, "RogerAI asked this Tower to slow down." + waiting
+	case rf.Status >= 500:
+		return refusalRecoverable, fmt.Sprintf("RogerAI answered %d.", rf.Status) + waiting
+	}
+	return refusalOther, ""
 }
 
 // inventoryRefresh is how often the fleet is re-pushed.

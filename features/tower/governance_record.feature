@@ -1,3 +1,6 @@
+# AMENDED 2026-11-24 (founder: "1. yes"): a refused request verified as the Tower's own key names
+# the Tower's state, so `roger tower serve` can tell the operator why. Everyone else still gets
+# the bare 403.
 # APPROVED SPEC - founder approved 2026-11-13 ("Approve as written"), with one ruling:
 # operators do NOT see the record yet ("Admin only for now"), so the operator-view scenario
 # was removed before approval took effect. Next slice (also ruled 2026-11-13): the signed,
@@ -130,7 +133,7 @@ Feature: Every governance event about a Tower leaves an attributed, durable reco
   Scenario Outline: A refused Tower request is logged with the reason
     Given a request names "tw-1" and is refused because <cause>
     When it reaches any Tower route
-    Then the Tower still receives the same 403 answer as today, with no reason disclosed
+    Then the Tower still receives the same 403 answer as today, with no reason disclosed, unless the request was verified as signed by that Tower's own identity key, in which case the 403 names the Tower's state (tower_canary_offline_station.feature)
     And the log shows "tower-event kind=request_refused tower=tw-1 reason=<reason>"
     And a "request_refused" event is recorded for "tw-1" with that reason
 

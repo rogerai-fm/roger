@@ -89,9 +89,18 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 	fmt.Fprintln(stderr, "error:", err) // roger's own style, so a script reads every command alike
+	return exitCode(err)
+}
+
+// exitCode is the status a failed command exits with.
+func exitCode(err error) int {
 	var ee exitError
 	if errors.As(err, &ee) {
 		return ee.code
+	}
+	var te terminalError
+	if errors.As(err, &te) {
+		return exitTerminal
 	}
 	return 1
 }

@@ -135,6 +135,9 @@ func (o hubOptions) tlsWanted() bool { return o.TLS || o.TLSCert != "" }
 // waiter that blocks until both have wound down. It fails fast (before serving anything) if
 // Core's grant key cannot be fetched - a hub that cannot verify grants would either refuse
 // everything or, worse, be tempted to skip the check.
+// errGrantKey marks a hub start that failed fetching Core's grant key - never a local fault.
+var errGrantKey = errors.New("cannot fetch Roger Core's grant key")
+
 func runHubInBackground(st *tower.State, opt hubOptions, out io.Writer, stop <-chan struct{}) (func(), error) {
 	// FAIL CLOSED ON A TLS POSTURE WITH NOTHING BEHIND IT. serveJoined resolves the certificate
 	// before it calls this, so a nil one here means a caller asked for TLS and did not supply
@@ -145,12 +148,6 @@ func runHubInBackground(st *tower.State, opt hubOptions, out io.Writer, stop <-c
 		return nil, errors.New("the hub was asked to serve TLS with no certificate resolved: " +
 			"refusing to serve plaintext under a TLS posture")
 	}
-	// THE GRANT CHECK CONTRACT (from the security audit): a REAL clock, so expired grants are
-	// refused, and THIS tower's own ID, so a grant minted for another tower is refused here.
-	coreKey, err := towerjoin.DispatchKey()
-	if err != nil {
-		return nil, fmt.Errorf("cannot fetch Roger Core's grant key: %w", err)
-	}
 	// THIS TOWER'S ADMITTED IDENTITY KEY, which the hub uses to PROVE its process epoch to a
 	// polling node. The epoch rides in the node's signed target, and it is published on an
 	// unauthenticated 401 over a plaintext link - so without a proof, anyone on the path could
@@ -158,7 +155,7 @@ func runHubInBackground(st *tower.State, opt hubOptions, out io.Writer, stop <-c
 	// (see internal/towerhub/nodeauth.go, HubKeyHeader). The node checks that proof against
 	// this key's fingerprint, which Core hands it at attach.
 	//
-	// FAIL FAST, like the grant key above and for the same reason: a hub that cannot prove its
+	// FAIL FAST: a hub that cannot prove its
 	// epoch is a hub every current node refuses to sign for, and discovering that as "no
 	// station ever serves" is worse than not starting.
 	identity, err := st.IdentityKey()
@@ -172,6 +169,17 @@ func runHubInBackground(st *tower.State, opt hubOptions, out io.Writer, stop <-c
 	towerID, err := towerjoin.CoreTowerID(st)
 	if err != nil {
 		return nil, err
+	}
+	// THE GRANT KEY LAST, after every local check: a fault on this machine (no identity, no
+	// admission) is terminal and should say so at once, while a Core it cannot reach is waited out
+	// by serve (startHub) - so the network fetch must not stand in front of the local checks.
+	// THE GRANT CHECK CONTRACT (from the security audit): a REAL clock, so expired grants are
+	// refused, and THIS tower's own ID, so a grant minted for another tower is refused here.
+	coreKey, err := towerjoin.DispatchKey()
+	if err != nil {
+		// errGrantKey, whatever went wrong: the endpoint is public, so no answer from it is a
+		// fault on this machine, and serve waits every one of them out (startHub).
+		return nil, fmt.Errorf("%w: %w", errGrantKey, err)
 	}
 	// THE SIGNED LATCH, ON DISK. Without it every redeploy re-opened the pre-signature bearer
 	// for nodes that upgraded long ago, because Core never rotates the token - see

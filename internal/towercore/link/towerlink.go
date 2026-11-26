@@ -704,8 +704,15 @@ func (s *Sessions) fresh(seen time.Time) bool {
 // Tower's CURRENT session, here or through the shared record: a close naming a superseded
 // or unknown session ends nothing, and the governance record must not say otherwise.
 func (s *Sessions) Close(sessionID, towerID string) bool {
+	ended, _ := s.CloseChecked(sessionID, towerID)
+	return ended
+}
+
+// CloseChecked is Close, reporting as well whether the shared record could NOT be read - in
+// which case ended is only this instance's answer, and a caller that must fail toward the
+// cautious side (a drain) can tell "not the current session" from "could not tell".
+func (s *Sessions) CloseChecked(sessionID, towerID string) (ended, unsure bool) {
 	s.mu.Lock()
-	ended := false
 	sess, held := s.byID[sessionID]
 	if held && sess.towerID == towerID {
 		delete(s.byID, sessionID)
@@ -716,7 +723,7 @@ func (s *Sessions) Close(sessionID, towerID string) bool {
 	}
 	s.mu.Unlock()
 	if s.cfg.Mirror == nil {
-		return ended
+		return ended, false
 	}
 	// WITH A SHARED VIEW, ONLY THE SHARED VIEW SAYS WHAT WAS CURRENT. This instance's map
 	// can still hold a session another instance has since superseded, so its answer above
@@ -728,11 +735,12 @@ func (s *Sessions) Close(sessionID, towerID string) bool {
 	// row that names EXACTLY this session, which only the authenticated Tower was told.
 	// An unreadable shared view falls back to this instance's answer, so a real close of a
 	// session held here is still recorded rather than logged as ending nothing.
-	if rec, there, err := s.cfg.Mirror.Get(towerID); err == nil {
+	rec, there, err := s.cfg.Mirror.Get(towerID)
+	if err == nil {
 		ended = there && rec.SessionID == sessionID
 	}
 	_ = s.cfg.Mirror.Del(towerID, sessionID)
-	return ended
+	return ended, err != nil
 }
 
 // Current names the Tower's current session, here or in the shared record.

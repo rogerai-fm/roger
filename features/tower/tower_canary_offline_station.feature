@@ -1,6 +1,12 @@
 # APPROVED SPEC - founder approved 2026-11-24 ("approved, but audit it and review and fix any issues"). Changes to an approved scenario need re-approval.
 # REVISED 2026-11-24 after the requested audit (17 findings, all applied; see "Audit changes" below).
-# BUILD STATUS: NOT BUILT. Approval is not implementation - this line says which.
+# Corrected 2026-11-24: Core emits lease_lapsed, never lease_expired (Examples row fixed).
+# Deploy Core before Towers update: an old Core sends a stateless 403.
+# BUILD STATUS: BUILT. cmd/rogerai-broker/towercanary.go and toweredge.go (nodeSilentLocked, the canary
+# candidate set), towerlink.go (towerCallerOr), towerleave.go (the signed leave), toweredgeattach.go
+# (the epoch in the attach reply); internal/towerjoin/link.go (Refusal); internal/towercli/serve.go
+# (recoverable vs terminal refusals, exitTerminal); internal/agent/leave.go; cmd/rogerai/onair_lock.go
+# (leaveBeforeExit); packaging/tower/roger-tower.service (RestartPreventExitStatus=78).
 #
 # Found 2026-11-24. The house Tower (tw-3081d0565b48999cdb34fbce) was suspended by Core and then
 # lapsed, after doing nothing wrong:
@@ -148,7 +154,7 @@ Feature: A Tower is never judged on a Station that Core itself knows is offline
         | refusal         | step                                  |
         | state_suspended | the first session open                |
         | lease_lapsed    | the first session open                |
-        | lease_expired   | the first inventory push              |
+        | lease_lapsed    | the first inventory push              |
         | state_suspended | the re-open after a refused heartbeat |
         | state_suspended | the full push after a re-open         |
         | Core unreachable | the first session open               |

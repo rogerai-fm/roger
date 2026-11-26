@@ -5,7 +5,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"rogerai.fm/roger/v7/internal/agent"
 	"rogerai.fm/roger/v7/internal/onair"
 )
 
@@ -53,11 +55,15 @@ func acquireOnAirLock(nodeID, station, model string) (release func(), err error)
 	if err != nil {
 		return nil, err
 	}
-	c := make(chan os.Signal, 1)
+	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		// Tell the rest of the share first, then clear the lock, then go. The notice is
+		// TAKE THE STATIONS OFF THE AIR FIRST (tower_canary_offline_station.feature): a signed
+		// leave per attachment, bounded by leaveLimit, and a second Ctrl-C skips the wait.
+		agent.StopAttaching() // first, so no relay loop re-attaches behind the leaves
+		leaveBeforeExit(shareLeave, c, leaveLimit)
+		// Then tell the rest of the share, then clear the lock, then go. The notice is
 		// deliberately not WAITED on: a second Ctrl-C is what an operator does when the first
 		// looks ignored, so the exit may not be held up for a background plane to unwind. What
 		// this buys is that a hub poll in flight sees a cancelled context instead of being cut
@@ -68,4 +74,31 @@ func acquireOnAirLock(nodeID, station, model string) (release func(), err error)
 		os.Exit(130) // 128 + SIGINT, the conventional Ctrl-C exit code
 	}()
 	return release, nil
+}
+
+// shareLeave sends a stopping share's leaves. A variable so a test's child process can stand in
+// a leave that never lands and watch the real signal handler.
+var shareLeave = agent.LeaveAll
+
+// leaveLimit bounds how long a stopping share waits for its leaves to land.
+const leaveLimit = 2 * time.Second
+
+// Contract: features/tower/tower_canary_offline_station.feature.
+//
+// leaveBeforeExit sends the share's leaves and returns when they are done, when limit passes,
+// or when a second signal arrives - whichever is first. A leave that does not land costs nothing
+// but time: Core's liveness predicate takes the Station out of rotation once the node is silent.
+func leaveBeforeExit(leave func(context.Context) int, second <-chan os.Signal, limit time.Duration) {
+	ctx, cancel := context.WithTimeout(context.Background(), limit)
+	defer cancel()
+	done := make(chan struct{})
+	go func() {
+		leave(ctx)
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-second:
+	case <-ctx.Done():
+	}
 }

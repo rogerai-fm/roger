@@ -320,12 +320,14 @@ func towerPostAs(ctx context.Context, st *tower.State, path string, body []byte,
 		// and an operator sent to check their Tower's lifecycle because they mistyped an
 		// invitation secret is an operator debugging the wrong thing. The canned line is the
 		// fallback for a 403 that carries nothing, not the answer to all of them.
+		state := envelopeTowerState(raw)
 		if msg, ok := envelopeMessage(raw); ok {
-			return resp.StatusCode, fmt.Errorf("%w: %s", ErrRefused, msg)
+			return resp.StatusCode, &Refusal{Status: resp.StatusCode, State: state, err: fmt.Errorf("%w: %s", ErrRefused, msg)}
 		}
-		return resp.StatusCode, fmt.Errorf("%w: this Tower may not hold a link right now (suspended, revoked, or its lease lapsed)", ErrRefused)
+		return resp.StatusCode, &Refusal{Status: resp.StatusCode, State: state,
+			err: fmt.Errorf("%w: this Tower may not hold a link right now (suspended, revoked, or its lease lapsed)", ErrRefused)}
 	case resp.StatusCode < 200 || resp.StatusCode >= 300:
-		return resp.StatusCode, fmt.Errorf("%w: %s", ErrRefused, bandOrRawError(raw))
+		return resp.StatusCode, &Refusal{Status: resp.StatusCode, err: fmt.Errorf("%w: %s", ErrRefused, bandOrRawError(raw))}
 	}
 	if out != nil && len(raw) > 0 {
 		if err := json.Unmarshal(raw, out); err != nil {
@@ -333,6 +335,48 @@ func towerPostAs(ctx context.Context, st *tower.State, path string, body []byte,
 		}
 	}
 	return resp.StatusCode, nil
+}
+
+// Contract: features/tower/tower_canary_offline_station.feature.
+//
+// Refusal is a non-2xx answer from Core (other than the need-full-inventory conflict), with the
+// HTTP status and, when Core verified the request as this Tower's own and refused it anyway, the
+// Tower's refusal state from error.metadata.tower_state ("state_suspended", "lease_lapsed",
+// "state_revoked", "cert_revoked", ...). State is empty when Core could not verify the request as
+// this Tower - an unknown Tower id, or a key that is not the one it enrolled. It unwraps to
+// ErrRefused, so every existing errors.Is check still holds.
+type Refusal struct {
+	Status int
+	State  string
+	err    error
+}
+
+func (r *Refusal) Error() string {
+	if r.err == nil {
+		return fmt.Sprintf("%v (status %d %s)", ErrRefused, r.Status, r.State)
+	}
+	return r.err.Error()
+}
+func (r *Refusal) Unwrap() error {
+	if r.err == nil {
+		return ErrRefused
+	}
+	return r.err
+}
+
+// envelopeTowerState is error.metadata.tower_state from Core's error envelope, or "".
+func envelopeTowerState(raw []byte) string {
+	var env struct {
+		Error struct {
+			Metadata struct {
+				TowerState string `json:"tower_state"`
+			} `json:"metadata"`
+		} `json:"error"`
+	}
+	if json.Unmarshal(raw, &env) != nil {
+		return ""
+	}
+	return env.Error.Metadata.TowerState
 }
 
 // envelopeMessage pulls the sentence Core wrote out of its {"error":{"message":...}}

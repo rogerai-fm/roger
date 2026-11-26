@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -384,12 +385,17 @@ func TestAFailedReopenStopsAndStillDrains(t *testing.T) {
 
 	// A nil stop channel, not closedStop(), because this test must reach the select loop: a
 	// fired stop signal would race the beat and the loop could take either branch.
+	//
+	// A 403 that names no state is waited out for a day before it is final
+	// (tower_canary_offline_station.feature, review fix B1), so the day runs on a test clock.
+	runADay(t)
 	beats := make(chan time.Time, 1)
 	var b bytes.Buffer
 	beats <- time.Now()
 	err := runLink(st, &b, nil, manualTicker(beats), link.RelayPlane{})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "may not hold a link")
+	require.Equal(t, exitTerminal, exitCode(err))
 	require.Equal(t, 1, core.called("/tower/session/close"), "it drained on the way out")
 }
 
@@ -402,11 +408,30 @@ func TestAnUnopenableSessionFailsBeforePushing(t *testing.T) {
 		w.WriteHeader(http.StatusForbidden)
 		return true
 	}
+	runADay(t) // a stateless 403 is final only after a day of retries (review fix B1)
 	var b bytes.Buffer
-	err := runLink(st, &b, closedStop(), manualTicker(nil), link.RelayPlane{})
+	err := runLink(st, &b, make(chan struct{}), manualTicker(nil), link.RelayPlane{})
 	require.Error(t, err)
+	require.Equal(t, exitTerminal, exitCode(err))
 	require.Zero(t, core.called("/tower/inventory"))
 	require.Zero(t, core.called("/tower/session/close"), "nothing to drain")
+}
+
+// runADay makes serve's backoff waits instant and moves its clock forward by each one, so a
+// refusal that must last 24 hours does so in the test.
+func runADay(t *testing.T) {
+	t.Helper()
+	var elapsed atomic.Int64
+	start := time.Now()
+	prevNow, prevWait := serveNow, serveWait
+	serveNow = func() time.Time { return start.Add(time.Duration(elapsed.Load())) }
+	serveWait = func(d time.Duration) <-chan time.Time {
+		elapsed.Add(int64(d))
+		c := make(chan time.Time, 1)
+		c <- time.Now()
+		return c
+	}
+	t.Cleanup(func() { serveNow, serveWait = prevNow, prevWait })
 }
 
 // A push that Core refuses outright stops the loop: retrying an inventory Core will never
@@ -872,6 +897,7 @@ func TestServeJoinedResolvesTLSAndSaysThePin(t *testing.T) {
 		return true
 	}
 
+	runADay(t) // the bare 403 ends serve only after a day of retries (review fix B1)
 	st := servingTower(t)
 	out := &syncBuffer{}
 	err := serveJoined(st, out, "203.0.113.9:8444", hubOptions{Addr: "127.0.0.1:0", TLS: true})
@@ -894,6 +920,7 @@ func TestServeJoinedSaysPlaintextAtTheTowerNotOnlyAtTheNode(t *testing.T) {
 		return true
 	}
 
+	runADay(t) // the bare 403 ends serve only after a day of retries (review fix B1)
 	st := servingTower(t)
 	out := &syncBuffer{}
 	err := serveJoined(st, out, "203.0.113.9:8444", hubOptions{Addr: "127.0.0.1:0"})
@@ -903,17 +930,42 @@ func TestServeJoinedSaysPlaintextAtTheTowerNotOnlyAtTheNode(t *testing.T) {
 }
 
 func TestServeJoinedFailsWhenTheHubCannot(t *testing.T) {
-	// No dispatch key at the stub, so the hub cannot start - and the serve must FAIL, not
-	// carry on linkless-hubless. The hub was started before the link so a consumer's first
-	// submit has somewhere to land; a serve that shrugged the hub off would advertise a data
-	// plane with nobody behind it.
+	// No dispatch key at the stub, so the hub cannot start - and the link must NOT open while it
+	// cannot: the hub is started before the link so a consumer's first submit has somewhere to
+	// land, and a serve that shrugged the hub off would advertise a data plane with nobody behind
+	// it. A missing grant key is waited out rather than fatal (it is Core's public endpoint, so
+	// no answer from it is a fault here - tower_canary_offline_station.feature, pre-push audit),
+	// so this watches the wait and stops it.
 	core := newCoreStub(t)
 	st := servingTower(t)
+	prev := serveWait
+	asked := make(chan struct{}, 64)
+	serveWait = func(time.Duration) <-chan time.Time {
+		select {
+		case asked <- struct{}{}:
+		default:
+		}
+		return time.After(time.Millisecond)
+	}
+	t.Cleanup(func() { serveWait = prev })
 	out := &syncBuffer{}
-	err := serveJoined(st, out, "203.0.113.9:8444", hubOptions{Addr: "127.0.0.1:0"})
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "grant key")
-	require.Zero(t, core.sessionCount(), "the link must not open when the hub already failed")
+	stop := make(chan struct{})
+	done := make(chan error, 1)
+	go func() {
+		_, err := startHub(st, hubOptions{Addr: "127.0.0.1:0"}, out, stop)
+		done <- err
+	}()
+	for i := 0; i < 3; i++ {
+		select {
+		case <-asked:
+		case <-time.After(5 * time.Second):
+			t.Fatalf("the hub start did not retry the grant key:\n%s", out.String())
+		}
+	}
+	close(stop)
+	require.ErrorIs(t, <-done, errStoppedWaiting)
+	require.Contains(t, out.String(), "grant key")
+	require.Zero(t, core.sessionCount(), "the link must not open when the hub cannot start")
 }
 
 func TestServeJoinedRefusesUnusableTLSFilesBeforeReachingAnything(t *testing.T) {

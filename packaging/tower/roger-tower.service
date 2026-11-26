@@ -25,6 +25,11 @@ ExecStartPre=/usr/local/bin/roger tower ready --config /etc/roger-tower/tower.ya
 ExecStart=/usr/local/bin/roger tower serve --dir /var/lib/roger-tower --config /etc/roger-tower/tower.yaml
 Restart=on-failure
 RestartSec=5s
+# 78 is `roger tower serve`'s terminal status: revoked, a revoked certificate, a Tower Core
+# does not recognise, the wrong mode, or a hub that cannot bind. Restarting cannot fix any of
+# them, so do not loop. A suspended Tower or a lapsed lease does not exit at all: serve stays
+# up and asks Core again (features/tower/tower_canary_offline_station.feature).
+RestartPreventExitStatus=78
 
 # The ONLY writable path. Identity keys and local admission state live here, owner-only.
 StateDirectory=roger-tower

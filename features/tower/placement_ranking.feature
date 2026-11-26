@@ -1,3 +1,5 @@
+# AMENDED 2026-11-24 (founder: "1. yes"): the attach reply gains one field, epoch, which the
+# signed leave in tower_canary_offline_station.feature quotes. Older nodes ignore it.
 # APPROVED SPEC - written and founder approved 2026-11-13 ("Approve as written"), with the
 # proposed numbers accepted as written. Changes to an approved scenario need re-approval.
 # BUILD STATUS: BUILT. internal/towercore/placement/rank.go (Choose, StrictlyBetter), cmd/rogerai-broker/
@@ -187,7 +189,7 @@ Feature: Core places each Station on the best eligible Tower, not the first one
 
   Scenario: The attach reply is unchanged in shape
     When a Station is placed by the ranked choice
-    Then the reply carries the same fields as today: station id, Tower id, endpoint, pin, hub token, Tower key fingerprint and state
+    Then the reply carries the same fields as today: station id, Tower id, endpoint, pin, hub token, Tower key fingerprint and state, plus the attachment epoch (added 2026-11-24 for the signed leave)
     And an older node that knows nothing of ranking attaches exactly as before
 
   Scenario: A live Station's re-attach never re-runs placement

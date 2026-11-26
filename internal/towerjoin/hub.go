@@ -36,10 +36,14 @@ func DispatchKey() (ed25519.PublicKey, error) {
 	client := &http.Client{Timeout: 20 * time.Second, CheckRedirect: protocol.NoDowngradeRedirect}
 	resp, err := client.Get(base + "/tower/dispatch/key")
 	if err != nil {
-		return nil, err
+		// Transport, not refusal: Core is briefly out of reach, which a Tower waits out.
+		return nil, fmt.Errorf("%w: %v", ErrUnreachable, err)
 	}
 	defer resp.Body.Close()
 	raw, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	if resp.StatusCode >= 500 {
+		return nil, fmt.Errorf("%w: dispatch key fetch: %d", ErrUnreachable, resp.StatusCode)
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("dispatch key fetch: %d: %s", resp.StatusCode, raw)
 	}

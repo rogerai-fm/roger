@@ -62,7 +62,10 @@ import (
 type TowerAttachment struct {
 	StationID string `json:"station_id"`
 	TowerID   string `json:"tower_id"`
-	Endpoint  string `json:"endpoint"`
+	// Epoch is the attachment's epoch, so a stopping node can leave exactly this attachment
+	// (LeaveAll). Zero from a Core older than the leave; such an attachment is not left.
+	Epoch    int64  `json:"epoch"`
+	Endpoint string `json:"endpoint"`
 	// HubToken is the pre-signature bearer credential. THIS NODE NO LONGER SENDS IT: hub
 	// requests are signed with the Station's assertion key instead (internal/towerhub's
 	// nodeauth.go), which is what stops an on-path attacker on a plaintext link from lifting a
@@ -725,6 +728,11 @@ func AttachTower(cfg Config, priv ed25519.PrivateKey, dir string) (*station.Stat
 // Station's reach (moved off it) from a certificate the Tower rotated (the new pin handed back)
 // (private_hub_placement.feature). It only ever moves this Station.
 func attachTowerAvoiding(cfg Config, priv ed25519.PrivateKey, dir string, gaveUp TowerAttachment) (*station.Station, TowerAttachment, error) {
+	// A STOPPING SHARE ATTACHES NOTHING (tower_canary_offline_station.feature): once its leaves
+	// have begun, an attach would put a Station back on the air behind the operator's Ctrl-C.
+	if leaving.Load() {
+		return nil, TowerAttachment{}, ErrLeaving
+	}
 	// A PRIVATE BAND IS NEVER ATTACHED. Structural, at the network act, so the guarantee does not
 	// depend on which branch of a caller happens to reach here. See ErrPrivateShareNeverRelays.
 	if cfg.Private {
@@ -848,6 +856,8 @@ func attachTowerAvoiding(cfg Config, priv ed25519.PrivateKey, dir string, gaveUp
 				"unverified one hands an on-path attacker a signature it chose. Roger Core must be " +
 				"updated before the towers and nodes that talk to it")
 	}
+	// Held for leaving: a stopping share takes this attachment off the air (leave.go).
+	holdAttachment(cfg.Broker, priv, at)
 	return st, at, nil
 }
 
@@ -1003,6 +1013,9 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 			return nil
 		}
 		st, at, err := attachTowerAvoiding(cfg, priv, dir, gaveUp)
+		if errors.Is(err, ErrLeaving) {
+			return nil // the share is stopping; this is the end of its relay, not a failure
+		}
 		if err == nil {
 			gaveUp = TowerAttachment{}
 		}
