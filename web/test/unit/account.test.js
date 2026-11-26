@@ -217,3 +217,15 @@ describe("export and delete", () => {
     expect(navs).toEqual([]);
   });
 });
+
+describe("the fault line (2026-11-26)", () => {
+  it("offers a retry and a sign-in link that comes back to this page", async () => {
+    globalThis.fetch = async () => { throw new Error("offline"); };
+    fakeLocation({ pathname: "/account.html" });
+    const { unmount } = render(AccountApp);
+    await waitFor(() => expect(el("pageError").hidden).toBe(false));
+    expect(el("pageError").textContent.replace(/\s+/g, " ").trim()).toBe("Could not load this page. Try again or sign in.");
+    expect(el("pageError").querySelector("a").getAttribute("href")).toBe("/login.html?next=%2Faccount.html");
+    unmount();
+  });
+});

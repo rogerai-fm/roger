@@ -9,7 +9,8 @@
   // invents a number.
   import { onMount } from "svelte";
   import { api, getJSON, logout } from "#lib/api.js";
-  import { bootGet, reason } from "./boot.js";
+  import { bootGet, reason, signIn } from "./boot.js";
+  import PageFault from "#lib/ui/PageFault.svelte";
   import { cr, when, rel } from "#lib/format.js";
   import RogerFmt from "#lib/fmt.js";
   import AccountNav from "#lib/ui/AccountNav.svelte";
@@ -131,7 +132,7 @@
 
   onMount(async () => {
     const res = await bootGet("/account");
-    if (res.status === 401) { location.replace("/login.html?next=" + encodeURIComponent("/payouts.html")); return; }
+    if (res.status === 401) { signIn("/payouts.html"); return; }
     if (!res.data) { status = "fault"; return; }
     const a = res.data;
     // A signed-in person with no operator account (a consumer, or a sign-in whose machines
@@ -151,7 +152,7 @@
 <div class="authwrap tint-panel">
 <LoadState status={status} what="your payouts" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. <button type="button" class="ghost" onclick={() => location.reload()}>Try again</button></p>
+  <PageFault shown={status === "fault"} />
   <h1>Payouts</h1>
   <p class="sub">Exactly what you earned, when it clears, and where it came from.</p>
 
@@ -271,7 +272,7 @@ roger share</pre>
     <h2>Towers &amp; relay</h2>
     <p class="fine">Your Towers and the sealed work they carry. Every settled request splits
       90% to the serving node, <b>5% to you</b>, 5% to the platform. Relay earnings are
-      held, released and <b>cashed out exactly like serving earnings</b> - the totals below
+      held, released and <b>cashed out exactly like serving earnings</b>; the totals below
       are already part of your balance above, split out here so you can see which stream
       earned what. <a href="/manual.html#sTower">Run a Tower &rarr;</a></p>
 
@@ -343,7 +344,7 @@ roger share</pre>
 
   <section class="panel">
     <h2>Ledger</h2>
-    <p class="fine">The accounting entries behind every payout, clawback and adjustment - your receipts.</p>
+    <p class="fine">The accounting entries behind every payout, clawback and adjustment: your receipts.</p>
     <ul class="recent po-ledger" id="ledger">
       {#each ledger as g}
         <li>

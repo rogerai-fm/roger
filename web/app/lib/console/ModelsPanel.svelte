@@ -24,7 +24,7 @@
 </script>
 <section class="panel" id="modelsWrap">
   <h2>Models &amp; pricing</h2>
-  <p>Set what each model you serve charges per million tokens, and add time-of-use windows (a cheaper night rate, a free daily window). Changes publish immediately and survive the node reconnecting - they only ever set future prices, never what was already billed.</p>
+  <p>Set what each model you serve charges per million tokens, and add time-of-use windows (a cheaper night rate, a free daily window). Changes publish immediately and survive the node reconnecting. They only ever set future prices, never what was already billed.</p>
   {#if status === "loading"}<p class="cn-state" id="mdLoading">Reading your models...</p>{/if}
   {#if status === "error"}<p class="cn-state" id="mdError">Could not load your models. Try again shortly.</p>{/if}
   {#if status === "empty"}<p class="cn-state" id="mdEmpty">No models on air yet. Run <code>roger share</code> on a box and the models it serves show up here to price.</p>{/if}
@@ -37,7 +37,7 @@
     <div class="md-list" id="mdList">
       {#each rows as m}<ModelCard {m} {ceil} onreload={load} />{/each}
     </div>
-    <p class="fine" id="mdCeil">Price ceiling: ${priceStr(ceil.in)} in / ${priceStr(ceil.out)} out per 1M tokens. It applies to every band, public or private - a private band hides a station from the market, it is not a price bypass.</p>
+    <p class="fine" id="mdCeil">Price ceiling: ${priceStr(ceil.in)} in / ${priceStr(ceil.out)} out per 1M tokens. It applies to every band, public or private; a private band hides a station from the market, it is not a price bypass.</p>
     </svelte:boundary>
   {/if}
 </section>

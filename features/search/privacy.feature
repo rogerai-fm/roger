@@ -29,19 +29,22 @@ Feature: Search words go to one station and its engine, and are not kept
 
   Rule: no query or result text is kept by the broker (P1)
 
+    # The probe carries letters hex never uses (k, u, q, m, t), so a request id, signature or
+    # hash in a stored record cannot match it by chance; "7f3a" alone did, once (2026-11-25).
+
     Scenario: A successful search leaves no query text behind
-      When the consumer searches for "a distinctive phrase 7f3a"
-      Then the broker log does not contain "7f3a"
-      And no ledger row, metric row, lineage entry or console event contains "7f3a"
+      When the consumer searches for "a distinctive phrase kumquat7f3a"
+      Then the broker log does not contain "kumquat7f3a"
+      And no ledger row, metric row, lineage entry or console event contains "kumquat7f3a"
 
     Scenario: A failed search leaves no query text behind
       Given the station returns HTTP 502
-      When the consumer searches for "a distinctive phrase 7f3a"
-      Then the broker log does not contain "7f3a"
+      When the consumer searches for "a distinctive phrase kumquat7f3a"
+      Then the broker log does not contain "kumquat7f3a"
 
     Scenario: A refused query leaves no query text behind
-      When the consumer searches for a flagged phrase containing "7f3a"
-      Then the broker log does not contain "7f3a"
+      When the consumer searches for a flagged phrase containing "kumquat7f3a"
+      Then the broker log does not contain "kumquat7f3a"
       And only the moderation category is recorded
 
     Scenario: Result text is not kept

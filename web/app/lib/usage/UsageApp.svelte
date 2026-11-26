@@ -17,6 +17,7 @@
   // exact-bucket readout (arrow keys move the cursor). Honest empty: real buckets only.
   import { onMount } from "svelte";
   import { api, getJSON, logout } from "#lib/api.js";
+  import { backHere } from "#lib/account/boot.js";
   import { n0, cr, num, kfmt, rfmt } from "#lib/format.js";
   import AccountNav from "#lib/ui/AccountNav.svelte";
   import { rollupModels, rollupTotals, seriesOK } from "#lib/rollup.js";
@@ -111,7 +112,7 @@
 <div class="authwrap tint-panel">
 <main class="card" id="card" hidden={auth !== "in"}>
   <h1>Metrics</h1>
-  <p class="sub">An explorable, time-aware view of what you host and earn, and what you consume and spend - over time and per model.</p>
+  <p class="sub">An explorable, time-aware view of what you host and earn, and what you consume and spend, over time and per model.</p>
 
   <!-- Range selector (shared by both views): re-fetches /metrics/series and redraws. -->
   <div class="mx-range" role="group" aria-label="Time range">
@@ -228,7 +229,7 @@
   <section class="acct-state tint-panel">
     <h2>Signed out</h2>
     <p>Your per-model tokens over time, earnings and spend show here once you do.</p>
-    <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html">Sign in</a></p>
+    <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html" use:backHere>Sign in</a></p>
   </section>
 </main>
 </div>

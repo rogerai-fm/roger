@@ -196,7 +196,7 @@ describe("the live session view", () => {
     await ready();
     await fireEvent.click(document.querySelector("#sessionRows tr button"));
     await waitFor(() => expect(visible("viewWrap")).toBe(true));
-    expect(text("viewTitle")).toBe("Session - laptop");
+    expect(text("viewTitle")).toBe("Session: laptop");
     await waitFor(() => expect(lines()).toEqual(["▸ (phone) hello", "◂ hi there", "◉ read_file", "- session ended on the host -"]));
     const join = p.calls.find((c) => c.path === "/rc/s1/join");
     expect(join.opts.method).toBe("POST");
@@ -251,7 +251,7 @@ describe("the live session view", () => {
     await fireEvent.click(document.querySelectorAll("#sessionRows tr")[1].querySelector("button"));
     await waitFor(() => expect(visible("viewWrap")).toBe(true));
     expect(text("stream")).toBe("Could not attach to this session.");
-    expect(text("viewTitle")).toBe("Session - s2");
+    expect(text("viewTitle")).toBe("Session: s2");
     expect(p.calls.some((c) => c.path === "/rc/s2/stream")).toBe(false);
     // no session is open: the ask box sends nothing (the legacy page had no current session either)
     await fireEvent.input(el("ask"), { target: { value: "hello?" } });
@@ -309,5 +309,21 @@ describe("the live session view", () => {
     expect(window.alert.mock.calls[0][0]).toMatch(/over TLS/);
     expect(window.alert.mock.calls[0][0]).toMatch(/not end-to-end encrypted/);
     expect(p.navs).toEqual([]);
+  });
+});
+
+describe("signed out (2026-11-26)", () => {
+  it("a 403 on the roster with no session is the sign-in gate, with a link that comes back here", async () => {
+    const p = mount({ "/rc/sessions": [403, {}], "/account": [401, {}] });
+    await waitFor(() => expect(visible("gate")).toBe(true));
+    expect(visible("error")).toBe(false);
+    expect(el("gate").querySelector("a").getAttribute("href")).toBe("/login.html?next=%2Fprivate.html");
+    p.unmount();
+  });
+  it("a 403 for a signed-in person stays a fault, never the gate", async () => {
+    const p = mount({ "/rc/sessions": [403, {}], "/account": [200, {}] });
+    await waitFor(() => expect(visible("error")).toBe(true));
+    expect(visible("gate")).toBe(false);
+    p.unmount();
   });
 });

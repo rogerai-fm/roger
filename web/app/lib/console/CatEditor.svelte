@@ -42,7 +42,7 @@
   $effect(() => {
     loadCatList().then((list) => {
       ready = list.length > 0;
-      if (!list.length) msg = { cls: "md-state--err", text: "Could not load the category list - try again shortly." };
+      if (!list.length) msg = { cls: "md-state--err", text: "Could not load the category list. Try again shortly." };
     });
   });
 

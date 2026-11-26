@@ -6,7 +6,8 @@
   // behind the credentialed session cookie; no token ever touches the page.
   import { onMount } from "svelte";
   import { api, postJSON, logout } from "#lib/api.js";
-  import { bootGet, reason } from "./boot.js";
+  import { bootGet, reason, signIn } from "./boot.js";
+  import PageFault from "#lib/ui/PageFault.svelte";
   import RogerFmt from "#lib/fmt.js";
   import { when } from "#lib/format.js";
   import AccountNav from "#lib/ui/AccountNav.svelte";
@@ -33,7 +34,7 @@
 
   onMount(async () => {
     const res = await bootGet("/account");
-    if (res.status === 401) { location.replace("/login.html?next=" + encodeURIComponent("/account.html")); return; }
+    if (res.status === 401) { signIn("/account.html"); return; }
     if (!res.data) { status = "fault"; return; }
     a = res.data;
     email = a.email || "";
@@ -55,7 +56,7 @@
     linkMsg = "Sending...";
     try {
       const r = await postJSON("/auth/email/link/start", { email: addr });
-      if (!r.ok) { linkMsg = await reason(r, "that did not work - try again"); return; }
+      if (!r.ok) { linkMsg = await reason(r, "that did not work, try again"); return; }
       token = (await r.json()).token || "";
       linkStep2 = true;
       linkMsg = "If that address can receive mail, a code is on its way.";   // never says whether the address is known
@@ -66,7 +67,7 @@
     if (!code) return;
     try {
       const r = await postJSON("/auth/email/link/verify", { email: addr, code, token });
-      if (!r.ok) { linkMsg = await reason(r, "that did not work - try again"); return; }
+      if (!r.ok) { linkMsg = await reason(r, "that did not work, try again"); return; }
       const j = await r.json();
       const done = (j && j.email) || addr;
       linkStep2 = false;
@@ -94,7 +95,7 @@
 <div class="authwrap tint-panel">
 <LoadState status={status} what="your account" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. <button type="button" class="ghost" onclick={() => location.reload()}>Try again</button></p>
+  <PageFault shown={status === "fault"} />
   <h1>Account</h1>
   <p class="sub">Signed in as <b id="who">{a ? RogerFmt.who(a) : "-"}</b></p>
 
@@ -182,8 +183,8 @@
 
   <section class="panel">
     <h2>Delete account</h2>
-    <p>This clears every identifier we hold for you - your email, your GitHub link, your
-      Apple link, and your name - and revokes your sessions.
+    <p>This clears every identifier we hold for you (your email, your GitHub link, your
+      Apple link and your name) and revokes your sessions.
       Financial records are retained, de-identified, for the legal retention window.
       Deletion is blocked while you hold a balance, unpaid earnings, or open disputes.</p>
     <button id="del" class="ghost danger" onclick={del}>Delete my account</button>

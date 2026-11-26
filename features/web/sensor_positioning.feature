@@ -29,8 +29,8 @@ Feature: Your device, now a sensor
   Scenario: the capabilities file is valid
     Then web/src/data/capabilities.json defines exactly the stages planned, lab,
       release-candidate, available, and engagement, in that order, each with a one-line
-      definition (engagement: built with one customer under a private engagement, no
-      self-serve tooling)
+      definition (engagement is a separate path, not a step past available: built with one
+      customer under a private engagement, with no self-serve tooling)
     And each stage has a short public label
     And every capability has an id, a name, a kind of adapter or base-skill, a base tier
       that exists in the Wave status file, a stage from the vocabulary, and a one-line

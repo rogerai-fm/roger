@@ -31,7 +31,13 @@ describe("boot (the login-loop rule)", () => {
   it("a 401 on the first feed goes to login; nothing else is read", async () => {
     const p = mount({ "/billing": [401, {}] });
     await waitFor(() => expect(p.navs).toEqual(["/login.html?next=%2Fbilling.html"]));
-    expect(p.fetched()).toEqual(["/billing"]);
+    expect(p.fetched()).toEqual(["/account", "/billing"]);
+  });
+  it("signed out, the broker still answers /billing (the shared wallet): the session decides, and the wallet is never read", async () => {
+    const p = mount({ ...OK, "/account": [401, {}] });
+    await waitFor(() => expect(p.navs).toEqual(["/login.html?next=%2Fbilling.html"]));
+    expect(p.fetched()).toEqual(["/account"]);
+    expect(el("card").hidden).toBe(true);
   });
   for (const status of [500, 503]) {
     it(`a ${status} shows an error and keeps the card with a working sign-out, no redirect`, async () => {
@@ -40,7 +46,7 @@ describe("boot (the login-loop rule)", () => {
       expect(p.navs).toEqual([]);
       expect(visible("pageError")).toBe(true);
       expect(el("card").classList.contains("is-fault")).toBe(true);
-      expect(p.fetched()).toEqual(["/billing"]);   // the secondary feeds wait for a confirmed session
+      expect(p.fetched()).toEqual(["/account", "/billing"]);   // the secondary feeds wait for a confirmed session
       await fireEvent.click(el("logout"));
       await waitFor(() => expect(p.navs).toEqual(["/login.html"]));
       expect(p.calls.at(-1)).toMatchObject({ path: "/auth/logout", opts: { method: "POST" } });
@@ -59,7 +65,7 @@ describe("boot (the login-loop rule)", () => {
     await settled(p);
     expect(visible("pageError")).toBe(false);
     expect(el("card").classList.contains("is-fault")).toBe(false);
-    expect(p.fetched()).toEqual(["/billing", "/metrics/series?days=30", "/account/limit", "/console?limit=40"]);
+    expect(p.fetched()).toEqual(["/account", "/billing", "/metrics/series?days=30", "/account/limit", "/console?limit=40"]);
     expect(text("balance")).toBe("$5.00");
     expect(text("derived")).toBe("$5.00");
   });

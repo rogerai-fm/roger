@@ -30,10 +30,10 @@
   "logEmptyConsumer": "No requests yet. Tune in with roger use <model> and your lineage lands here.",
   "logEmptyOwner": "No requests served yet. Put a GPU on air with roger share and the traffic it serves shows here, receipt by receipt.",
   "modelsWrap.h2": "Models & pricing",
-  "modelsWrap.lede": "Set what each model you serve charges per million tokens, and add time-of-use windows (a cheaper night rate, a free daily window). Changes publish immediately and survive the node reconnecting - they only ever set future prices, never what was already billed.",
+  "modelsWrap.lede": "Set what each model you serve charges per million tokens, and add time-of-use windows (a cheaper night rate, a free daily window). Changes publish immediately and survive the node reconnecting. They only ever set future prices, never what was already billed.",
   "mdLoading": "Reading your models...",
   "mdError": "Could not load your models. Try again shortly.",
   "mdEmpty": "No models on air yet. Run roger share on a box and the models it serves show up here to price.",
   "mdCatNote": "Each card shows the category your station registered (a guess is marked ~). Change it here with Edit category (it then wins over the node's own), or from the node with roger share --category, the TUI SHARE tab (g), or the local console's Category button.",
-  "mdCeil": "Price ceiling: $50 in / $100 out per 1M tokens. It applies to every band, public or private - a private band hides a station from the market, it is not a price bypass."
+  "mdCeil": "Price ceiling: $50 in / $100 out per 1M tokens. It applies to every band, public or private; a private band hides a station from the market, it is not a price bypass."
 }

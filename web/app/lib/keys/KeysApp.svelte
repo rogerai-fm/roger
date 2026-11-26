@@ -5,6 +5,7 @@
   // the page; the only secret here is a freshly minted one, shown once and never re-fetched.
   import { onMount } from "svelte";
   import { BROKER, api, logout } from "#lib/api.js";
+  import { backHere } from "#lib/account/boot.js";
   import { num } from "#lib/format.js";
   import * as AK from "./accountKeys.js";
   import AccountNav from "#lib/ui/AccountNav.svelte";
@@ -454,7 +455,7 @@ roger share</pre>
     <p>Grant keys are owner-issued: you sign in once, with GitHub, Apple or an emailed
       code, then mint private bearer keys for your bots, family, or your own headless
       boxes. Each key is shown only once.</p>
-    <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html">Sign in</a></p>
+    <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html" use:backHere>Sign in</a></p>
   </section>
 </main>
 </div>

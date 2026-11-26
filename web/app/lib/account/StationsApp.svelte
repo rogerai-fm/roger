@@ -9,7 +9,8 @@
   // error. The chain state is an AUDIT SIGNAL, never a penalty, and the copy says so.
   import { onMount } from "svelte";
   import { api, postJSON } from "#lib/api.js";
-  import { bootGet } from "./boot.js";
+  import { bootGet, signIn } from "./boot.js";
+  import PageFault from "#lib/ui/PageFault.svelte";
   import RogerFmt from "#lib/fmt.js";
   import AccountNav from "#lib/ui/AccountNav.svelte";
 
@@ -36,7 +37,7 @@
     const ch = st.chain || {};
     switch (st.chain_state) {
       case "continuous": return { cls: "ok", text: "Chain continuous" };
-      case "breaks-recorded": return { cls: "warn", text: ch.breaks + (ch.breaks === 1 ? " break recorded" : " breaks recorded") + " - audit signal only" };
+      case "breaks-recorded": return { cls: "warn", text: ch.breaks + (ch.breaks === 1 ? " break recorded" : " breaks recorded") + ", audit signal only" };
       default: return { cls: "muted", text: "No receipts yet" };
     }
   }
@@ -75,14 +76,14 @@
       } else {
         appealBusy = false;   // a refusal can be retried
         appealMsg = r.status === 401 ? "Your session expired. Sign in again, then send the appeal."
-          : (j && j.error && j.error.message) || "That did not go through - try again.";
+          : (j && j.error && j.error.message) || "That did not go through. Try again.";
       }
     } catch { appealBusy = false; appealMsg = "Could not reach RogerAI. Check your connection and try again."; }
   }
 
   onMount(async () => {
     const res = await bootGet("/stations");
-    if (res.status === 401) { location.replace("/login.html?next=" + encodeURIComponent("/stations.html")); return; }   // sign in, then come straight back
+    if (res.status === 401) { signIn("/stations.html"); return; }   // sign in, then come straight back
     if (res.status === 403) {
       view = "nooperator";
       const a = await bootGet("/account");
@@ -104,7 +105,7 @@
   <h1>Your stations</h1>
   <p class="sub">Signed in as <b id="who">{who}</b> &middot; every station registered to your account</p>
 
-  <p class="ds-state" id="stError" role="alert" hidden={view !== "fault"}>Could not load your stations. <button type="button" class="ghost" onclick={() => location.reload()}>Try again</button></p>
+  <PageFault shown={view === "fault"} what="your stations" id="stError" cls="ds-state" />
 
   <section class="acct-state tint-panel" id="stNoOperator" hidden={view !== "nooperator"}>
     <h2>You are not sharing from this sign-in</h2>
@@ -160,7 +161,7 @@ roger share</pre>
     <h2>Account evidence</h2>
     <p class="fine">
       Marks recorded against your account, each with the evidence that produced it.
-      These are shown to you in full because they can affect payouts - if you think one
+      These are shown to you in full because they can affect payouts. If you think one
       is wrong, you can appeal it.
     </p>
     <div id="stStrikes">
@@ -196,7 +197,7 @@ roger share</pre>
     </p>
     <p class="fine">
       A break is an <b>audit signal, not a penalty</b>. Restarting your station starts
-      a new chain, which reads as a break today - that is expected and does not affect
+      a new chain, which reads as a break today. That is expected and does not affect
       your earnings or standing.
     </p>
   </section>

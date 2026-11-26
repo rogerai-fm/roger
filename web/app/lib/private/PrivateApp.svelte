@@ -11,6 +11,7 @@
   // Honest labels: PRIVATE = account-locked + broker-relayed, NOT end-to-end encrypted.
   import { onMount, tick } from "svelte";
   import { api } from "#lib/api.js";
+  import { bootGet, backHere } from "#lib/account/boot.js";
   import { stateLabel, frameLine, sseFrames } from "./rc.js";
 
   let mounted = $state(false);
@@ -29,7 +30,9 @@
   async function loadRoster() {
     try {
       const r = await api("/rc/sessions");
-      if (r.status === 401) { roster = "gate"; return; }
+      // The broker refuses this feed with a 403 when nobody is signed in (seen live 2026-11-26), which read
+      // as "Could not reach Base Station". The session itself says which it is: only its 401 is the gate.
+      if (r.status === 401 || (r.status === 403 && (await bootGet("/account")).status === 401)) { roster = "gate"; return; }
       if (!r.ok) throw new Error("sessions " + r.status);
       const data = await r.json();
       sessions = (data && data.sessions) || [];
@@ -47,7 +50,7 @@
         throw new Error(r.status === 401
           ? "sign in to see your private bands"
           : r.status === 403   // signed in, but no machine is linked to this sign-in: not "sign in"
-            ? "private bands belong to an account with a machine on air - none is linked to this sign-in (run roger login, then roger share)"
+            ? "private bands belong to an account with a machine on air; none is linked to this sign-in (run roger login, then roger share)"
             : "could not load your private bands (" + r.status + ")");
       }
       const data = await r.json();
@@ -170,7 +173,7 @@
   function whatPrivate(e) {
     e.preventDefault();
     window.alert("Private means account-locked and code-gated. Traffic is carried over TLS through "
-      + "the RogerAI broker relay - it is not end-to-end encrypted, and tools run on the host "
+      + "the RogerAI broker relay. It is not end-to-end encrypted, and tools run on the host "
       + "machine after you confirm them.");
   }
 
@@ -186,19 +189,19 @@
   <section class="panel" id="privateAbout">
     <h2>What a private band is</h2>
     <p>A station hidden from the public market, reachable only by a frequency code you
-      hold - your model, on the network's routing, receipts and failover, without a
+      hold: your model, on the network's routing, receipts and failover, without a
       public listing. Mint one from a share you own; hand the code only to your people.
       The <a href="/manual.html">manual</a> has the full ceremony, and
       <a href="/pricing.html#why">the why page</a> has the argument.</p>
   </section>
   <h1>Base Station</h1>
-  <p class="sub">Your private side of the dial. <b>&#9673; PRIVATE</b> - your account
+  <p class="sub">Your private side of the dial. <b>&#9673; PRIVATE</b>: your account
     only &middot; relayed through the broker &middot;
     <a href="#" id="whatPrivate" onclick={whatPrivate}>over TLS, not end-to-end encrypted</a>.</p>
 
   <p class="cn-state" id="loading" hidden={roster !== "loading"}>Tuning in...</p>
   <p class="cn-state" id="error" hidden={roster !== "error"}>Could not reach Base Station. Try again shortly.</p>
-  <div class="acct-state tint-panel" id="gate" hidden={roster !== "gate"}><p><a href="/login.html">Sign in</a> to see your private sessions and bands.</p></div>
+  <div class="acct-state tint-panel" id="gate" hidden={roster !== "gate"}><p><a href="/login.html" use:backHere>Sign in</a> to see your private sessions and bands.</p></div>
 
   <!-- ============ REMOTE SESSIONS ============ -->
   <section class="panel" id="sessionsWrap" hidden={roster !== "ready"}>
@@ -234,13 +237,13 @@
 
   <!-- ============ LIVE SESSION VIEW ============ -->
   <section class="panel" id="viewWrap" hidden={!current && !attachError}>
-    <h2 id="viewTitle">{current ? "Session - " + (current.name || current.id) : attachError ? "Session - " + attachError.name : "Session"}</h2>
-    <p class="sub" id="viewBadge"><b>&#9673; PRIVATE</b> - your account only &middot;
+    <h2 id="viewTitle">{current ? "Session: " + (current.name || current.id) : attachError ? "Session: " + attachError.name : "Session"}</h2>
+    <p class="sub" id="viewBadge"><b>&#9673; PRIVATE</b>: your account only &middot;
       broker relay &middot; tools run on the host</p>
     <div class="rc-stream" id="stream" aria-live="polite" bind:this={stream}>{#if attachError}Could not attach to this session.{/if}{#each lines as line}{#if line.confirm !== undefined}<div class="rc-line rc-confirm"><span>{line.text}</span><button type="button" class="rc-btn primary" onclick={() => answerConfirm(true, line.confirm)}>Approve</button><button type="button" class="rc-btn ghost" onclick={() => answerConfirm(false, line.confirm)}>Deny</button></div>{:else}<div class="rc-line {line.cls}">{line.text}</div>{/if}{/each}</div>
     <form id="askForm" class="rc-ask" autocomplete="off" onsubmit={send}>
       <input id="ask" class="kf__in" type="text"
-        placeholder="ask from here - it runs on the host" bind:value={ask} />
+        placeholder="ask from here; it runs on the host" bind:value={ask} />
       <button class="primary" type="submit">Send</button>
       <button class="ghost" type="button" id="closeView" onclick={closeView}>Close</button>
     </form>

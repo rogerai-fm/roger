@@ -16,7 +16,8 @@
   // missing, so the balance and the top-up flow never block on them.
   import { onMount } from "svelte";
   import { getJSON, logout } from "#lib/api.js";
-  import { bootGet } from "#lib/account/boot.js";
+  import { bootGet, signIn } from "#lib/account/boot.js";
+  import PageFault from "#lib/ui/PageFault.svelte";
   import { n0, cr, when } from "#lib/format.js";
   import { seriesOK } from "#lib/rollup.js";
   import AccountNav from "#lib/ui/AccountNav.svelte";
@@ -62,8 +63,12 @@
   const chargeLabel = (e) => when(e.ts) + " - " + (e.model || "request") + (e.node ? " - " + e.node : "");
 
   onMount(async () => {
+    // The session is asked first: the broker answers /billing without one (it serves the wallet that
+    // callers with no account share), so a signed-out visitor was shown a wallet that is not theirs
+    // (2026-11-26). Only a 401 means signed out; any other answer goes on to the feed, which decides.
+    if ((await bootGet("/account")).status === 401) { signIn("/billing.html"); return; }
     const res = await bootGet("/billing");
-    if (res.status === 401) { location.replace("/login.html?next=" + encodeURIComponent("/billing.html")); return; }
+    if (res.status === 401) { signIn("/billing.html"); return; }
     if (!res.data) { status = "fault"; return; }
     d = res.data;
     status = "ready";
@@ -75,7 +80,7 @@
 <div class="authwrap tint-panel">
 <LoadState status={status} what="your billing" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <p class="fine" id="pageError" role="alert" hidden={status !== "fault"}>Could not load this page. <button type="button" class="ghost" onclick={() => location.reload()}>Try again</button></p>
+  <PageFault shown={status === "fault"} />
   <h1>Billing</h1>
   <p class="sub">Add money, watch it go further. Your wallet, your spend, and what RogerAI saves you against the name-brand labs.</p>
 

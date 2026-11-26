@@ -173,7 +173,7 @@ for (const s of ACCOUNT_STATES) {
       : /<section class="acct-state tint-panel">/;
     assert.match(scope, open);
     if (s.action) {
-      assert.match(scope, /<p class="research-actions research-actions--lead"><a class="research-button" href="\/login\.html">Sign in<\/a><\/p>/);
+      assert.match(scope, /<p class="research-actions research-actions--lead"><a class="research-button" href="\/login\.html"(?: use:backHere)?>Sign in<\/a><\/p>/);   // the link may carry the come-back-here action (2026-11-26)
       assert.doesNotMatch(scope, /style="/, "no inline style");
     }
   });
