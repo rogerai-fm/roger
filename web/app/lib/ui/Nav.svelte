@@ -125,10 +125,10 @@
           Source
         </a>
 {/if}
-        <a class="nav__link nav__util" href="/login.html" data-session-login>Log in</a>
+        <a class="nav__link nav__util" href="/login.html" data-session-login>Sign in</a>
 {#if variant === "marketing"}
         <!-- RESERVED: App Store badge SLOT (cut, not live). Position is locked here -
-             after Log in, before the theme toggle - so the utility cluster won't
+             after Sign in, before the theme toggle - so the utility cluster won't
              reflow when the CTA goes live. We do NOT fabricate an App Store link or
              badge yet: no listing exists. When the RogerAI iOS app ships, add the
              real "Download on the App Store" badge anchor here (classes

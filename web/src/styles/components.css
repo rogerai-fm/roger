@@ -523,7 +523,7 @@ li:nth-child(7) > .wave-bar { --gap: 2.4px; }
    scrubber's red needle as the dial on a wide screen (a hairline scale where the
    scrubber steps aside). The lamp is red ONLY for the available stage, like the
    on-air dot; every other stage is a quiet mark: a ring for lab, a filled ink dot for a
-   release candidate, a dashed ring for planned. No-JS: the complete list. Nothing moves. */
+   release candidate, a dashed ring for planned, a double ring for engagement only. No-JS: the complete list. Nothing moves. */
 .spectrum--dial { grid-template-columns: repeat(3, minmax(0, 1fr)); text-align: center; }
 .spectrum--dial li { padding-top: var(--s-3); }
 .spectrum--dial b { margin-top: var(--s-3); }
@@ -533,6 +533,7 @@ li:nth-child(7) > .wave-bar { --gap: 2.4px; }
 }
 [data-cap-stage="release-candidate"] .cap-lamp { background: var(--ink-500); }
 [data-cap-stage="planned"] .cap-lamp { border: 2px dashed var(--ink-400); }
+[data-cap-stage="engagement"] .cap-lamp { border: 4px double var(--ink-500); }
 [data-cap-stage="available"] .cap-lamp { border-color: var(--live); background: var(--live); }
 /* the stage words are the tinted-panel tag's label type (grouped with it below) */
 .spectrum--dial .cap-stage { margin: var(--s-1) 0 var(--s-2); }

@@ -1,12 +1,12 @@
 // Logged-in nav swap. Same-origin, external (CSP script-src 'self'): no inline.
 //
 // On load, ask the broker who we are over a credentialed CORS request. If a user
-// comes back, swap the nav "Log in" link for a compact account control: the user's
+// comes back, swap the nav "Sign in" link for a compact account control: the user's
 // GitHub avatar + @login, opening a small dropdown (Dashboard, Billing, Account,
 // Sign out). Logged-out stays exactly as the static markup shipped. No tokens ever
 // touch JS - the broker holds the session in a signed http-only cookie.
 //
-// Loaded on index.html AND the account pages. It only acts where a "Log in" link
+// Loaded on index.html AND the account pages. It only acts where a "Sign in" link
 // (marked data-session-login, or the homepage .nav__util login link) is present,
 // so it is inert and safe on the auth-card pages that have no marketing nav.
 (function () {
@@ -26,7 +26,7 @@
     return /(?:^|;\s*)roger_signed_in=1(?:;|$)/.test(document.cookie);
   }
 
-  // The "Log in" anchor to replace. Prefer an explicit hook; fall back to the
+  // The "Sign in" anchor to replace. Prefer an explicit hook; fall back to the
   // homepage nav's utility login link by href.
   function findLoginLink() {
     var el = document.querySelector("[data-session-login]");

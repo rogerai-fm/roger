@@ -28,7 +28,9 @@ Feature: Your device, now a sensor
 
   Scenario: the capabilities file is valid
     Then web/src/data/capabilities.json defines exactly the stages planned, lab,
-      release-candidate, and available, in that order, each with a one-line definition
+      release-candidate, available, and engagement, in that order, each with a one-line
+      definition (engagement: built with one customer under a private engagement, no
+      self-serve tooling)
     And each stage has a short public label
     And every capability has an id, a name, a kind of adapter or base-skill, a base tier
       that exists in the Wave status file, a stage from the vocabulary, and a one-line
@@ -43,7 +45,7 @@ Feature: Your device, now a sensor
   Scenario: the first entries say what is true today
     Then fire early warning is an adapter on Wave Pico, in the lab
     And telemetry drift is a base skill of the model, not an adapter
-    And "your own" is an adapter that is planned
+    And "your own" is an adapter built by engagement only
     And vibration is not listed as an adapter
     And no entry uses the words fire detection
     And the iPad row is planned and drawn as a ghost, because the iPad does not run Wave

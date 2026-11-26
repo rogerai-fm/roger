@@ -74,7 +74,7 @@
         loadAppeals();
       } else {
         appealBusy = false;   // a refusal can be retried
-        appealMsg = r.status === 401 ? "Your session expired - sign in again, then send the appeal."
+        appealMsg = r.status === 401 ? "Your session expired. Sign in again, then send the appeal."
           : (j && j.error && j.error.message) || "That did not go through - try again.";
       }
     } catch { appealBusy = false; appealMsg = "Could not reach RogerAI. Check your connection and try again."; }

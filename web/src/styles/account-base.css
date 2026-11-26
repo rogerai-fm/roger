@@ -443,6 +443,23 @@ body.auth {
 .emailform .primary:hover { background: var(--ink-700); }
 .emailform .err { color: var(--live-text); }
 
+/* Ping at the top of a sign-in card (AuthPing.svelte): the mascot's ink body, its red waves and eye
+   from base.css .ping-mark; a hollow eye when the card has nothing more to do. */
+.auth-ping { display: block; width: 56px; height: auto; margin: 0 0 var(--s-4); color: var(--ink-900); overflow: visible; }
+.ping-mark__eye-hollow { fill: none; stroke: var(--ink-400); stroke-width: 2.5; }
+@media (max-width: 560px) { .auth-ping { width: 40px; margin-bottom: var(--s-3); } }
+
+/* The code step's two quiet actions sit on one line, written as buttons (they act, they go nowhere). */
+.emailform .code-again { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); margin: var(--s-4) 0 var(--s-2); }
+.textbtn {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: var(--t-xs); color: var(--ink-500);
+  text-decoration: underline; text-decoration-color: var(--hairline-2); text-underline-offset: 3px;
+}
+.textbtn:hover { color: var(--live-text); text-decoration-color: var(--live); }
+.textbtn:focus-visible { outline: 2px solid var(--live); outline-offset: 2px; border-radius: var(--r-xs); }
+.textbtn:disabled { opacity: .5; cursor: default; }
+
 /* A labelled rule between the first-party form and the providers. */
 .or {
   display: flex;

@@ -16,6 +16,6 @@
   });
 </script>
 <svelte:head>{@html head}</svelte:head>
-  <Nav variant='lean' home='/' />
+  <Nav variant='lean' home='/' promo={false} />
 <Island name="login" component={LoginApp} />
   <Footer anchors='/' />

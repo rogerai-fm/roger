@@ -108,7 +108,7 @@ function buildPage(doc) {
   const login = doc.createElement("a");
   login.className = "nav__util";
   login.setAttribute("href", "/login");
-  login.textContent = "Log in";
+  login.textContent = "Sign in";
   utils.appendChild(login);
   nav.appendChild(utils);
   doc.body.appendChild(nav);
@@ -145,7 +145,7 @@ test("logged-out (no hint cookie): no /account probe, static nav untouched", asy
   const { calls, utils, login } = await run({ cookie: "" });
   // No fetch at all -> no request -> no 401 in the console (that IS the fix).
   assert.equal(calls.length, 0, "no probe when roger_signed_in is absent");
-  assert.ok(utils.children.includes(login), "the Log in link is left exactly as shipped");
+  assert.ok(utils.children.includes(login), "the Sign in link is left exactly as shipped");
 });
 
 // An unrelated cookie must not be mistaken for the hint.
@@ -164,7 +164,7 @@ test("logged-in (roger_signed_in=1): credentialed /account probe, then nav swap 
   assert.deepEqual(calls[0].opts, { credentials: "include" }, "credentialed CORS (cookie carried)");
 
   // The static link is replaced in place by the account control.
-  assert.ok(!utils.children.includes(login), "the Log in link was swapped out");
+  assert.ok(!utils.children.includes(login), "the Sign in link was swapped out");
   const wrap = utils.children.find((c) => c.className === "acctmenu");
   assert.ok(wrap, "an .acctmenu wrapper took the slot");
   const btn = wrap.children.find((c) => c.tagName === "BUTTON");

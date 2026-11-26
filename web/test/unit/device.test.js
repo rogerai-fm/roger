@@ -60,6 +60,17 @@ describe("device approval", () => {
     expect(el("dvRequested").textContent).toBe("just now");
     expect(visible("dvAsk")).toBe(false);
   });
+  it("shows where the login was started when the broker knows, by name, and nothing when it does not", async () => {
+    for (const [origin, want] of [["US", "just now, from United States"], ["", "just now"], ["203.0.113.5", "just now"]]) {
+      broker({ "/auth/device/pending": [200, { ...PENDING, origin }] });
+      fakeLocation({ pathname: "/device.html", search: "?code=ABCD-2468" });
+      const { unmount } = render(DeviceApp);
+      await waitFor(() => expect(visible("dvConfirm")).toBe(true));
+      expect(el("dvRequested").textContent).toBe(want);
+      unmount();
+    }
+  });
+
   it("a code in the URL is pre-filled and looked up, but nothing is approved by the load", async () => {
     const calls = broker({ "/auth/device/pending": [200, PENDING] });
     fakeLocation({ pathname: "/device.html", search: "?code=abcd-2468" });

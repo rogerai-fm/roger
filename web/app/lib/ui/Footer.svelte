@@ -38,7 +38,7 @@
       </div>
       <div class="footer__group">
         <small class="footer__heading">Account</small>
-        <a href="/login.html">Log in</a>
+        <a href="/login.html">Sign in</a>
         <a href="/dashboard.html">Dashboard</a>
         <a href="/console.html">Console</a>
         <a href="/keys.html">API keys</a>

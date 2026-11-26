@@ -198,8 +198,7 @@
 
   <p class="cn-state" id="loading" hidden={roster !== "loading"}>Tuning in...</p>
   <p class="cn-state" id="error" hidden={roster !== "error"}>Could not reach Base Station. Try again shortly.</p>
-  <div class="acct-state tint-panel" id="gate" hidden={roster !== "gate"}><p>Sign in to see your private sessions and bands.
-    <a href="/login.html">Log in</a>.</p></div>
+  <div class="acct-state tint-panel" id="gate" hidden={roster !== "gate"}><p><a href="/login.html">Sign in</a> to see your private sessions and bands.</p></div>
 
   <!-- ============ REMOTE SESSIONS ============ -->
   <section class="panel" id="sessionsWrap" hidden={roster !== "ready"}>

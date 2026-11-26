@@ -105,4 +105,38 @@ describe("sign in", () => {
     await waitFor(() => expect(visible("code-step")).toBe(true));
     expect(el("email-sent-to").textContent).toBe("grace@example.com");
   });
+  // 2026-11-25 (login pass): the code is six digits read off a phone. Spaces and words pasted with it
+  // are dropped, the sixth digit signs in on its own (once, even if Enter follows), and a new code can
+  // be asked for without retyping the address.
+  it("email: a pasted code keeps its digits and signs in at the sixth, once", async () => {
+    const calls = broker({ "/account": [401, {}], "/auth/email/start": [200, {}], "/auth/email/verify": [200, { next: "/dashboard.html" }] });
+    const navs = fakeLocation({ pathname: "/login.html" });
+    render(LoginApp);
+    await fireEvent.input(el("email-input"), { target: { value: "ada@example.com" } });
+    await fireEvent.submit(el("email-form"));
+    await waitFor(() => expect(visible("code-step")).toBe(true));
+    await fireEvent.input(el("code-input"), { target: { value: "Code: 123 45" } });
+    expect(el("code-input").value).toBe("12345");
+    expect(calls.filter((c) => c.path === "/auth/email/verify")).toHaveLength(0);
+    await fireEvent.input(el("code-input"), { target: { value: "123 456" } });
+    await fireEvent.submit(el("email-form"));
+    await waitFor(() => expect(navs).toEqual(["/dashboard.html"]));
+    const verifies = calls.filter((c) => c.path === "/auth/email/verify");
+    expect(verifies).toHaveLength(1);
+    expect(verifies[0].body.code).toBe("123456");
+  });
+  it("email: 'send a new code' asks again for the same address and says so", async () => {
+    const calls = broker({ "/account": [401, {}], "/auth/email/start": [200, {}] });
+    fakeLocation({ pathname: "/login.html" });
+    render(LoginApp);
+    await fireEvent.input(el("email-input"), { target: { value: "ada@example.com" } });
+    await fireEvent.submit(el("email-form"));
+    await waitFor(() => expect(visible("code-step")).toBe(true));
+    await fireEvent.click(el("email-resend"));
+    await waitFor(() => expect(el("email-note").textContent).toBe("A new code is on its way."));
+    const starts = calls.filter((c) => c.path === "/auth/email/start");
+    expect(starts).toHaveLength(2);
+    expect(starts[1].body).toEqual({ email: "ada@example.com" });
+    expect(visible("code-step")).toBe(true);
+  });
 });

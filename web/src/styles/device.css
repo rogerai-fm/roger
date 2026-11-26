@@ -27,6 +27,14 @@
   font-family: var(--font-mono);
   letter-spacing: 0.08em;
 }
+/* the code is what you compare, so it stays large; when it was asked is context, set at text size */
+.dv-facts .dv-when {
+  font-family: var(--font-ui);
+  font-size: var(--t-body);
+  letter-spacing: 0;
+  line-height: var(--lh-body);
+  color: var(--ink-700);
+}
 
 /* One sentence of caution, sitting where it is read before the buttons. No alarm
    colour: it informs, it does not frighten. */

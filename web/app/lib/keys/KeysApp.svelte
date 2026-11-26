@@ -448,13 +448,13 @@ roger share</pre>
 <!-- Logged-out gate: shown when the broker says we are not signed in. -->
 <main class="card" id="gate" hidden={gate !== "out"}>
   <h1>API keys</h1>
-  <p class="sub">Log in to mint and manage your account keys and grant keys.</p>
+  <p class="sub">Sign in to mint and manage your account keys and grant keys.</p>
   <section class="acct-state tint-panel">
     <h2>Signed out</h2>
-    <p>Grant keys are owner-issued: you sign in once - with GitHub, Apple, or an emailed
-      code - then mint private bearer keys for your bots, family, or your own headless
+    <p>Grant keys are owner-issued: you sign in once, with GitHub, Apple or an emailed
+      code, then mint private bearer keys for your bots, family, or your own headless
       boxes. Each key is shown only once.</p>
-    <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html">Log in</a></p>
+    <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html">Sign in</a></p>
   </section>
 </main>
 </div>

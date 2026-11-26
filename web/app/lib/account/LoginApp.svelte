@@ -7,6 +7,7 @@
   import { onMount } from "svelte";
   import { account, postJSON } from "#lib/api.js";
   import { carryNext, nextParam } from "./carryNext.js";
+  import AuthPing from "#lib/ui/AuthPing.svelte";
 
   let step = $state("email");        // email | code
   let email = $state("");
@@ -25,22 +26,22 @@
     return { ok: r.ok, status: r.status, body: j };
   }
 
-  async function sendCode() {
-    address = email.trim();
+  async function sendCode(again = false) {
+    if (!again) address = email.trim();
     if (!address) return;
     busy = true; say("Sending...");
     try {
       const res = await post("/auth/email/start", { email: address });
       busy = false;
       if (!res.ok) { say(res.body.error || "Could not send a code. Try again in a moment.", true); return; }
-      step = "code"; say("");
+      step = "code"; say(again ? "A new code is on its way." : "");
       queueMicrotask(() => codeInput?.focus());
     } catch { busy = false; say("Could not reach RogerAI. Check your connection and try again.", true); }
   }
 
   async function verifyCode() {
     const c = code.trim();
-    if (!c) return;
+    if (!c || busy) return;      // the sixth digit already sent it; Enter must not send it twice
     busy = true; say("Checking...");
     try {
       // the destination rides along: the broker re-validates it, a hint never an instruction
@@ -52,7 +53,13 @@
   }
 
   function submit(e) { e.preventDefault(); if (step === "email") sendCode(); else verifyCode(); }
-  function again(e) { e.preventDefault(); step = "email"; say(""); queueMicrotask(() => emailInput?.focus()); }
+  function again() { step = "email"; code = ""; say(""); queueMicrotask(() => emailInput?.focus()); }
+  // The code is six digits read off a phone: keep the digits of whatever was typed or pasted
+  // ("123 456", "Code: 123456"), and sign in once the sixth arrives.
+  function typed(e) {
+    code = e.currentTarget.value.replace(/\D/g, "").slice(0, 6);
+    if (code.length === 6 && !busy) verifyCode();
+  }
 
   onMount(async () => {
     // already signed in: this page has nothing to do
@@ -63,8 +70,9 @@
 </script>
 <div class="authwrap tint-panel">
 <main class="card">
+  <AuthPing />
   <h1>Sign in</h1>
-  <p class="sub">You need an account to <b>pay for paid models</b> or to <b>get paid</b> for sharing a GPU. Free models need no sign in. Signing in unlocks your usage dashboard: spend, history, and earnings.</p>
+  <p class="sub" hidden={step !== "email"}>To <b>pay for paid models</b> or to <b>get paid</b> for sharing a GPU. Free models need no account.</p>
   <form id="email-form" class="emailform" novalidate onsubmit={submit}>
     <div id="email-step" hidden={step !== "email"}>
       <label class="lbl" for="email-input">Email</label>
@@ -74,12 +82,15 @@
     </div>
     <div id="code-step" hidden={step !== "code"}>
       <p class="sub">If that address can receive mail, a code is on its way to
-        <b id="email-sent-to">{address}</b>. Enter it below - it expires in 10 minutes.</p>
+        <b id="email-sent-to">{address}</b>. It expires in 10 minutes.</p>
       <label class="lbl" for="code-input">Sign-in code</label>
       <input id="code-input" type="text" name="code" autocomplete="one-time-code"
-             inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" required bind:value={code} bind:this={codeInput}>
+             inputmode="numeric" placeholder="000000" required bind:value={code} bind:this={codeInput} oninput={typed}>
       <button id="code-verify" class="gh primary" type="submit" disabled={busy}>Sign in</button>
-      <p class="fine"><a href="#" id="email-again" onclick={again}>Use a different address</a></p>
+      <p class="code-again">
+        <button type="button" class="textbtn" id="email-resend" disabled={busy} onclick={() => sendCode(true)}>Send a new code</button>
+        <button type="button" class="textbtn" id="email-again" onclick={again}>Use a different address</button>
+      </p>
     </div>
     <p id="email-note" class="fine{bad ? ' err' : ''}">{note}</p>
   </form>
@@ -92,6 +103,6 @@
     <svg viewBox="0 0 384 512" width="16" height="18" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
     Continue with Apple
   </a>
-  <p class="fine">We only read what's needed to verify you - nothing else.</p>
+  <p class="fine">We only read what we need to verify you.</p>
 </main>
 </div>

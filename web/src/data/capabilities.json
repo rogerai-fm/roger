@@ -4,13 +4,15 @@
     "planned": "Declared; nothing is trained or built for it yet.",
     "lab": "Trained or built and measured on our own benchmark; not released, and no field claim.",
     "release-candidate": "Passed its own release gate; not yet installable by a customer.",
-    "available": "A customer can install it on their own machine, and its card is published."
+    "available": "A customer can install it on their own machine, and its card is published.",
+    "engagement": "Built with one customer, on their machines and data, under a private engagement; there is no self-serve tooling."
   },
   "stageLabels": {
     "planned": "planned",
     "lab": "in the lab",
     "release-candidate": "release candidate",
-    "available": "available"
+    "available": "available",
+    "engagement": "engagement only"
   },
   "capabilities": [
     {
@@ -34,8 +36,8 @@
       "kind": "adapter",
       "name": "Your own",
       "base": "pico",
-      "stage": "planned",
-      "description": "An add-on trained on your own machines and your own normal days. You will be able to build one; the tooling is not built yet."
+      "stage": "engagement",
+      "description": "An add-on trained on your own machines and your own normal days, built with you under a private engagement."
     }
   ],
   "devices": [

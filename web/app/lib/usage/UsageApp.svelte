@@ -224,11 +224,11 @@
 <!-- Logged-out gate: shown when the broker says we are not signed in. -->
 <main class="card" id="gate" hidden={auth !== "gate"}>
   <h1>Metrics</h1>
-  <p class="sub">Log in to see your provider earnings and usage.</p>
+  <p class="sub">Sign in to see your provider earnings and usage.</p>
   <section class="acct-state tint-panel">
     <h2>Signed out</h2>
-    <p>Sign in to view per-model tokens over time, earnings and spend.</p>
-    <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html">Log in</a></p>
+    <p>Your per-model tokens over time, earnings and spend show here once you do.</p>
+    <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html">Sign in</a></p>
   </section>
 </main>
 </div>

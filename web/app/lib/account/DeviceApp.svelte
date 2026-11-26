@@ -6,6 +6,7 @@
   // (features/auth/broker_mediated_login.feature): inform without alarming.
   import { onMount } from "svelte";
   import { api, postJSON } from "#lib/api.js";
+  import AuthPing from "#lib/ui/AuthPing.svelte";
 
   let view = $state("loading");   // nothing shows until the script decides (the legacy initial HTML hid every section)          // ask | confirm | approved | denied | signedout
   let code = $state("");             // the input
@@ -21,8 +22,14 @@
     if (!unix) return "just now";
     const s = Math.max(0, Math.floor(Date.now() / 1000 - unix));
     if (s < 45) return "just now";
-    if (s < 3600) return Math.floor(s / 60) + " minutes ago";
-    return Math.floor(s / 3600) + " hours ago";
+    const n = s < 3600 ? Math.floor(s / 60) : Math.floor(s / 3600);
+    return n + (s < 3600 ? " minute" : " hour") + (n === 1 ? "" : "s") + " ago";
+  }
+  // where the login was started: the broker sends a 2-letter country code (never an address),
+  // shown by name so an unfamiliar origin stands out (broker_mediated_login.feature)
+  function place(cc) {
+    if (!/^[A-Z]{2}$/.test(cc || "")) return "";
+    try { return new Intl.DisplayNames(["en"], { type: "region" }).of(cc) || cc; } catch { return cc; }
   }
   const normalize = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
   // A code may arrive pre-filled in the URL, but a page load never approves anything
@@ -53,7 +60,8 @@
     try { info = await r.json(); } catch { askError = "Could not reach RogerAI. Try again in a moment."; view = "ask"; return; }
     current = c;
     shownCode = info.user_code;
-    requested = ago(info.requested_at);
+    const from = place(info.origin);
+    requested = ago(info.requested_at) + (from ? ", from " + from : "");
     view = "confirm";
   }
 
@@ -61,15 +69,15 @@
     confirmError = "";
     let r;
     try { r = await postJSON("/auth/device/" + path, { user_code: current }); }
-    catch { confirmError = "That did not work. The code may have expired - start a new sign-in."; return; }
+    catch { confirmError = "That did not work. The code may have expired. Start a new sign-in."; return; }
     if (r.status === 401) { showSignedOut(); return; }
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
-      confirmError = (j && j.error) || "That did not work. The code may have expired - start a new sign-in.";
+      confirmError = (j && j.error) || "That did not work. The code may have expired. Start a new sign-in.";
       return;
     }
     let out;
-    try { out = await r.json(); } catch { confirmError = "That did not work. The code may have expired - start a new sign-in."; return; }
+    try { out = await r.json(); } catch { confirmError = "That did not work. The code may have expired. Start a new sign-in."; return; }
     if (path === "approve") { account = out.account || "your account"; view = "approved"; }
     else view = "denied";
   }
@@ -81,6 +89,8 @@
 </script>
 <div class="authwrap tint-panel">
 <main class="card" id="card">
+  <!-- Ping listens until the decision is made; a denial or a signed-out visit dims its eye -->
+  <AuthPing on={view !== "denied" && view !== "signedout"} />
   <h1>Sign in to RogerAI</h1>
 
   <!-- Signed out: this page can do nothing until we know who is approving. -->
@@ -112,7 +122,7 @@
 
     <dl class="stats dv-facts">
       <div><dt>Code from your terminal</dt><dd id="dvShownCode">{shownCode}</dd></div>
-      <div><dt>Requested</dt><dd id="dvRequested">{requested}</dd></div>
+      <div><dt>Requested</dt><dd class="dv-when" id="dvRequested">{requested}</dd></div>
     </dl>
 
     <p>Check that the code above matches the one your terminal printed.</p>

@@ -25,7 +25,7 @@ const data = () => JSON.parse(readFileSync(DATA, "utf8"));
 const wave = () => JSON.parse(readFileSync(path.join(SRC, "data", "wave-status.json"), "utf8"));
 const entries = () => [...data().capabilities, ...data().devices];
 const byId = (id) => entries().find((e) => e.id === id);
-const STAGES = ["planned", "lab", "release-candidate", "available"];
+const STAGES = ["planned", "lab", "release-candidate", "available", "engagement"];
 const pages = () => readdirSync(DIST).filter((f) => f.endsWith(".html"));
 const dist = (p) => readFileSync(path.join(DIST, p), "utf8");
 const visible = (html) => html
@@ -37,7 +37,7 @@ const FIRE_DETECTION = /fire[\s-]*detect|detects?\s+(a\s+|the\s+)?(wild)?fires?\
 
 /* ---- 1. the file is valid ------------------------------------------------ */
 
-test("capabilities: the stage vocabulary is exactly the fixed four, in order, each defined in one line", () => {
+test("capabilities: the stage vocabulary is exactly the fixed five, in order, each defined in one line", () => {
   const d = data();
   assert.deepEqual(Object.keys(d.stages), STAGES);
   for (const [k, v] of Object.entries(d.stages)) {
@@ -100,12 +100,12 @@ test("capabilities: fire early warning is an adapter on Wave Pico, in the lab", 
   assert.equal(c.stage, "lab");
 });
 
-test("capabilities: telemetry drift is a base skill, your own is planned, vibration is no adapter", () => {
+test("capabilities: telemetry drift is a base skill, your own is by engagement only, vibration is no adapter", () => {
   assert.equal(byId("telemetry-drift")?.kind, "base-skill");
   assert.equal(byId("telemetry-drift").base, "pico");
   assert.equal(byId("custom")?.name, "Your own");
   assert.equal(byId("custom").kind, "adapter");
-  assert.equal(byId("custom").stage, "planned");
+  assert.equal(byId("custom").stage, "engagement");
   for (const c of data().capabilities.filter((x) => x.kind === "adapter")) {
     assert.doesNotMatch(`${c.id} ${c.name}`, /vibration|bearing|predictive/i, `${c.id}: vibration is not an adapter`);
   }

@@ -56,7 +56,7 @@ describe("link handler", () => {
     broker({ "/rc/attach": [401, {}] });
     const navs = fakeLocation({ pathname: "/r.html", hash: "#ABC123" });
     render(LinkApp);
-    await waitFor(() => expect(msg()).toMatch(/Log in to your account on this device/));
+    await waitFor(() => expect(msg()).toMatch(/Sign in to your account on this device/));
     expect(document.querySelector("#msg a").getAttribute("href")).toBe("/login.html");
     expect(navs).toEqual([]);
     expect(sessionStorage.getItem("rc_open")).toBeNull();

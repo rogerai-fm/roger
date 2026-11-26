@@ -6,7 +6,7 @@
 //     Monetize were REMOVED from the bar; they still live in the footer + scroll)
 //   - utility cluster: "API keys" REMOVED from the bar (it's a signed-in action; it
 //     moved to the footer Account group)
-//   - an App Store CTA SLOT is RESERVED (a comment, cut but not live) after Log in,
+//   - an App Store CTA SLOT is RESERVED (a comment, cut but not live) after Sign in,
 //     before the theme toggle - no listing exists yet, so no badge/link is fabricated
 //   - App -> /app.html, a real "tuning up" placeholder page (so the link 200s, not dead)
 //   - the footer keeps the FULL map: everything pulled from the bar stays reachable there
@@ -124,7 +124,7 @@ test("marketing top bar: the removed items are NOT live links anywhere in the ba
   }
 });
 
-test("marketing top bar: order is Models·Research·Company | App | Manual·Source·Log in (then the reserved slot + toggle)", () => {
+test("marketing top bar: order is Models·Research·Company | App | Manual·Source·Sign in (then the reserved slot + toggle)", () => {
   const links = liveHrefs(withoutPanels(topbar(readDist("index.html"))));
   assert.deepEqual(links, [
     "#top",                                   // brand
@@ -192,9 +192,9 @@ test("every disclosure group keeps a working link beside its caret", () => {
 
 test("App Store CTA slot is RESERVED (a comment), not a fabricated live link/badge", () => {
   const bar = topbar(readDist("index.html"));
-  // built pages ship no comments; the slot is marked in the Nav component's source, between Log in and the toggle
+  // built pages ship no comments; the slot is marked in the Nav component's source, between Sign in and the toggle
   const navSrc = readFileSync(path.join(WEB, "app", "lib", "ui", "Nav.svelte"), "utf8");
-  assert.match(navSrc, /data-session-login>Log in<\/a>[\s\S]{0,80}<!-- RESERVED: App Store badge SLOT[\s\S]*?-->[\s\S]{0,80}<button class="theme-toggle"/, "the reserved-slot comment marks the position");
+  assert.match(navSrc, /data-session-login>Sign in<\/a>[\s\S]{0,80}<!-- RESERVED: App Store badge SLOT[\s\S]*?-->[\s\S]{0,80}<button class="theme-toggle"/, "the reserved-slot comment marks the position");
   // no live App Store anchor yet (no listing exists) - the slot lives only inside a comment.
   const links = liveHrefs(bar);
   assert.ok(!links.some((h) => /app.?store|apps\.apple\.com|itunes\.apple\.com/i.test(h)),
@@ -203,7 +203,7 @@ test("App Store CTA slot is RESERVED (a comment), not a fabricated live link/bad
     "no live nav__appstore element outside the comment");
 });
 
-test("lean nav (account pages): brand + Models/Voices/Manual/Log in + toggle, no marketing extras", () => {
+test("lean nav (account pages): brand + Models/Voices/Manual/Sign in + toggle, no marketing extras", () => {
   const bar = topbar(readDist("dashboard.html"));
   const links = liveHrefs(bar);
   assert.deepEqual(links, [
