@@ -294,6 +294,7 @@ func ParseReceipt(raw []byte, assertionKey ed25519.PublicKey, network, attemptID
 		UsageOut       string `json:"usage_out"`
 		TokIn          string `json:"tok_in"`
 		TokOut         string `json:"tok_out"`
+		Failure        string `json:"failure"`
 	}
 	if err := json.Unmarshal(raw, &obj); err != nil {
 		return Receipt{}, fmt.Errorf("this receipt cannot be read: %w", err)
@@ -335,7 +336,16 @@ func ParseReceipt(raw []byte, assertionKey ed25519.PublicKey, network, attemptID
 	if err != nil {
 		return Receipt{}, errors.New("this receipt's output token usage is not a number")
 	}
+	// A FAILURE RECEIPT CLAIMS NOTHING (tower_failed_attempt_release.feature). One that claims usage,
+	// or commits to response bytes, is not a failure receipt and not a served one either: refused,
+	// so the hold stays until a valid receipt or the sweep.
+	if obj.Failure != "" && (in != 0 || out != 0 || tokIn != 0 || tokOut != 0 || obj.ResponseDigest != digestOf(nil)) {
+		return Receipt{}, errors.New("a failure receipt cannot claim usage or response bytes")
+	}
+	if obj.Failure != "" && !KnownFailureClass(obj.Failure) {
+		return Receipt{}, errors.New("this failure receipt names no known failure class")
+	}
 	return Receipt{AttemptID: obj.AttemptID, RequestDigest: obj.RequestDigest,
 		ResponseDigest: obj.ResponseDigest, Usage: Usage{In: in, Out: out},
-		TokUsage: Usage{In: tokIn, Out: tokOut}, Signed: raw}, nil
+		TokUsage: Usage{In: tokIn, Out: tokOut}, Failure: obj.Failure, Signed: raw}, nil
 }

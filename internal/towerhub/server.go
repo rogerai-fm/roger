@@ -645,8 +645,10 @@ func (s *Server) Complete(w http.ResponseWriter, r *http.Request) {
 	// this Station ride to Core. Checked before Complete (which consumes the waiter but not the
 	// dispatch record) so a consumer who gave up waiting still gets the node paid - the node
 	// honestly did the work - while a fabricated attempt id goes nowhere.
-	// Consumed only when there is a receipt to courier: a failure completion must not burn
-	// the record a node's later receipt-bearing retry would need.
+	// Consumed only when there is a receipt to courier. A completion carrying a failure and no
+	// receipt must not burn the record a node's later receipt-bearing retry would need; one
+	// carrying a failure RECEIPT is couriered like any receipt, so the consumer's hold is released
+	// (tower_failed_attempt_release.feature).
 	carried, wireIn := false, 0
 	if len(rec) > 0 {
 		carried, wireIn = s.hub.ConsumeDispatched(req.AttemptID, req.StationID)

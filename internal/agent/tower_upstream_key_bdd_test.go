@@ -707,8 +707,18 @@ func (s *ukState) upstreamRejectsKey() error {
 }
 
 func (s *ukState) noReceiptNoStrike() error {
+	// "Produces no receipt" meant no receipt that settles money for work. Since
+	// tower_failed_attempt_release.feature (approved 2026-11-24) the one receipt a failed attempt
+	// carries is a FAILURE receipt - zero usage, the failure class - which releases the hold and
+	// claims nothing. Anything else is still a failure of this step.
 	if len(s.receipt) != 0 {
-		return errors.New("a failed attempt produced a receipt")
+		rec, err := dispatch.ParseReceipt(s.receipt, s.assertion, link.PublicNetwork, s.attempt, s.stationID)
+		if err != nil {
+			return fmt.Errorf("the failed attempt's receipt does not verify as the Station's: %w", err)
+		}
+		if rec.Failure == "" || rec.Usage != (dispatch.Usage{}) || rec.TokUsage != (dispatch.Usage{}) {
+			return errors.New("a failed attempt produced a receipt that claims work")
+		}
 	}
 	if s.failure == "" {
 		return errors.New("the failed attempt carried no failure")

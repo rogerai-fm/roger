@@ -129,9 +129,22 @@ type Receipt struct {
 	// tamper-evident wire measurement; tokens are the billing basis, bounded downstream by the
 	// grant's token ceiling, the Tower byte-attestation (tokens <= bytes), and sampled audit.
 	TokUsage Usage `json:"tok_usage"`
+	// Failure is the failure class of a FAILURE RECEIPT (tower_failed_attempt_release.feature):
+	// the Station's signed statement that its upstream failed and it did no billable work. A
+	// failure receipt claims zero usage and commits to no response bytes. Empty on a served
+	// receipt, and absent from its signed object, so a served receipt's bytes are unchanged.
+	Failure string `json:"failure,omitempty"`
 	// Signed is the canonical Station-signed object.
 	Signed []byte `json:"signed"`
 }
+
+// Failure classes a Station signs into a failure receipt.
+const (
+	FailureUpstreamRefused = "upstream-refused" // the upstream refused the Station's key (401, 403)
+	FailureThrottled       = "throttled"        // the upstream said 429
+	FailureUpstreamError   = "upstream-error"   // any other upstream failure: 5xx, timeout, empty
+	FailureTooLarge        = "too-large"        // the reply was over a limit and was refused
+)
 
 // Config is how a registry is built.
 type Config struct {
@@ -488,7 +501,14 @@ func SignReceipt(priv ed25519.PrivateKey, network string, g Grant, request, body
 	// Station could have served a different request than the grant authorized and nothing
 	// downstream of the grant check would notice. Here it signs for exactly the bytes it saw.
 	rec := Receipt{AttemptID: g.AttemptID, RequestDigest: digestOf(request), ResponseDigest: digestOf(body), Usage: u, TokUsage: tok}
-	raw, err := json.Marshal(map[string]any{
+	return signReceipt(priv, network, g, rec)
+}
+
+// signReceipt signs rec as the Station's receipt object: ONE definition of the signed map for a
+// served receipt and a failure receipt alike. The "failure" key is present only on a failure
+// receipt, so a served receipt's signed bytes are exactly what they were before it existed.
+func signReceipt(priv ed25519.PrivateKey, network string, g Grant, rec Receipt) (Receipt, error) {
+	obj := map[string]any{
 		"network":         network,
 		"type":            TypeReceipt,
 		"version":         towerobj.FormatInt(Version),
@@ -496,11 +516,15 @@ func SignReceipt(priv ed25519.PrivateKey, network string, g Grant, request, body
 		"station_id":      g.StationID,
 		"request_digest":  rec.RequestDigest,
 		"response_digest": rec.ResponseDigest,
-		"usage_in":        towerobj.FormatInt(u.In),
-		"usage_out":       towerobj.FormatInt(u.Out),
-		"tok_in":          towerobj.FormatInt(tok.In),
-		"tok_out":         towerobj.FormatInt(tok.Out),
-	})
+		"usage_in":        towerobj.FormatInt(rec.Usage.In),
+		"usage_out":       towerobj.FormatInt(rec.Usage.Out),
+		"tok_in":          towerobj.FormatInt(rec.TokUsage.In),
+		"tok_out":         towerobj.FormatInt(rec.TokUsage.Out),
+	}
+	if rec.Failure != "" {
+		obj["failure"] = rec.Failure
+	}
+	raw, err := json.Marshal(obj)
 	if err != nil {
 		return Receipt{}, err
 	}
@@ -510,6 +534,54 @@ func SignReceipt(priv ed25519.PrivateKey, network string, g Grant, request, body
 	}
 	rec.Signed = signed
 	return rec, nil
+}
+
+// Contract: features/tower/tower_failed_attempt_release.feature.
+//
+// SignFailureReceipt is what a Station signs when its upstream failed: the same signed object as
+// SignReceipt, with zero usage, the digest of an empty response, and the failure class. It claims
+// nothing, so it is against the Station's own interest and cannot be used to avoid paying for work
+// that was served; settling it releases the consumer's hold at zero cost. A Core from before this
+// field ignores it and settles the same zero receipt, which is the same refund.
+func SignFailureReceipt(priv ed25519.PrivateKey, network string, g Grant, request []byte, class string) (Receipt, error) {
+	if !KnownFailureClass(class) {
+		return Receipt{}, fmt.Errorf("%q is not a failure class a receipt may carry", class)
+	}
+	return signReceipt(priv, network, g, Receipt{AttemptID: g.AttemptID, RequestDigest: digestOf(request),
+		ResponseDigest: digestOf(nil), Failure: class})
+}
+
+// KnownFailureClass reports whether class is one of the four a failure receipt may carry
+// (tower_failed_attempt_release.feature). Anything else - unknown, misspelt, over-long - is a
+// receipt nobody can act on, and is refused.
+func KnownFailureClass(class string) bool {
+	switch class {
+	case FailureUpstreamRefused, FailureThrottled, FailureUpstreamError, FailureTooLarge:
+		return true
+	}
+	return false
+}
+
+// IsFailureReceipt reports, WITHOUT verifying the signature, whether raw is shaped as a failure
+// receipt: a failure class and zero usage. It is for a party that cannot verify (the node's own
+// hub loop) deciding whether a receipt may ride along with a failure; Core verifies it in full.
+func IsFailureReceipt(raw []byte) bool {
+	var obj struct {
+		Failure  string `json:"failure"`
+		UsageIn  string `json:"usage_in"`
+		UsageOut string `json:"usage_out"`
+		TokIn    string `json:"tok_in"`
+		TokOut   string `json:"tok_out"`
+	}
+	if len(raw) == 0 || json.Unmarshal(raw, &obj) != nil || obj.Failure == "" {
+		return false
+	}
+	for _, v := range []string{obj.UsageIn, obj.UsageOut, obj.TokIn, obj.TokOut} {
+		if v != "" && v != "0" {
+			return false
+		}
+	}
+	return true
 }
 
 // digestOf is the commitment used for both request and response bodies.

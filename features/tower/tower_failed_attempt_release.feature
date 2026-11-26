@@ -1,5 +1,18 @@
 # APPROVED SPEC - founder approved 2026-11-24 ("2. yes. approved"). Changes to an approved scenario need re-approval.
-# BUILD STATUS: NOT BUILT. Approval is not implementation - this line says which.
+# BUILD STATUS: BUILT. internal/towercore/dispatch (SignFailureReceipt, ParseReceipt, IsFailureReceipt),
+# internal/station/edge_sealed.go (failureReceipt), internal/towerhub/serve.go (a failure receipt rides
+# with a failure), cmd/rogerai-broker/toweredge.go (settle writes no outcome or audit for one) and
+# edgebridge.go (no StationFault row for a proven upstream failure on the consumer path; the
+# canary still records CanaryFail; the consumer's status follows the Station's signed class).
+#
+# FOUNDER RULING 2026-11-26 ("Split it"), where this file and the other meet: a failure receipt
+# proves the upstream failed, not that the prompt was too long. A context-window claim that is not
+# believed is a Station fault on the Tower's record whether or not a receipt rode along
+# (context_window_class.feature D7). Every other failure the Station proves with a receipt records
+# none (tower_failed_attempt_release.feature).
+#
+# Deploy Core before nodes update: an old Core settles a failure receipt at zero but records it as
+# uncorroborated.
 #
 # Founder ruling 2026-11-24 ("fix"): make Core do what tower_upstream_key.feature already says -
 # when the upstream refuses or fails, "the consumer's hold is released, and it is never a strike"

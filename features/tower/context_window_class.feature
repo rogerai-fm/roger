@@ -7,6 +7,12 @@
 # docs/tower.md. Executable: internal/station/context_window_class_bdd_test.go,
 # internal/agent/context_window_class_bdd_test.go, and the broker's own runner for the broker scenarios.
 #
+# FOUNDER RULING 2026-11-26 ("Split it"), where this file and the other meet: a failure receipt
+# proves the upstream failed, not that the prompt was too long. A context-window claim that is not
+# believed is a Station fault on the Tower's record whether or not a receipt rode along
+# (context_window_class.feature D7). Every other failure the Station proves with a receipt records
+# none (tower_failed_attempt_release.feature).
+#
 # A station behind a Tower that refuses a prompt as too long is answered with the same
 # context_exceeded code a direct station gets (features/errors/context_exceeded.feature).
 # The founder ruled yes on 2026-11-23. This file is the how.

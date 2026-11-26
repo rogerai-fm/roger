@@ -129,7 +129,10 @@ func TestABodyPastTheReadLimitIsRefusedNotCut(t *testing.T) {
 	env, rec, failure := e.ServeSealed(context.Background(), g.Signed, sealFor(t, s, g.AttemptID, []byte(`{"p":1}`)))
 	require.Equal(t, "the model returned more than this grant allows", failure)
 	require.Empty(t, env)
-	require.Empty(t, rec)
+	requireFailureReceipt(t, rec, s, g, dispatch.FailureTooLarge)
+	for i := 8; i <= len(testUpKey); i++ {
+		require.NotContains(t, string(rec), testUpKey[:i])
+	}
 
 	got, err := HTTPUpstream{URL: up.URL, Key: testUpKey}.Serve(context.Background(), []byte(`{}`))
 	require.Error(t, err)

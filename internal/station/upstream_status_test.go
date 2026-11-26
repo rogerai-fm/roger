@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"rogerai.fm/roger/v7/internal/towercore/dispatch"
 )
 
 func TestHTTPUpstreamNon2xxIsATypedStatusError(t *testing.T) {
@@ -65,6 +66,7 @@ func TestServeSealedTypedStatusCrossesAsNumbersOnly(t *testing.T) {
 	env, receipt, failure := e.ServeSealed(context.Background(), g.Signed, sealFor(t, s, g.AttemptID, []byte(`{"p":"the secret launch codes"}`)))
 	require.Equal(t, "the model did not answer (status 429, retry-after 9)", failure)
 	require.NotContains(t, failure, "launch codes", "no upstream echo crosses the tower")
-	require.Empty(t, receipt)
+	requireFailureReceipt(t, receipt, s, g, dispatch.FailureThrottled)
+	require.NotContains(t, string(receipt), "launch codes")
 	require.Empty(t, env)
 }

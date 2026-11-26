@@ -74,8 +74,10 @@ func (c *AttemptCache) Mark(attemptID string, deadline time.Time) bool {
 
 // ServeSealed serves one Topology-2 job: open the sealed request, verify the edge grant
 // against the plaintext, serve, sign a token receipt, and seal the result to the consumer.
-// Its shape is exactly the towerhub Executor seam: (resultEnvelope, receipt, failure), where
-// a failure carries no receipt - a refusal is not a result and must never settle one.
+// Its shape is exactly the towerhub Executor seam: (resultEnvelope, receipt, failure). A refusal
+// (bad grant, bad envelope, a repeat) carries no receipt. An UPSTREAM failure carries a failure
+// receipt - zero usage, the failure class - which claims nothing and releases the consumer's hold
+// (tower_failed_attempt_release.feature); it never carries a receipt that settles work.
 func (e EdgeExecutor) ServeSealed(ctx context.Context, grantRaw, sealedReq []byte) (resultEnvelope, receipt []byte, failure string) {
 	if len(e.CoreKey) == 0 {
 		// FAIL CLOSED, same as every other serve: a Station with no pinned Core key cannot tell
@@ -137,21 +139,25 @@ func (e EdgeExecutor) ServeSealed(ctx context.Context, grantRaw, sealedReq []byt
 		// only the class. A TYPED status reply adds its status and Retry-After (two numbers, no
 		// echo), so the relay can answer a consumer's 429 as a 429 with its wait
 		// (features/routing/edge_bridge_parity.feature) instead of a generic failure.
+		//
+		// AND A FAILURE RECEIPT (tower_failed_attempt_release.feature): a Station-signed statement
+		// that it did no billable work, so Core releases the consumer's hold at once instead of at
+		// the stale-hold sweep. It carries the class, never the upstream's words.
 		var se *UpstreamStatusError
 		if errors.As(err, &se) {
 			if e.Log != nil {
 				fmt.Fprintln(e.Log, operatorLine(grant.AttemptID, se))
 			}
-			return nil, nil, se.Class()
+			return nil, e.failureReceipt(grant, request, failureClassOf(err)), se.Class()
 		}
 		if errors.Is(err, ErrUpstreamTooLarge) {
-			return nil, nil, "the model returned more than this grant allows"
+			return nil, e.failureReceipt(grant, request, dispatch.FailureTooLarge), "the model returned more than this grant allows"
 		}
-		return nil, nil, "the model did not answer"
+		return nil, e.failureReceipt(grant, request, dispatch.FailureUpstreamError), "the model did not answer"
 	}
 	// The output ceiling is enforced at the party being paid, exactly as on the TLS edge.
 	if int64(len(body)) > grant.MaxOut {
-		return nil, nil, "the model returned more than this grant allows"
+		return nil, e.failureReceipt(grant, request, dispatch.FailureTooLarge), "the model returned more than this grant allows"
 	}
 	// The TOKEN receipt (Option C): byte usage as the tamper-evident wire measure, token usage
 	// from the model's own report as the billing basis - clamped downstream to the grant's
@@ -184,6 +190,34 @@ func (e EdgeExecutor) ServeSealed(ctx context.Context, grantRaw, sealedReq []byt
 		e.Transcripts.Keep(Transcript{AttemptID: grant.AttemptID, Request: request, Response: body})
 	}
 	return raw, rec.Signed, ""
+}
+
+// failureClassOf maps an upstream failure to the class a failure receipt signs.
+func failureClassOf(err error) string {
+	var se *UpstreamStatusError
+	if errors.As(err, &se) {
+		switch {
+		case se.Status == 401 || se.Status == 403:
+			return dispatch.FailureUpstreamRefused
+		case se.Status == 429:
+			return dispatch.FailureThrottled
+		}
+	}
+	return dispatch.FailureUpstreamError
+}
+
+// Contract: features/tower/tower_failed_attempt_release.feature.
+//
+// failureReceipt signs the zero receipt for a failed upstream call. It rides back to the hub with
+// the failure, and the hub's courier carries it to Core like any receipt. A Station that cannot
+// sign returns nil: the attempt then falls back to the stale-hold sweep, as before this change.
+func (e EdgeExecutor) failureReceipt(grant dispatch.EdgeGrant, request []byte, class string) []byte {
+	rec, err := dispatch.SignFailureReceipt(e.Station.assertionPriv, e.Network,
+		dispatch.Grant{AttemptID: grant.AttemptID, StationID: grant.StationID}, request, class)
+	if err != nil {
+		return nil
+	}
+	return rec.Signed
 }
 
 // operatorLineMax bounds the operator's line for an attempt, in characters.

@@ -181,7 +181,10 @@ func TestServeSealedUpstreamFailureIsGenericAndUnreceipted(t *testing.T) {
 	env, receipt, failure := e.ServeSealed(context.Background(), g.Signed, sealFor(t, s, g.AttemptID, []byte(`{"p":"the secret launch codes"}`)))
 	require.Equal(t, "the model did not answer", failure, "the wire gets only the class")
 	require.NotContains(t, failure, "launch codes", "no upstream echo crosses the tower")
-	require.Empty(t, receipt)
+	// tower_failed_attempt_release.feature: a failed upstream call yields a FAILURE receipt (zero
+	// usage, the class), never a receipt that claims work - and it carries no upstream words.
+	requireFailureReceipt(t, receipt, s, g, dispatch.FailureUpstreamError)
+	require.NotContains(t, string(receipt), "launch codes")
 	require.Empty(t, env)
 }
 
@@ -202,7 +205,8 @@ func TestServeSealedEnforcesTheByteCeilings(t *testing.T) {
 	up2.body = []byte("far more than four bytes")
 	_, receipt2, failure2 := e2.ServeSealed(context.Background(), g2.Signed, sealFor(t, s2, g2.AttemptID, []byte(`{}`)))
 	require.Contains(t, failure2, "more than this grant allows")
-	require.Empty(t, receipt2)
+	// Never signed FOR (no served receipt); signed as a failure, so the hold is released.
+	requireFailureReceipt(t, receipt2, s2, g2, dispatch.FailureTooLarge)
 }
 
 // Grant A paired with an envelope sealed for attempt B does not open - the AAD binding, on the
@@ -228,4 +232,18 @@ func TestServeSealedResultIsBoundToItsAttempt(t *testing.T) {
 	require.NoError(t, err)
 	_, err = envelope.OpenWith(consumerPriv, sealed, "att-a-different-attempt")
 	require.Error(t, err, "the result must not open under another attempt id")
+}
+
+// requireFailureReceipt asserts receipt is S's signed FAILURE receipt for g's attempt: the class
+// given, zero byte and token usage, and the digest of no response bytes
+// (tower_failed_attempt_release.feature).
+func requireFailureReceipt(t *testing.T, receipt []byte, s *Station, g dispatch.EdgeGrant, class string) {
+	t.Helper()
+	require.NotEmpty(t, receipt, "a failed upstream call yields a failure receipt")
+	rec, err := dispatch.ParseReceipt(receipt, s.AssertionPub(), "roger-public", g.AttemptID, s.StationID)
+	require.NoError(t, err)
+	require.Equal(t, class, rec.Failure)
+	require.Equal(t, dispatch.Usage{}, rec.Usage)
+	require.Equal(t, dispatch.Usage{}, rec.TokUsage)
+	require.Equal(t, dispatch.DigestOf(nil), rec.ResponseDigest)
 }

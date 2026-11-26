@@ -1083,7 +1083,8 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 				Station: st, CoreKey: coreKey, Network: link.PublicNetwork,
 				// The upstream key rides here exactly as on the classic path, and is redacted at the
 				// source (features/tower/tower_upstream_key.feature).
-				Upstream: station.HTTPUpstream{URL: cfg.Upstream, Key: cfg.UpstreamKey},
+				Upstream: station.HTTPUpstream{URL: cfg.Upstream, Key: cfg.UpstreamKey,
+					Timeout: cfg.UpstreamTimeout},
 				OnUpstreamError: func(se *station.UpstreamStatusError) {
 					if said.first(se.Status) {
 						notice.notify(upstreamNotice(se))

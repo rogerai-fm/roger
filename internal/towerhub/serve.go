@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"rogerai.fm/roger/v7/internal/towercore/dispatch"
 )
 
 // PollBackoff is how long a node waits after a hard poll/complete failure before retrying, so a
@@ -87,10 +89,12 @@ func ServeLoop(ctx context.Context, c *Client, station string, exec Executor, on
 			continue
 		}
 		env, receipt, failure := exec.Serve(ctx, job.Grant, job.Envelope)
-		if failure != "" {
-			// A FAILURE NEVER CARRIES A SETTLEABLE RECEIPT, whatever the executor returned. Zero
-			// it here so a buggy or hostile executor cannot smuggle a receipt through on a failed
-			// serve - the receipt is what settles money, and a failure is not a result.
+		if failure != "" && !dispatch.IsFailureReceipt(receipt) {
+			// A FAILURE NEVER CARRIES A RECEIPT THAT CLAIMS WORK, whatever the executor returned.
+			// Zero it here so a buggy or hostile executor cannot smuggle a paying receipt through on
+			// a failed serve. The one receipt that may ride with a failure is a FAILURE RECEIPT -
+			// zero usage, the failure class - which claims nothing and releases the consumer's
+			// hold (tower_failed_attempt_release.feature). Core verifies it in full.
 			receipt = nil
 		}
 		if cerr := c.CompleteResult(ctx, station, Result{

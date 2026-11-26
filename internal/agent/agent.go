@@ -71,6 +71,9 @@ type Config struct {
 
 	Broker, Upstream, UpstreamKey string
 	NodeID, Region, HW, Model     string
+	// UpstreamTimeout bounds one upstream call on the joined-Tower path; zero is the station's
+	// own default (120 s). A TEST SEAM: no flag or setting sets it in production.
+	UpstreamTimeout time.Duration
 	// StationModels says what this station serves right now, for a standalone Tower's poll (nil:
 	// the poll names nothing and the Tower keeps the list it attached).
 	StationModels func() []string

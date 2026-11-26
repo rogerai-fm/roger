@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"rogerai.fm/roger/v7/internal/towercore/dispatch"
 	"strconv"
 	"strings"
 	"testing"
@@ -91,8 +92,11 @@ func (s *cwState) servesSealed() error {
 	if s.hits != 1 {
 		return fmt.Errorf("the model was asked %d times, want once (failure %q)", s.hits, failure)
 	}
-	if len(env) != 0 || len(receipt) != 0 {
-		return fmt.Errorf("a failed serve returned an envelope (%d bytes) or a receipt (%d bytes)", len(env), len(receipt))
+	// No envelope, and no receipt that claims work: a failed serve may carry only the Station's
+	// signed zero-usage FAILURE receipt (tower_failed_attempt_release.feature), which releases the
+	// consumer's hold and bills nobody.
+	if len(env) != 0 || (len(receipt) != 0 && !dispatch.IsFailureReceipt(receipt)) {
+		return fmt.Errorf("a failed serve returned an envelope (%d bytes) or a receipt that is not a zero-usage failure receipt (%d bytes)", len(env), len(receipt))
 	}
 	s.served, s.failure = true, failure
 	return nil
