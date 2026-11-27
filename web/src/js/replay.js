@@ -2,7 +2,7 @@
    replay.js - the clock of a recorded timelapse (Replay.svelte, replay.css; 2026-11-26)
    A [data-replay] figure holds every frame of every scenario in the page, each with its own
    state as data attributes. This shows a frame: it turns the frame on, writes its clock, reading
-   and answers into the labels, sets the figure's attributes (state, alert, over, look, and every data-a-* of the frame as data-*; the scene's sheet reads them) and
+   and answers into the labels, sets the figure's attributes (state, alert, over, look, and every key of the frame's data-a as data-*; the scene's sheet reads them) and
    moves the playhead. Showing a frame is a pure function of its number, so play, pause, scrub
    and replay are the same call.
    It plays once when most of the feed is in view, pauses off screen and when the tab is hidden,
@@ -30,6 +30,10 @@
       tabs.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-scn") === id)); });
       [].forEach.call(fig.querySelectorAll(".rp__trace"), function (s) { s.classList.toggle("is-on", s.getAttribute("data-scn") === id); });
     }
+    // A frame's scene states (data-a) and readouts (data-r) are one JSON object each. They were spread as
+    // one attribute per key until 2026-11-26: a spread on an <img> makes the renderer add inline onload and
+    // onerror handlers, which the site's content security policy refuses (78 console errors on one page).
+    function bag(f, name) { try { return JSON.parse(f.getAttribute(name) || "{}") || {}; } catch (e) { return {}; } }
     function dur(k) { return Number(frames[k].getAttribute("data-ms")) || 800; }
     function total() { var ms = 0; for (var i = 0; i < frames.length; i++) ms += dur(i); return ms; }
     function at(ms) { var k = 0; while (k < frames.length - 1 && ms >= dur(k)) ms -= dur(k++); return k; }
@@ -42,13 +46,13 @@
       [].forEach.call(fig.querySelectorAll(".rp__frame.is-on"), function (el) { if (el !== f) el.classList.remove("is-on"); });
       f.classList.add("is-on");
       ["state", "alert", "over", "look"].forEach(function (a) { fig.setAttribute("data-" + a, f.getAttribute("data-" + a)); });
-      [].forEach.call(f.attributes, function (at) { if (at.name.indexOf("data-a-") === 0) fig.setAttribute("data-" + at.name.slice(7), at.value); });   // the scene's own states
+      var a = bag(f, "data-a"); Object.keys(a).forEach(function (k) { fig.setAttribute("data-" + k, a[k]); });   // the scene's own states
       if (out.time) out.time.textContent = f.getAttribute("data-clock");
       if (out.plus) out.plus.textContent = f.getAttribute("data-plus");
       if (out.axis) out.axis.textContent = f.getAttribute("data-axis");
       if (out.view) out.view.textContent = f.getAttribute("data-view");
       if (out.cap) out.cap.textContent = caption(k);
-      outs.forEach(function (el) { el.textContent = f.getAttribute("data-r-" + el.getAttribute("data-read")) || ""; });   // what each part says at this frame
+      var r = bag(f, "data-r"); outs.forEach(function (el) { var v = r[el.getAttribute("data-read")]; el.textContent = v == null ? "" : v; });   // what each part says at this frame
       var word = fig.getAttribute("data-word-" + f.getAttribute("data-state")) || "";
       states.forEach(function (el) { el.textContent = word; });
       if (mark) mark.style.left = f.getAttribute("data-x") + "%";

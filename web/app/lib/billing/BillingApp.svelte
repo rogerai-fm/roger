@@ -80,8 +80,8 @@
 <div class="authwrap tint-panel">
 <LoadState status={status} what="your billing" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <PageFault shown={status === "fault"} />
   <h1>Billing</h1>
+  <PageFault shown={status === "fault"} />
   <p class="sub">Add money, watch it go further. Your wallet, your spend, and what RogerAI saves you against the name-brand labs.</p>
 
   <!-- VALUE FIRST: the savings-vs-frontier headline, the one place the page leads with the

@@ -95,8 +95,8 @@
 <div class="authwrap tint-panel">
 <LoadState status={status} what="your account" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <PageFault shown={status === "fault"} />
   <h1>Account</h1>
+  <PageFault shown={status === "fault"} />
   <p class="sub">Signed in as <b id="who">{a ? RogerFmt.who(a) : "-"}</b></p>
 
   <!-- WALLET: the available balance, front and center - the one number a person opens this

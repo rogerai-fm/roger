@@ -130,7 +130,11 @@
   .rp__axis { height: 48px; }
   /* too narrow for labels on the drawing: the readouts that change stay, the rest is a list under it */
   .rp__part, .rp__unit { display: none; }   /* the drawing alone; what each part says is in the list under it */
-  .rp .rp__chat { position: static; width: auto; margin-top: var(--s-2); }   /* the exchange follows the drawing */
+  /* the exchange follows the list, not the drawing: its room is held while it is empty, and between the drawing
+     and the list that read as a hole (seen live on a phone, 2026-11-26) */
+  .rp__strip { display: flex; flex-direction: column; }
+  .rp__scene, .rp__draw { display: contents; }
+  .rp .rp__chat { position: static; width: auto; margin-top: var(--s-3); order: 2; }
   .rp__statew--feed { font-size: var(--t-micro); min-width: 0; }
   .rp__rows { display: grid; gap: 2px; list-style: none; margin: var(--s-2) 0 0; padding: 0; font-size: var(--t-micro); line-height: 1.4; color: var(--ink-500); }
   .rp__rows li { display: grid; grid-template-columns: 10px auto 1fr; gap: 0 var(--s-1); align-items: baseline; }

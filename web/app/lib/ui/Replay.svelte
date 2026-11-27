@@ -43,8 +43,7 @@
         <img class="rp__frame" class:is-on={s.id === sc0.id && k === d.still[1]} data-scn={s.id} data-k={k} src={f.src} width={d.feed.size?.[0] || 800} height={d.feed.size?.[1] || 486} loading="lazy" decoding="async"
           alt={f.caption ? `${s.title}, ${f.clock}: ${f.caption}` : ""} data-clock={f.clock} data-plus={f.plus || ""} data-view={f.view || ""} data-axis={f.axis || ""} data-state={f.state}
           data-alert={f.alert ? 1 : 0} data-over={f.over ? 1 : 0} data-look={f.look ? 1 : 0} data-ms={f.ms} data-x={f.x} data-say={f.caption || ""}
-          {...Object.fromEntries(Object.entries(f.attrs || {}).map(([k, v]) => [`data-a-${k}`, v]))}
-          {...Object.fromEntries(Object.entries(f.says || {}).map(([k, v]) => [`data-r-${k}`, v]))} />
+          data-a={JSON.stringify(f.attrs || {})} data-r={JSON.stringify(f.says || {})} />
       {/each}
     {/each}
     <p class="rp__clock" aria-hidden="true"><b class="rp__time">{f0.clock}</b><span class="rp__plus">{f0.plus}</span><span class="rp__statew rp__statew--feed">{d.words.states[f0.state]}</span></p>

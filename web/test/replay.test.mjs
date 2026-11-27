@@ -195,3 +195,12 @@ test("the model pages link to both timelapses with a picture and do not carry th
   assert.match(fire, /id="timelapse"/, "the fire door has somewhere to land");
   assert.match(og, /id="theft-timelapse"/, "the oil and gas door has somewhere to land");
 });
+
+test("no built page carries an inline event handler (the content security policy refuses them)", async () => {
+  const { readdirSync } = await import("node:fs");
+  for (const f of readdirSync(DIST).filter((n) => n.endsWith(".html"))) {
+    const html = readFileSync(path.join(DIST, f), "utf8").replace(/<script[\s\S]*?<\/script>|<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>/g, " ");
+    const hit = html.match(/<[a-z][^<>]*\son[a-z]+="[^"]*"/i);
+    assert.equal(hit && hit[0].slice(-80), null, `${f}: an inline handler`);
+  }
+});

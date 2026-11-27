@@ -152,8 +152,8 @@
 <div class="authwrap tint-panel">
 <LoadState status={status} what="your payouts" />
 <main class="card{status === 'fault' ? ' is-fault' : ''}" id="card" hidden={status === "loading"}>
-  <PageFault shown={status === "fault"} />
   <h1>Payouts</h1>
+  <PageFault shown={status === "fault"} />
   <p class="sub">Exactly what you earned, when it clears, and where it came from.</p>
 
   <section class="acct-state tint-panel" id="poNoOperator" hidden={status !== "nooperator"}>
