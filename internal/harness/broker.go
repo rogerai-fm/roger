@@ -223,7 +223,11 @@ func BrokerCompleterRoute(rt BrokerRoute) Completer {
 			}
 		}
 		msg, err := parseCompletion(raw, resp.StatusCode)
-		if err != nil && len(tools) > 0 && !requiresTools(routing) && brokerRefusedTools(resp.StatusCode, err.Error()) {
+		// On the LAN relay the refusal is a model server's own, passed through or carried on
+		// the relay's "tried" list (features/agent/plain_chat_fallback_lan.feature, L1). Off
+		// it, only the broker's words count (L5).
+		if err != nil && len(tools) > 0 && !requiresTools(routing) &&
+			(brokerRefusedTools(resp.StatusCode, err.Error()) || inLAN && localRefusedTools(resp.StatusCode, err.Error())) {
 			return Message{}, &ToolsRefusedError{Model: model, Err: err}
 		}
 		return msg, err

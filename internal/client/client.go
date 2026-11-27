@@ -2877,8 +2877,14 @@ func dialEdgePath(ctx context.Context, p EdgePeer, path string, body []byte, edg
 		return nil, nil, err
 	}
 	if retryable(resp.StatusCode, nil) {
+		// A model turn carries the member's own words (plain_chat_fallback_lan.feature, L2).
+		// A voice turn stays status-only, as say_lan.go rules.
+		note := ""
+		if path == "/edge/infer" {
+			note = failureNote(resp)
+		}
 		resp.Body.Close()
-		return nil, nil, fmt.Errorf("answered %d", resp.StatusCode)
+		return nil, nil, fmt.Errorf("answered %d%s", resp.StatusCode, note)
 	}
 	return resp, leaf, nil
 }

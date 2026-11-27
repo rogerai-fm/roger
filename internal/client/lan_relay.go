@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -90,8 +91,9 @@ func relayLAN(ctx context.Context, w http.ResponseWriter, opts ProxyOptions, ban
 			if resp.StatusCode >= 500 {
 				// a Tower that could not serve (no station free, overloaded) is a failure to move
 				// past, inside the LAN, not an answer to hand the caller
+				note := failureNote(resp)
 				resp.Body.Close()
-				tried = append(tried, fmt.Sprintf("%s: status %d", entry, resp.StatusCode))
+				tried = append(tried, fmt.Sprintf("%s: status %d%s", entry, resp.StatusCode, note))
 				continue
 			}
 			onServed(0)
@@ -137,6 +139,49 @@ func relayLAN(ctx context.Context, w http.ResponseWriter, opts ProxyOptions, ban
 
 // PinnedSelf is the Pinned label of a session opened on this machine's own serve.
 const PinnedSelf = "this machine"
+
+// failureNoteWait bounds how long a failed source's reply is read for its words.
+var failureNoteWait = 2 * time.Second
+
+// failureNote is the words a local source that answered 5xx leaves on its "tried" entry
+// (features/agent/plain_chat_fallback_lan.feature, L2): ": <message>", or "" when the reply
+// carries none. Only the reply's JSON error.message (or a bare string "error") is kept, from at
+// most 64 KB of body, cut to its first line and 200 characters with control and format
+// characters removed. It is another machine's text, shown as its own words. The relay makes no
+// routing decision on it; a caller reads it as it reads any reply a source wrote itself.
+func failureNote(resp *http.Response) string {
+	// A source that answered 5xx and then stalls its body must not hold the ladder: the read is
+	// cut off, and whatever arrived is judged as it stands.
+	stall := time.AfterFunc(failureNoteWait, func() { resp.Body.Close() })
+	defer stall.Stop()
+	raw, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
+	var body struct {
+		Error json.RawMessage `json:"error"`
+	}
+	var obj struct {
+		Message string `json:"message"`
+	}
+	var msg string
+	if json.Unmarshal(raw, &body) != nil {
+		return ""
+	}
+	if json.Unmarshal(body.Error, &msg) != nil {
+		_ = json.Unmarshal(body.Error, &obj)
+		msg = obj.Message
+	}
+	msg = strings.TrimSpace(msg)
+	if i := strings.IndexAny(msg, "\n\r\u0085\u2028\u2029"); i >= 0 {
+		msg = msg[:i] // the first line, by any line break a terminal or browser honours
+	}
+	msg = strings.TrimSpace(cleanGrantText(msg))
+	if r := []rune(msg); len(r) > 200 {
+		msg = string(r[:200])
+	}
+	if msg == "" {
+		return ""
+	}
+	return ": " + msg
+}
 
 // relaySelfFirst is the self rung of every ladder: a model roger serves itself answers before
 // any Edge peer, Tower or the market (edge_device_runtime.feature §3). It reports served, or why
