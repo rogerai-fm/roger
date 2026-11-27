@@ -127,3 +127,20 @@ func (m *memStore) Len() int {
 	defer m.mu.Unlock()
 	return len(m.by)
 }
+
+// OpenUntil is Store.OpenUntil.
+func (m *memStore) OpenUntil(stationID string, now time.Time) (time.Time, int, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var latest time.Time
+	n := 0
+	for _, r := range m.by {
+		if r.StationID == stationID && r.State != StateSettled && r.Deadline.After(now) {
+			n++
+			if r.Deadline.After(latest) {
+				latest = r.Deadline
+			}
+		}
+	}
+	return latest, n, nil
+}

@@ -1,5 +1,15 @@
 # APPROVED SPEC - founder approved 2026-11-24 ("approved"). Changes to an approved scenario need re-approval.
-# BUILD STATUS: NOT BUILT. Approval is not implementation - this line says which.
+# BUILD STATUS: BUILT. cmd/rogerai-broker/toweredgeattach.go, towerofferchange.go, towermobility.go,
+# towerlink.go, sharedstore.go (incrWithTTL); internal/towercore/attach (UpdateOffer, SetStateFrom,
+# AttachedAt kept on revival), internal/towercore/mobility (NoteNudgeOnce), internal/towercore/dispatch
+# (OpenUntil); internal/store (OwnerBannedSince); internal/agent (stationdir.go, relaywatch.go,
+# reattachWait, nudgeActionable, ReattachDelayFor, moveWhy); internal/towerhub (PollAccepted,
+# askCoreAboutUnknown).
+#
+# AMENDED 2026-11-24 (founder: "yes"): modality limits, stale-mirror scenario dropped, recovery bound 12
+# minutes with flat 30 s retry after no data plane. An in-place offer change may only go to a modality the
+# Tower path already carries (chat, text); "A stale mirror is not taken as a live Tower" was dropped by
+# ruling, so private_hub_placement.feature's behaviour for a report while the Tower is not pulling stands.
 #
 # Founder request 2026-11-23: "review and audit the behavior of our relay towers and how
 # stations will work with them, i want it to be as idempotent as possible and stations to be
@@ -62,7 +72,7 @@ Feature: Stations move freely between Towers, and every attach, move and retry i
         | price in 150               |
         | price out 250              |
         | model "m2"                 |
-        | modality "tts"             |
+        | modality "text"            |
         | model "m2" and price in 0  |
 
     Scenario Outline: An offer change is refused from anyone but the key holder
@@ -118,9 +128,14 @@ Feature: Stations move freely between Towers, and every attach, move and retry i
 
     Scenario: The modality is part of the offer
       Given S is live with modality "chat"
-      When it re-attaches with modality "tts" and everything else the same
-      Then the row is updated to "tts" and the event is written
+      When it re-attaches with modality "text" and everything else the same
+      Then the row is updated to "text" and the event is written
       And a re-attach is never answered with the old row while its modality differs
+
+    Scenario: A change to a modality a Tower does not carry is refused like a fresh attach
+      When S re-attaches with modality "tts"
+      Then it is refused with the same status and words a fresh tts attach gets
+      And S keeps its old offer and stays live
 
     Scenario: Two shares on one machine do not fight over one Station
       Given one machine runs two `roger share` processes with different models
@@ -143,16 +158,12 @@ Feature: Stations move freely between Towers, and every attach, move and retry i
       When S re-attaches
       Then the answer is 503 "the tower this node is attached to has no data plane right now - try again shortly", as today
 
-    Scenario: A stale mirror is not taken as a live Tower
-      Given Tower A's process died and the shared mirror still shows its link
-      When S reports Tower A's hub unreachable with the hub address and pin it holds
-      Then S is not handed Tower A's hub again in that answer
-
     Scenario: Time from a Tower dying to its idle Stations serving elsewhere is bounded
       Given Tower A dies with 100 idle Stations attached
-      When every Station follows its own backoff and re-attaches
-      Then every one of them is serving through another Tower within 10 minutes of A's death
-      # PROPOSED NUMBER: 10 minutes. The audit measured about 6 to 20+ minutes today.
+      When every Station retries every 30 seconds while Core answers "no data plane" for its Tower, instead of backing off
+      Then every one of them is serving through another Tower within 12 minutes of A's death
+      And moves keep the approved pacing
+      # RULED 2026-11-24: flat 30 s retry after no data plane; 12-minute bound for 100 Stations.
 
     Scenario: The stale comment that said RelayPlane and Live see one instance is corrected
       Then the code comment at the retry branch describes the shared-mirror reads it really makes

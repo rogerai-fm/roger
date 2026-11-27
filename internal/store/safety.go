@@ -378,6 +378,10 @@ func (m *Mem) BanOwner(accountID, reason, evidenceJSON string) error {
 	}
 	if _, ok := m.bannedOwners[accountID]; !ok {
 		m.bannedOwners[accountID] = reason // first ban wins; evidence preserved in strikes
+		if m.bannedOwnersAt == nil {
+			m.bannedOwnersAt = map[string]time.Time{}
+		}
+		m.bannedOwnersAt[accountID] = time.Now()
 		// Record the ban itself as a (terminal) strike so the evidence trail shows it.
 		m.strikeID++
 		m.strikes = append(m.strikes, Strike{
@@ -386,6 +390,13 @@ func (m *Mem) BanOwner(accountID, reason, evidenceJSON string) error {
 		})
 	}
 	return nil
+}
+
+func (m *Mem) OwnerBannedSince(accountID string) (time.Time, bool, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	at, ok := m.bannedOwnersAt[accountID]
+	return at, ok, nil
 }
 
 func (m *Mem) IsOwnerBanned(accountID string) (bool, string, error) {
@@ -453,6 +464,7 @@ func (m *Mem) ForgiveOwner(accountID string) (int, error) {
 	}
 	m.strikes = kept
 	delete(m.bannedOwners, accountID)
+	delete(m.bannedOwnersAt, accountID)
 	delete(m.accountHold, accountID)
 	return forgiven, nil
 }

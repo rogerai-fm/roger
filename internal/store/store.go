@@ -790,6 +790,9 @@ type Store interface {
 	BanOwner(accountID, reason, evidenceJSON string) error
 	// IsOwnerBanned reports whether an owner account is durably banned, with the reason.
 	IsOwnerBanned(accountID string) (banned bool, reason string, err error)
+	// OwnerBannedSince is when an owner account's ban was recorded (the first ban, which is the one
+	// kept). found==false when the account is not banned.
+	OwnerBannedSince(accountID string) (at time.Time, found bool, err error)
 	// BannedOwners returns the banned owner set (account id -> reason), re-hydrated at
 	// startup so an owner ban survives a broker restart.
 	BannedOwners() (map[string]string, error)
@@ -1083,10 +1086,11 @@ type Mem struct {
 	// bound to the OWNER ACCOUNT (owner pubkey), bannedOwners is the durable owner ban
 	// set, accountHold holds ALL of an owner's lots from promotion. Rare, off the hot
 	// path; guarded by m.mu.
-	strikes      []Strike          // append-only evidence-bound owner strikes
-	strikeID     int64             // monotonic strike id
-	bannedOwners map[string]string // owner pubkey -> ban reason (durable, anti-rotation)
-	accountHold  map[string]int64  // owner pubkey -> unix when all-lots hold was placed (auto-expires)
+	strikes        []Strike             // append-only evidence-bound owner strikes
+	strikeID       int64                // monotonic strike id
+	bannedOwners   map[string]string    // owner pubkey -> ban reason (durable, anti-rotation)
+	bannedOwnersAt map[string]time.Time // owner pubkey -> when the ban was recorded
+	accountHold    map[string]int64     // owner pubkey -> unix when all-lots hold was placed (auto-expires)
 	// receipts retains the broker-signed receipt per request id - the in-memory twin of the
 	// Postgres receipts.receipt column, so a void's audit fields (void_reason, upstream_status)
 	// survive on this store too and ThrottledCount / ReceiptOf can read them back.

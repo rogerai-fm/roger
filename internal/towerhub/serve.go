@@ -76,6 +76,9 @@ func ServeLoop(ctx context.Context, c *Client, station string, exec Executor, on
 			}
 			continue
 		}
+		if c.PollAccepted != nil {
+			c.PollAccepted(ok)
+		}
 		if !ok {
 			// Empty long poll - poll again, but never faster than emptyPollFloor so a tower that
 			// returns 204 immediately cannot busy-spin this worker.

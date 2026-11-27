@@ -45,7 +45,6 @@ import (
 	randv2 "math/rand/v2"
 	"net"
 	"net/http"
-	"path/filepath"
 	"rogerai.fm/roger/v7/internal/netpriv"
 	"strings"
 	"sync"
@@ -588,7 +587,10 @@ func staleAdvertisement(err error) bool {
 	switch {
 	case err == nil, errors.Is(err, context.Canceled):
 		return false
-	case hubRefusedIdentity(err):
+	case hubRefusedIdentity(err) && !hubNoNode(err):
+		// A hub that says it has no node registered for this Station is not refusing this node's
+		// identity: it has not learned the attachment, and past relayWatch's grace that is a hub
+		// failure Core can answer (station_mobility_idempotency.feature).
 		return false
 	case errors.Is(err, towerhub.ErrHubMultipleProcesses):
 		return false
@@ -756,7 +758,7 @@ func attachTowerAvoiding(cfg Config, priv ed25519.PrivateKey, dir string, gaveUp
 	// prints nothing, which is right for "no relay is free" and quite wrong for "this host
 	// can never join again". A genuinely broken directory still errors out rather than
 	// minting a second identity beside the one attachments name.
-	st, err := station.InitOrOpen(filepath.Join(dir, "tower-station"))
+	st, err := station.InitOrOpen(stationDirFor(dir, cfg.NodeID))
 	if err != nil {
 		return nil, TowerAttachment{}, fmt.Errorf("station identity: %w", err)
 	}
@@ -1046,11 +1048,13 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 				// same error is still RETURNED, just after this node has given the condition a
 				// chance to end, and ErrPrivateShareNeverRelays is structural rather than
 				// temporary so it never waits at all.
-				firstTries++
-				if errors.Is(err, ErrPrivateShareNeverRelays) || firstTries >= firstAttachAttempts {
+				if !strings.Contains(err.Error(), noDataPlane) {
+					firstTries++
+				}
+				if firstAttachGivesUp(err, firstTries) {
 					return err
 				}
-				if !waitFor(ctx, reattachDelay(firstTries-1)) {
+				if !reattachWait(ctx, ReattachDelayFor(err, max(firstTries-1, 0)), cfg.NodeID) {
 					return nil
 				}
 				continue
@@ -1060,7 +1064,7 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 			// renewed, an instance of Core that is redeploying, or a fabric with nothing free
 			// right now are all conditions that end.
 			notice.notify(fmt.Errorf("%w: %w", ErrRelayReattachFailed, err))
-			if !waitFor(ctx, reattachDelay(consecutive)) {
+			if !reattachWait(ctx, ReattachDelayFor(err, consecutive), cfg.NodeID) {
 				return nil
 			}
 			consecutive++
@@ -1102,6 +1106,11 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 		if movedFrom != "" {
 			notice.notify(errors.New(movedNotice(movedFrom, at.TowerID, movedWhy)))
 			movedFrom, movedWhy = "", ""
+		}
+		// AN OFFER CHANGED IN PLACE is said once, in the operator's terminal
+		// (station_mobility_idempotency.feature R1): Core updated the row instead of refusing.
+		if strings.HasPrefix(at.Note, "offer changed") {
+			notice.notify(errors.New("relay: " + at.Note))
 		}
 		started := time.Now()
 		terr := serveTowerTenancy(ctx, cfg, at, exec, coreEnvKey, out, notice)
@@ -1147,7 +1156,7 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 			if firstTries >= firstAttachAttempts {
 				return terr
 			}
-			if !waitFor(ctx, reattachDelay(firstTries-1)) {
+			if !reattachWait(ctx, reattachDelay(firstTries-1), cfg.NodeID) {
 				return nil
 			}
 			continue
@@ -1164,7 +1173,7 @@ func ServeTower(ctx context.Context, cfg Config, priv ed25519.PrivateKey, dir st
 		// A tenancy that STOOD for a while and then broke is a fresh event, not the next attempt
 		// at an old one, so it starts the backoff over.
 		consecutive = streakAfterTenancy(consecutive, time.Since(started))
-		if !waitFor(ctx, reattachDelay(consecutive)) {
+		if !reattachWait(ctx, reattachDelay(consecutive), cfg.NodeID) {
 			return nil
 		}
 		consecutive++
@@ -1299,14 +1308,30 @@ func serveTowerTenancy(ctx context.Context, cfg Config, at TowerAttachment,
 	// A move: Core's nudge ends this tenancy once the work in flight has finished, so the
 	// node attaches again and is placed where Core chose.
 	gate := gateFor(cfg.NodeID)
+	begun := time.Now() // a nudge from before this attach was answered by it
 	moved := make(chan string, 1)
+	watch := newRelayWatch(at.TowerID, begun, notice.notify)
+	// A poll the hub answered: the recovery line, and empty polls after an unacted nudge.
+	client.PollAccepted = func(job bool) {
+		if watch.onPoll(job) {
+			select {
+			case moved <- "no work since a nudge":
+				cancel()
+			default:
+			}
+		}
+	}
 	go func() {
 		for {
 			select {
 			case <-tctx.Done():
 				return
 			case n := <-nudgeChan(cfg.NodeID):
-				if !n.fresh(time.Now()) || !gate.allow() || !gate.waitIdle(tctx, nudgeExpiry-time.Since(n.at)) {
+				if !nudgeActionable(n, begun, time.Now()) {
+					continue
+				}
+				if !gate.allow() || !gate.waitIdle(tctx, nudgeExpiry-time.Since(n.at)) {
+					watch.onNudgeHeard() // heard, not acted on: empty polls from here count
 					continue
 				}
 				select {
@@ -1326,6 +1351,10 @@ func serveTowerTenancy(ctx context.Context, cfg Config, at TowerAttachment,
 				// classified for the operator - because the two questions have different answers.
 				// A pin mismatch is both loud and terminal; a dial that is refused is neither loud
 				// nor terminal on its own and terminal after ninety seconds of it.
+				// A hub that does not know this node yet: quiet inside the grace, a hub failure after.
+				if hubNoNode(err) && !watch.onNoNode(err) {
+					return
+				}
 				if streak.observe(err, time.Now()) {
 					trip(err)
 				}
@@ -1345,7 +1374,9 @@ func serveTowerTenancy(ctx context.Context, cfg Config, at TowerAttachment,
 				// one standing failure Core cannot answer differently, so telling the operator is
 				// the whole of the available remedy.
 				if hubRefusedIdentity(err) {
-					notice.notify(fmt.Errorf("%w: %w", ErrHubRefusedThisNode, err))
+					if !hubNoNode(err) { // relayWatch has said the true thing about a no-node 401
+						notice.notify(fmt.Errorf("%w: %w", ErrHubRefusedThisNode, err))
+					}
 					return
 				}
 				// THE RELAY SAID SOMETHING IT COULD NOT PROVE, or the endpoint is answered by

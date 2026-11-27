@@ -243,6 +243,9 @@ type Store interface {
 	Settle(attemptID string, now time.Time) (Record, error)
 	// Reap drops attempts past their deadline.
 	Reap(before time.Time) (int64, error)
+	// OpenUntil is how many of a Station's attempts have not settled and can still settle at now,
+	// and the latest of their deadlines (station_mobility_idempotency.feature R5).
+	OpenUntil(stationID string, now time.Time) (latest time.Time, open int, err error)
 }
 
 // Registry issues grants and admits exactly one result for each.

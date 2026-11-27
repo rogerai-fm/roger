@@ -623,6 +623,9 @@ func (g *nonceGate) forget(stationID string) {
 type authResult struct {
 	ok  bool
 	why string
+	// unknown is set only for a Station this hub has no node registered for: the one refusal
+	// that asking Core can change (a bad signature or a stale epoch on a known id cannot).
+	unknown bool
 }
 
 // knownCredential is the CHEAP DOOR, and it exists to be called before a body is read.
@@ -718,7 +721,7 @@ func (s *Server) authNode(r *http.Request, stationID string, body []byte) authRe
 	signsAlready := s.signed[stationID]
 	s.mu.RUnlock()
 	if !known {
-		return authResult{why: "no node is registered for this Station on this tower"}
+		return authResult{why: "no node is registered for this Station on this tower", unknown: true}
 	}
 
 	pubHex := r.Header.Get(protocol.HeaderPubkey)

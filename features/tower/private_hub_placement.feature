@@ -1,3 +1,5 @@
+# AMENDED 2026-11-24 by station_mobility_idempotency.feature R3 (founder approved 2026-11-24, marked "CHANGES
+# APPROVED BEHAVIOUR"): an unreachable private hub is moved off in the same attach answer, not "try again".
 # APPROVED SPEC - written and founder approved 2026-11-14 ("Approve as written"): every upgraded Tower pulls,
 # "same network" is the same public IPv4 or the same IPv6 /64, numbers accepted (3 s pickup, 4 held
 # pulls, 25 s hold). Changes to an approved scenario need re-approval.
@@ -189,8 +191,8 @@ Feature: A Tower with no public address serves the Stations on its own network
   Scenario: A Station that cannot reach its Tower's hub is moved, and not placed back for a day
     Given a Station placed on a private-hub Tower whose network matched by public address, behind a carrier NAT
     When the Station's node cannot reach the hub and asks Core again, naming that Tower
-    Then Core does not name that hub again and tells the node to try again shortly
-    And the mobility pass moves the Station off that Tower with the trigger "unreachable", under the pacing every move follows
+    Then Core does not name that hub again, and in the same answer moves the Station off that Tower and places it on another one
+    And the move is recorded with the trigger "unreachable", under the claim every move takes
     And placement does not offer that Tower to the Station for 24 hours
 
   Scenario: An unreachable report changes nothing when it cannot help

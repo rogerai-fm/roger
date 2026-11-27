@@ -72,6 +72,9 @@ CREATE INDEX IF NOT EXISTS tower_attempts_pending
 -- The reaper's index.
 CREATE INDEX IF NOT EXISTS tower_attempts_deadline
     ON rogerai.tower_attempts (deadline);
+-- The idle gate's index (station_mobility_idempotency.feature R5): a Station's unsettled attempts.
+CREATE INDEX IF NOT EXISTS tower_attempts_station_open
+    ON rogerai.tower_attempts (station_id, deadline) WHERE state <> 'settled';
 -- ADDITIVE, and not merely present in the CREATE above. A column added to a CREATE TABLE IF
 -- NOT EXISTS body never reaches a database that already has the table - the statement is a
 -- no-op there - so every column added after the first release needs its own ALTER. Caught by
@@ -282,4 +285,17 @@ func scanAttempt(row scanner) (Record, bool, error) {
 	// Postgres hands back its own location; the caller compares against wall-clock time.
 	r.Deadline = r.Deadline.UTC()
 	return r, true, nil
+}
+
+// OpenUntil is Store.OpenUntil.
+func (p *PGStore) OpenUntil(stationID string, now time.Time) (time.Time, int, error) {
+	var latest sql.NullTime
+	var n int
+	err := p.db.QueryRow(`SELECT max(deadline), count(*) FROM rogerai.tower_attempts
+	                       WHERE station_id=$1 AND state <> $2 AND deadline > $3`,
+		stationID, StateSettled, now).Scan(&latest, &n)
+	if err != nil {
+		return time.Time{}, 0, err
+	}
+	return latest.Time, n, nil
 }

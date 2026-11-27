@@ -386,6 +386,21 @@ func (p *Postgres) BanOwner(accountID, reason, evidenceJSON string) error {
 	return err
 }
 
+func (p *Postgres) OwnerBannedSince(accountID string) (time.Time, bool, error) {
+	if accountID == "" {
+		return time.Time{}, false, nil
+	}
+	var at sql.NullTime
+	err := p.db.QueryRow(`SELECT created_at FROM rogerai.banned_owners WHERE account_id=$1`, accountID).Scan(&at)
+	if err == sql.ErrNoRows {
+		return time.Time{}, false, nil
+	}
+	if err != nil {
+		return time.Time{}, false, err
+	}
+	return at.Time, at.Valid, nil
+}
+
 func (p *Postgres) IsOwnerBanned(accountID string) (bool, string, error) {
 	if accountID == "" {
 		return false, "", nil

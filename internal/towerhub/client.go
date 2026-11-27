@@ -94,6 +94,9 @@ type Client struct {
 	epochMu sync.RWMutex
 	epoch   string
 	retired []string
+	// PollAccepted, when set, is called after every poll the hub answered: job reports whether
+	// it carried work (station_mobility_idempotency.feature: a node knows its relay knows it).
+	PollAccepted func(job bool)
 }
 
 // maxRetiredEpochs bounds the abandoned-epoch memory. A client that legitimately moves epoch

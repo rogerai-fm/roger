@@ -43,6 +43,10 @@ const (
 // node by a SIGNATURE over each request, made with the Station's assertion key (nodeauth.go),
 // but reads no content.
 type Server struct {
+	// askMu and lastAsk pace askCoreAboutUnknown.
+	askMu   sync.Mutex
+	lastAsk time.Time
+
 	hub       *Hub
 	check     GrantCheck
 	submitTTL time.Duration
@@ -54,10 +58,11 @@ type Server struct {
 	// Fires ONLY for attempts this hub actually dispatched to that Station (audit L2): a node
 	// fabricating attempt ids cannot ride the tower's signature to Core.
 	OnComplete func(stationID string, res Result)
-	// OnUnknownStation, when set, observes a Submit refused with ErrNoStation (audit M3): the
-	// tower hangs an immediate node-registration refresh here so a freshly self-attached node
-	// becomes servable without waiting out the periodic refresh. Called on its own goroutine;
-	// the caller is responsible for rate-limiting.
+	// OnUnknownStation, when set, observes a Submit refused with ErrNoStation (audit M3), and a
+	// Poll from a Station the hub does not know (station_mobility_idempotency.feature): the tower
+	// hangs an immediate node-registration refresh here so a freshly self-attached node becomes
+	// servable without waiting out the periodic refresh. A Submit calls it on its own goroutine;
+	// a Poll calls it synchronously, at most once a second, so it must return promptly.
 	OnUnknownStation func(stationID string)
 	// OnTranscript, when set, observes a node's answered audit (see audit.go) - the tower's
 	// courier forwards it to Core, tower-signed. Called on its own goroutine.
@@ -562,7 +567,11 @@ func (s *Server) Poll(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "a hub GET carries no body")
 		return
 	}
-	if auth := s.authNode(r, stationID, body); !auth.ok {
+	auth := s.authNode(r, stationID, body)
+	if !auth.ok && auth.unknown && s.askCoreAboutUnknown(stationID) {
+		auth = s.authNode(r, stationID, body)
+	}
+	if !auth.ok {
 		writeErr(w, http.StatusUnauthorized, auth.why)
 		return
 	}
@@ -672,3 +681,40 @@ func (s *Server) Complete(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 }
+
+// askCoreAboutUnknown asks Core about a Station the hub does not know, on a POLL as well as on a
+// submit (station_mobility_idempotency.feature): a node that just attached used to get 401s until
+// the next 30-second refresh. It waits for the answer, so a Station Core confirms is served on the
+// same poll. At most once a second, whatever the callers, so polls naming random Station ids cannot
+// make the hub flood Core; a caller turned away by that limit gets today's 401. Reports whether it
+// asked.
+func (s *Server) askCoreAboutUnknown(stationID string) bool {
+	if s.OnUnknownStation == nil || stationID == "" {
+		return false
+	}
+	// Check and stamp under the lock, ask outside it: a poll never waits on another poll's ask.
+	// One that finds an ask too recent, or one already running, is answered today's 401 at once.
+	if !s.askMu.TryLock() {
+		return false
+	}
+	if !s.lastAsk.IsZero() && time.Since(s.lastAsk) < time.Second {
+		s.askMu.Unlock()
+		return false
+	}
+	s.lastAsk = time.Now()
+	s.askMu.Unlock()
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		s.OnUnknownStation(stationID)
+	}()
+	select {
+	case <-done:
+		return true
+	case <-time.After(unknownAskTimeout):
+		return false // the refresh finishes on its own; this poll gets today's 401
+	}
+}
+
+// unknownAskTimeout bounds how long a poll waits for Core to confirm a Station the hub did not know.
+const unknownAskTimeout = 3 * time.Second

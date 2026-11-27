@@ -9,6 +9,8 @@ package agent
 import (
 	"context"
 	"errors"
+	randv2 "math/rand/v2"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -114,10 +116,23 @@ func (e movedError) Error() string { return errMoved.Error() + " (" + e.reason +
 func (e movedError) Unwrap() error { return errMoved }
 
 var moveWhy = map[string]string{
-	"better_tower":  "a better relay was found for it",
-	"tower_failing": "its relay was failing",
-	"stage_cap":     "its relay was full for its trust stage",
-	"tower_gone":    "its relay was gone",
+	"better_tower":          "a better relay was found for it",
+	"tower_failing":         "its relay was failing",
+	"stage_cap":             "its relay was full for its trust stage",
+	"tower_gone":            "its relay was gone",
+	"left_network":          "it is no longer on its relay's local network",
+	"unreachable":           "it could not reach its relay",
+	"no work since a nudge": "Roger Core asked it to move and no work came for five minutes",
+}
+
+// ineligibleWhy words the reasons a relay may stop taking work (station_mobility_idempotency.feature
+// R4); Core sends them as "ineligible:<reason>".
+var ineligibleWhy = map[string]string{
+	"lease_expired":     "its relay's approval lapsed",
+	"suspended":         "its relay was suspended",
+	"draining":          "its relay is shutting down",
+	"failing_admission": "its relay is waiting to be approved again",
+	"banned":            "its relay's owner may no longer run one",
 }
 
 // movedNotice is what the operator sees in `roger share` once a moved Station has attached
@@ -125,6 +140,12 @@ var moveWhy = map[string]string{
 // operators behind them.
 func movedNotice(from, to, reason string) string {
 	why, ok := moveWhy[reason]
+	if r, isInel := strings.CutPrefix(reason, "ineligible:"); isInel {
+		why, ok = ineligibleWhy[r]
+		if !ok {
+			why, ok = "its relay stopped taking work", true
+		}
+	}
 	if !ok {
 		why = "Roger Core asked it to attach again"
 	}
@@ -144,4 +165,67 @@ func (g gatedExec) Serve(ctx context.Context, grant, envelope []byte) ([]byte, [
 	g.gate.begin()
 	defer g.gate.end()
 	return g.inner.Serve(ctx, grant, envelope)
+}
+
+// reattachWait waits out a re-attach backoff, and a fresh nudge cuts it short
+// (station_mobility_idempotency.feature R3). Core nudges a node it is moving every 30 seconds and
+// undoes the move after three unanswered nudges; a node sitting out a backoff of several minutes
+// used to hear none of them, so its move was undone and it waited anyway. The one-a-minute pace
+// still holds. false means ctx ended.
+func reattachWait(ctx context.Context, d time.Duration, nodeID string) bool {
+	t := time.NewTimer(d)
+	defer t.Stop()
+	var nudges chan nudge
+	if nodeID != "" {
+		nudges = nudgeChan(nodeID)
+	}
+	for {
+		select {
+		case <-t.C:
+			return true
+		case <-ctx.Done():
+			return false
+		case n := <-nudges:
+			if n.fresh(time.Now()) && gateFor(nodeID).allow() {
+				return true
+			}
+		}
+	}
+}
+
+// nudgeActionable reports whether a nudge may end a tenancy that began at started: it must be
+// fresh, and it must have arrived after that attach. A nudge buffered before the attach was
+// answered by the attach itself, so acting on it would only re-attach once more for nothing.
+func nudgeActionable(n nudge, started, now time.Time) bool {
+	return n.fresh(now) && !n.at.Before(started)
+}
+
+// ReattachDelayFor is how long a node waits before asking Core again after a failed re-attach.
+//
+// After "no data plane" (its Tower is not linked) the wait is a flat 25 to 35 seconds, not the
+// doubling backoff (station_mobility_idempotency.feature, ruled 2026-11-24): Core declares a Tower
+// gone after a fixed window and then moves its Stations as they ask, so a node that had backed off
+// to many minutes would sit dark long after Core was ready to place it. Every other refusal keeps
+// the doubling backoff.
+func ReattachDelayFor(err error, consecutive int) time.Duration {
+	if err != nil && strings.Contains(err.Error(), noDataPlane) {
+		return 25*time.Second + time.Duration(randv2.Int64N(int64(10*time.Second)))
+	}
+	return reattachDelay(consecutive)
+}
+
+// noDataPlane is the words Core answers a re-attach with when the Station's Tower is not linked.
+const noDataPlane = "has no data plane right now"
+
+// firstAttachGivesUp reports whether a node's FIRST attach stops trying after tries refusals. While
+// Core answers "no data plane" it never does: that answer means Core has this node's Station and is
+// waiting for its Tower to come back or be declared gone, and the node retries on the flat 30 s.
+func firstAttachGivesUp(err error, tries int) bool {
+	if errors.Is(err, ErrPrivateShareNeverRelays) {
+		return true
+	}
+	if err != nil && strings.Contains(err.Error(), noDataPlane) {
+		return false
+	}
+	return tries >= firstAttachAttempts
 }
