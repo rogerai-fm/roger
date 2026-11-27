@@ -886,11 +886,42 @@
     });
   }
 
+  // chatFoldInteraction is a model's interaction from all its stations, the broker's fold
+  // (client.FoldInteraction): online stations vote, the majority wins and a tie is chat; when
+  // no online station says anything, every station votes.
+  function chatFoldInteraction(list) {
+    function vote(all) {
+      var chat = 0, single = 0;
+      list.forEach(function (o) {
+        if (!all && o.online !== true) return;
+        var i = String(o.interaction || "").trim().toLowerCase().replace(/[- ]/g, "_");
+        if (i === "chat") chat++;
+        else if (i === "single_turn") single++;
+      });
+      return single > chat ? "single_turn" : chat > 0 ? "chat" : "";
+    }
+    return vote(false) || vote(true);
+  }
+
+  // chatOneJobModels is the set of models whose folded interaction is single_turn. K9 is per
+  // model, so one station's word never decides it.
+  function chatOneJobModels(offers) {
+    var by = {}, out = {};
+    (offers || []).forEach(function (o) {
+      if (o && o.model) (by[o.model] || (by[o.model] = [])).push(o);
+    });
+    Object.keys(by).forEach(function (m) {
+      if (chatFoldInteraction(by[m]) === "single_turn") out[m] = true;
+    });
+    return out;
+  }
+
   // chatMarketOffers are the bands the broker says are ON AIR. `online` is the field, and
   // it was there all along - nothing else in the feed answers "will this answer me?".
   function chatMarketOffers() {
+    var oneJob = chatOneJobModels(lastOffers);
     return (lastOffers || []).filter(function (o) {
-      return o.model && o.online === true && !chatCannotTalk(o.modality, o.interaction);
+      return o.model && o.online === true && !oneJob[o.model] && !chatCannotTalk(o.modality, "");
     });
   }
 

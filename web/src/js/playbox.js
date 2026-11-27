@@ -130,14 +130,39 @@
   // A search station rides the same feeds tagged modality "search". It is priced per query
   // and answers on /v1/search, so it is never a model on this page.
   function isSearch(o) { return !!o && o.modality === "search"; }
-  // A one-job model (interaction "single_turn") takes one input of a fixed shape, not a
-  // conversation, so the chat shelf never offers it (market_listing_kinds.feature K9).
-  function isOneJob(o) { return !!o && o.interaction === "single_turn"; }
+  // A model's interaction from all its stations, the broker's fold: online stations vote, the
+  // majority wins and a tie is chat; when no online station says anything, every station votes.
+  function foldInteraction(list) {
+    function vote(all) {
+      var chat = 0, single = 0;
+      list.forEach(function (o) {
+        if (!all && o.online !== true) return; // the Go fold: only a station marked online votes
+        var i = String(o.interaction || "").trim().toLowerCase().replace(/[- ]/g, "_");
+        if (i === "chat") chat++;
+        else if (i === "single_turn") single++;
+      });
+      return single > chat ? "single_turn" : chat > 0 ? "chat" : "";
+    }
+    return vote(false) || vote(true);
+  }
+  // A one-job model (folded interaction "single_turn") takes one input of a fixed shape, not a
+  // conversation, so the chat shelf never offers it (market_listing_kinds.feature K9, per model).
+  function oneJobModels(offers) {
+    var by = {}, out = {};
+    offers.forEach(function (o) {
+      if (o && o.model) (by[o.model] || (by[o.model] = [])).push(o);
+    });
+    Object.keys(by).forEach(function (m) {
+      if (foldInteraction(by[m]) === "single_turn") out[m] = true;
+    });
+    return out;
+  }
 
   function bandsFromOffers(offers) {
     var by = {};
+    var oneJob = oneJobModels(offers);
     offers.forEach(function (o) {
-      if (!o || !o.model || isSearch(o) || isOneJob(o)) return;
+      if (!o || !o.model || isSearch(o) || oneJob[o.model]) return;
       var b = by[o.model] || (by[o.model] = {
         model: o.model, count: 0, free: false, tier: 99, signal: 0, tps: 0, caps: {}, stations: [],
         online: false

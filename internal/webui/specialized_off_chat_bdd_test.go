@@ -28,8 +28,8 @@ type consoleSpec struct {
 func pickerFns(t *testing.T) string {
 	js := chatJS(t)
 	var out []string
-	for _, name := range []string{"chatIsVoice", "chatCannotTalk"} {
-		re := regexp.MustCompile(`(?s)function ` + name + `\(.*?\n?\s*\}\n`)
+	for _, name := range []string{"chatIsVoice", "chatCannotTalk", "chatFoldInteraction", "chatOneJobModels"} {
+		re := regexp.MustCompile(`(?s)  function ` + name + `\(.*?\n  \}\n`)
 		m := re.FindString(js)
 		if m == "" {
 			t.Fatalf("console.js has no function %s", name)
@@ -47,8 +47,9 @@ func (c *consoleSpec) build(t *testing.T) error {
 	offers, _ := json.Marshal(c.offers)
 	script := pickerFns(t) + `
 const offers = ` + string(offers) + `;
+const oneJob = chatOneJobModels(offers);
 console.log(JSON.stringify(offers.filter(function (o) {
-  return o.model && o.online === true && !chatCannotTalk(o.modality, o.interaction);
+  return o.model && o.online === true && !oneJob[o.model] && !chatCannotTalk(o.modality, "");
 }).map(function (o) { return o.model; })));`
 	out, err := exec.Command(node, "-e", script).CombinedOutput()
 	if err != nil {
@@ -149,5 +150,53 @@ console.log(JSON.stringify(` + rows + `.filter(function (r) {
 	}
 	if want := []string{"chat-8b", "plain"}; !slices.Equal(got, want) {
 		t.Fatalf("local chat rows %v, want %v", got, want)
+	}
+}
+
+// K9 is per MODEL: the console folds every station's vote the way the broker and the CLI do
+// (client.FoldInteraction): online stations vote, the majority wins, a tie is chat, and only
+// when no online station says anything do the offline ones decide. One station's word never
+// decides a model's kind.
+func TestConsoleOneJobFoldsPerModel(t *testing.T) {
+	node, err := exec.LookPath("node")
+	if err != nil {
+		t.Skip("node is needed to run the console's picker code")
+	}
+	js := chatJS(t)
+	var fns []string
+	for _, name := range []string{"chatIsVoice", "chatCannotTalk", "chatFoldInteraction", "chatOneJobModels"} {
+		m := regexp.MustCompile(`(?s)  function ` + name + `\(.*?\n  \}\n`).FindString(js)
+		if m == "" {
+			t.Fatalf("console.js has no function %s", name)
+		}
+		fns = append(fns, m)
+	}
+	on := func(m, inter string) map[string]any {
+		return map[string]any{"model": m, "online": true, "interaction": inter}
+	}
+	off := func(m, inter string) map[string]any {
+		return map[string]any{"model": m, "online": false, "interaction": inter}
+	}
+	for _, c := range []struct {
+		name   string
+		offers []map[string]any
+		oneJob bool
+	}{
+		{"one station of three says one-job", []map[string]any{on("m", "single_turn"), on("m", "chat"), on("m", "chat")}, false},
+		{"majority one-job", []map[string]any{on("m", "single_turn"), on("m", "single_turn"), on("m", "chat")}, true},
+		{"tie is chat", []map[string]any{on("m", "single_turn"), on("m", "chat")}, false},
+		{"offline one-job vote does not count", []map[string]any{on("m", "chat"), off("m", "single_turn")}, false},
+		{"online silent, offline decide", []map[string]any{on("m", ""), off("m", "single_turn")}, true},
+		{"one-job, one station", []map[string]any{on("m", "single_turn")}, true},
+	} {
+		offers, _ := json.Marshal(c.offers)
+		script := strings.Join(fns, "\n") + "\nconsole.log(JSON.stringify(!!chatOneJobModels(" + string(offers) + ")[\"m\"]));"
+		out, err := exec.Command(node, "-e", script).CombinedOutput()
+		if err != nil {
+			t.Fatalf("%s: node: %v: %s", c.name, err, out)
+		}
+		if got := strings.TrimSpace(string(out)) == "true"; got != c.oneJob {
+			t.Errorf("%s: one-job=%v, want %v", c.name, got, c.oneJob)
+		}
 	}
 }

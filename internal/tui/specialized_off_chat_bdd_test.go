@@ -171,3 +171,33 @@ func TestAgentSkipsATunedOneJobModel(t *testing.T) {
 		t.Fatalf("a tuned one-job model is an agent candidate: %v", m.agentModelCandidates())
 	}
 }
+
+// One model, one kind (K9 "a model"): the fold runs over every station of the MODEL, so two
+// quants of one model are both specialized or both chat, and the agent's model-keyed skip
+// can never drop a chat band of a model whose other quant is one-job.
+func TestBandSpecializedFoldsAcrossQuants(t *testing.T) {
+	mk := func(quant, inter string) offer {
+		o := offer{Model: "m", Modality: protocol.ModalityChat, Online: true, Quant: quant}
+		o.Interaction = inter
+		return o
+	}
+	for _, c := range []struct {
+		name   string
+		offers []offer
+		want   bool
+	}{
+		{"one-job majority across quants", []offer{mk("Q4_K_M", "single_turn"), mk("Q4_K_M", "single_turn"), mk("Q8_0", "chat")}, true},
+		{"chat majority across quants", []offer{mk("Q4_K_M", "single_turn"), mk("Q8_0", "chat"), mk("Q8_0", "chat")}, false},
+		{"tie across quants is chat", []offer{mk("Q4_K_M", "single_turn"), mk("Q8_0", "chat")}, false},
+	} {
+		bands := groupBands(c.offers, nil)
+		if len(bands) != 2 {
+			t.Fatalf("%s: want two bands (one per quant), got %d", c.name, len(bands))
+		}
+		for _, b := range bands {
+			if b.specialized != c.want {
+				t.Errorf("%s: band %s specialized=%v, want %v", c.name, b.quant, b.specialized, c.want)
+			}
+		}
+	}
+}

@@ -36,7 +36,7 @@ or `native`), so callers can tell a resold engine from someone's own index.
 ### Brave
 
 ```
-roger share --search brave --price-per-1k 6
+roger share --search brave --price-per-1k 5
 ```
 
 roger reads the key from `--upstream-key`, then `BRAVE_SEARCH_API_KEY`, then asks for it with

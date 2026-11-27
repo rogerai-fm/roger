@@ -3001,5 +3001,8 @@ func printFrequencyCode(w io.Writer, model, code, display, howTo string) {
 		fmt.Fprintln(w, "  the cosmetic \"MHz\" part is optional - the code after it is what matters.")
 	} else if display != "" {
 		fmt.Fprintf(w, "\n  on air on your existing private band: %s (code shown only at first creation)\n", display)
+	} else {
+		fmt.Fprintln(w, "\n  this band is private, but the broker sent no frequency code yet.")
+		fmt.Fprintln(w, "  run `roger bands list` to find the band, then `roger bands new-code <band-id>` for a code.")
 	}
 }

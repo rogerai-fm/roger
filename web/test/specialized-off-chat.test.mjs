@@ -22,7 +22,7 @@ function cut(name) {
 }
 
 function shelf(offers) {
-  const src = ["isOnline", "callsign", "capsOf", "looksEmbeddingOnly", "looksVision", "isSearch", "isOneJob", "bandsFromOffers"].map(cut).join("\n");
+  const src = ["isOnline", "callsign", "capsOf", "looksEmbeddingOnly", "looksVision", "isSearch", "foldInteraction", "oneJobModels", "bandsFromOffers"].map(cut).join("\n");
   const fn = new Function(src + "\nreturn bandsFromOffers;")();
   const bands = fn(offers);
   return (Array.isArray(bands) ? bands : Object.values(bands)).map((b) => b.model);
@@ -44,4 +44,22 @@ test("site Playbox chat shelf: a one-job model is not offered, a chat model is",
 
 test("site Playbox chat shelf: a model with no interaction stays", () => {
   assert.deepEqual(shelf([{ model: "mystery-7b", online: true, node_id: "a" }]), ["mystery-7b"]);
+});
+
+// K9 is per MODEL: the shelf folds every station's vote the way the broker does. Online
+// stations vote, the majority wins, a tie is chat; only when no online station says anything
+// do the offline ones decide. One station's word never decides a model's kind.
+test("site Playbox chat shelf: one-job is the per-model fold, not one station's word", () => {
+  const on = (interaction, id) => ({ model: "m", modality: "chat", online: true, interaction, node_id: id });
+  const off = (interaction, id) => ({ model: "m", modality: "chat", online: false, interaction, node_id: id });
+  const cases = [
+    ["one station of three says one-job", [on("single_turn", "a"), on("chat", "b"), on("chat", "c")], true],
+    ["majority one-job", [on("single_turn", "a"), on("single_turn", "b"), on("chat", "c")], false],
+    ["tie is chat", [on("single_turn", "a"), on("chat", "b")], true],
+    ["offline one-job vote does not count", [on("chat", "a"), off("single_turn", "b")], true],
+    ["online silent, offline decide", [on("", "a"), off("single_turn", "b")], false],
+  ];
+  for (const [name, offers, onShelf] of cases) {
+    assert.equal(shelf(offers).includes("m"), onShelf, name);
+  }
 });

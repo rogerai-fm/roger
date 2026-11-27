@@ -93,7 +93,11 @@ func TestMarketPrintsEverySectionInOrder(t *testing.T) {
 	})
 	out, err := listOut(t, func() error { return Market(url, ListOptions{}) })
 	require.NoError(t, err)
-	at := func(s string) int { i := strings.Index(out, s); require.GreaterOrEqual(t, i, 0, "missing %q:\n%s", s, out); return i }
+	at := func(s string) int {
+		i := strings.Index(out, s)
+		require.GreaterOrEqual(t, i, 0, "missing %q:\n%s", s, out)
+		return i
+	}
 	require.Less(t, at("MODELS"), at("SPECIALIZED"))
 	require.Less(t, at("SPECIALIZED"), at("VOICES"))
 	require.Less(t, at("VOICES"), at("SEARCH"))
@@ -120,7 +124,7 @@ func TestMarketKindFilterAndEmpty(t *testing.T) {
 	out, err := listOut(t, func() error { return Market(url, ListOptions{Kind: "search"}) })
 	require.NoError(t, err)
 	require.Contains(t, out, "SEARCH")
-	require.Contains(t, out, "web ") // built from the /discover offer
+	require.Contains(t, out, "web ")            // built from the /discover offer
 	require.Regexp(t, `web +searxng +5\b`, out) // 5000 per 1M = $5 per 1K
 	require.NotContains(t, out, "MODELS")
 
@@ -192,4 +196,33 @@ func TestMarketFoldsAModelIntoOneSection(t *testing.T) {
 	row := regexp.MustCompile(`(?m)^[◉○]\s+\S+\s+job\s`) // a station row (status glyph) whose model is "job"
 	require.Len(t, row.FindAllString(out[spec:], -1), 2, "both job rows under SPECIALIZED:\n%s", out)
 	require.Empty(t, row.FindAllString(out[:spec], -1))
+}
+
+// --kind models|voices leaves search out, so the listing never asks for /search/stations.
+// --kind search and the full listing still do.
+func TestMarketFetchesSearchStationsOnlyWhenListed(t *testing.T) {
+	for _, c := range []struct {
+		kind string
+		want int
+	}{{"models", 0}, {"voices", 0}, {"search", 1}, {"", 1}} {
+		hits := 0
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.URL.Path {
+			case "/discover":
+				_ = json.NewEncoder(w).Encode(map[string]any{"offers": everyKind()})
+			case "/search/stations":
+				hits++
+				_ = json.NewEncoder(w).Encode(map[string]any{"stations": []map[string]any{}})
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		for _, asJSON := range []bool{false, true} {
+			hits = 0
+			_, err := listOut(t, func() error { return Market(srv.URL, ListOptions{Kind: c.kind, JSON: asJSON}) })
+			require.NoError(t, err)
+			require.Equal(t, c.want, hits, "--kind %q json=%v", c.kind, asJSON)
+		}
+		srv.Close()
+	}
 }

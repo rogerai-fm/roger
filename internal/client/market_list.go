@@ -162,8 +162,6 @@ func Market(broker string, opt ListOptions) error {
 		}
 		groups[k] = append(groups[k], o)
 	}
-	stations := searchStations(broker, feedSearch)
-
 	want := func(k string) bool {
 		switch opt.Kind {
 		case "":
@@ -172,6 +170,10 @@ func Market(broker string, opt ListOptions) error {
 			return k == kindModels
 		}
 		return k == opt.Kind
+	}
+	var stations []searchStation
+	if want(kindSearch) { // a listing without search never asks for it
+		stations = searchStations(broker, feedSearch)
 	}
 	if opt.JSON {
 		return printListJSON(groups, stations, want)

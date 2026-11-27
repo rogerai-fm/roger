@@ -132,8 +132,8 @@ func TestStationConfig(t *testing.T) {
 
 // TestCommandHandlers drives the broker-facing command handlers against a fake broker.
 func TestCommandHandlers(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	writeAuth(t) // satisfy the login gate on payout/appeal
+	useTempConfig(t) // also stops any Edge host a past test left running, before this dir is removed
+	writeAuth(t)     // satisfy the login gate on payout/appeal
 	cfg := config{Broker: fakeBroker(t), User: "u_gh_1"}
 
 	mustNil := func(name string, err error) {

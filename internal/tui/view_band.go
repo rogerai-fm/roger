@@ -55,8 +55,9 @@ type band struct {
 	// groupBands sets it. isVoice() (tts/stt) drives BOTH the separate "Voices" section in the
 	// browser AND the preview-instead-of-chat divert in connect().
 	modality string
-	// specialized marks a one-job model: a station published interaction "single_turn"
-	// (features/cli/market_listing_kinds.feature K9). It is never offered as a chat partner.
+	// specialized marks a one-job model: the fold of every station of the MODEL (across quants)
+	// is interaction "single_turn" (features/cli/market_listing_kinds.feature K9). It is never
+	// offered as a chat partner.
 	specialized bool
 	stations    int     // online stations serving it
 	minIn       float64 // cheapest active in-price now (the headline $/1M in, mirrors the web)
@@ -602,12 +603,18 @@ func groupBands(offers []offer, limits *LimitStore) []band {
 		b.stations++
 		b.online = true
 	}
+	// K9 is per MODEL: every station of the model votes, across quants, so one model is
+	// one kind on every band it has (and on every client).
+	perModel := map[string][]offer{}
+	for _, o := range offers {
+		perModel[o.Model] = append(perModel[o.Model], o)
+	}
 	out := make([]band, 0, len(order))
 	for _, k := range order {
 		b := byKey[k]
 		b.tax = foldTaxonomy(b.all) // by the /market rule: online human stations vote
 		b.about, b.tuning, b.base, b.license = foldAbout(b.all)
-		b.specialized = !b.isVoice() && bandInteraction(b.all) == protocol.InteractionSingleTurn
+		b.specialized = !b.isVoice() && bandInteraction(perModel[b.model]) == protocol.InteractionSingleTurn
 		out = append(out, *b)
 	}
 	sort.SliceStable(out, func(i, j int) bool {
