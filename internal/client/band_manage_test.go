@@ -96,10 +96,8 @@ func TestRevokeBandSurfacesTheHumanSentence(t *testing.T) {
 // An unreachable broker is a transport failure, not a band problem - it must be
 // distinguishable so callers do not tell the operator their band is missing.
 func TestBandCallsReportAnUnreachableBroker(t *testing.T) {
-	// A closed server: the port is dead.
-	srv := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
-	dead := srv.URL
-	srv.Close()
+	// An address that drops every connection (see deadBroker).
+	dead := deadBroker(t)
 
 	if err := RevokeBand(dead, "band_x"); err == nil {
 		t.Error("revoking against a dead broker must error")

@@ -138,10 +138,8 @@ func TestGetJSONDistinctErrorOnUnreachable(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
-	// A server we immediately close, so the address refuses connections.
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
-	dead := srv.URL
-	srv.Close()
+	// An address that drops every connection (see deadBroker).
+	dead := deadBroker(t)
 
 	var out struct{}
 	err := getJSON(dead, "/balance", "tester", &out)

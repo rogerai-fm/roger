@@ -229,11 +229,8 @@ func (s *proxyState) startBroker() {
 
 func (s *proxyState) brokerURL() string {
 	if s.unreachable {
-		// A dead endpoint: start-then-close so the port is refused fast (transport error).
-		dead := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
-		u := dead.URL
-		dead.Close()
-		return u
+		// A dead endpoint: every connection is dropped, a fast transport error (see deadBroker).
+		return closedServer()
 	}
 	return s.broker
 }

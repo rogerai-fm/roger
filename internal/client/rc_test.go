@@ -33,14 +33,16 @@ func rcSigned(r *http.Request, raw []byte) bool {
 	return ok
 }
 
-// closedServer returns a base URL whose listener is already closed - a guaranteed
-// transport error for the ErrBrokerUnreachable branches.
-func closedServer() string {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
-	url := srv.URL
-	srv.Close()
+// closedServer returns a base URL that drops every connection - a guaranteed transport error
+// for the ErrBrokerUnreachable branches. One address serves every caller and its port stays
+// held for the life of the test binary, so no test's server can land on it (see deadBroker).
+var closedServer = sync.OnceValue(func() string {
+	url, _, err := deadAddr()
+	if err != nil {
+		panic(err) // no loopback port to listen on: nothing in this package can run
+	}
 	return url
-}
+})
 
 // waitTrue polls cond until it is true or the deadline lapses.
 func waitTrue(t *testing.T, what string, cond func() bool) {

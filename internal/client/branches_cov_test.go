@@ -2,6 +2,7 @@ package client
 
 import (
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -32,14 +33,35 @@ func jsonServer(t *testing.T, status int, body string, headers map[string]string
 	return srv.URL
 }
 
-// deadBroker returns the URL of a server that is immediately closed, so every request
-// to it fails at the transport layer (connection refused) - the unreachable branch.
+// deadBroker is the address of a broker that cannot be reached. It keeps its port for the whole
+// test and drops every connection, so a parallel test's server can never land on the port and
+// answer instead (that was a 404 in place of the transport error, seen 2026-11-26).
 func deadBroker(t *testing.T) string {
 	t.Helper()
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
-	url := srv.URL
-	srv.Close()
+	url, stop, err := deadAddr()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(stop)
 	return url
+}
+
+// deadAddr is deadBroker without a test to clean up after: stop frees the port.
+func deadAddr() (url string, stop func(), err error) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return "", nil, err
+	}
+	go func() {
+		for {
+			c, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			_ = c.Close()
+		}
+	}()
+	return "http://" + ln.Addr().String(), func() { _ = ln.Close() }, nil
 }
 
 // TestParseChatErrorBranches covers parseChatError's every shape: a broker error
