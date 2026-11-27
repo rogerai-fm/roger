@@ -122,6 +122,16 @@
    "/models.html"
   ]
  },
+ "broadcasts-search-in-pictures.html": {
+  "sha": "8ea56860e1acc4136369de92f099eae9431e99dffed435aa4caec23e98ff7ead",
+  "length": 5073,
+  "hrefs": [
+   "/broadcasts.html",
+   "https://rogerai.fm/manual#sSearch",
+   "https://github.com/rogerai-fm/roger/blob/main/docs/search-providers.md",
+   "/broadcasts-how-llms-work.html"
+  ]
+ },
  "broadcasts-share-gpu-earn.html": {
   "sha": "e4a52bcef0f1c9d160723d9dcdd31ca1169d6ae2ff420256a9441ce74696d086",
   "length": 5779,
@@ -160,9 +170,10 @@
   ]
  },
  "broadcasts.html": {
-  "sha": "2d30be15adc25ce3e15bcfdd68096ddc87f628c58f577e83eaa8122454676a29",
-  "length": 4582,
+  "sha": "0bcb5a0fabe643c0009d1eea5d72a6f82207a6a09f0d5218879f4755145b677f",
+  "length": 4771,
   "hrefs": [
+   "/broadcasts-search-in-pictures.html",
    "/broadcasts-how-llms-work.html",
    "/broadcasts-jev-vs-wave.html",
    "/broadcasts-sharing-your-gpu-is-safe.html",

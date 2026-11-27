@@ -13,7 +13,7 @@ import path from "node:path";
 const WEB = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => readFileSync(path.join(WEB, "dist", p), "utf8");
 
-export const PAGES = ["broadcasts-how-llms-work.html"];
+export const PAGES = ["broadcasts-how-llms-work.html", "broadcasts-search-in-pictures.html"];
 export const MAX_SENTENCE = 28;   // words
 export const MAX_AVERAGE = 16;    // words
 

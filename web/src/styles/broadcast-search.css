@@ -1,0 +1,50 @@
+/* Broadcast 017: how search works, in pictures. Page-only pieces: the loop/still swap, the
+   route strip (FIG. 2), the model-vs-search table (FIG. 4) and the command blocks. Colours are
+   theme tokens only. Motion is opt-in; every figure is complete without it. */
+
+/* a loop shows; its still stands in under reduced motion */
+.srch-fig .srch-still { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .srch-fig .srch-loop { display: none; }
+  .srch-fig .srch-still { display: block; }
+}
+
+/* FIG. 2: the route, as page text so it reflows on a phone */
+.srch-route { position: relative; padding: 1.25rem 0 1.5rem; }
+.srch-route__steps {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; gap: .75rem; align-items: stretch;
+}
+.srch-route__steps li {
+  flex: 1 1 0; border: 1.5px solid currentColor; border-radius: 6px;
+  padding: .75rem .5rem; text-align: center; position: relative;
+}
+.srch-route__steps li + li::before {
+  content: "\2192"; position: absolute; left: -.72rem; top: 50%;
+  transform: translate(-50%, -50%); font-family: var(--font-mono, monospace);
+}
+.srch-route__steps b { display: block; font-family: var(--font-mono, monospace); font-size: .95rem; }
+.srch-route__steps small { display: block; margin-top: .25rem; font-size: .8rem; }
+.srch-route__live { border-color: var(--live) !important; }
+.srch-route__live b { color: var(--live-text); }
+.srch-route__dot {
+  position: absolute; left: 12%; bottom: .35rem; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--live);
+}
+@media (max-width: 640px) {
+  .srch-route__steps { flex-direction: column; }
+  .srch-route__steps li + li::before { content: "\2193"; left: 50%; top: -.4rem; }
+  .srch-route__dot { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .srch-route__dot { animation: srch-trip 5s ease-in-out infinite; }
+  @keyframes srch-trip {
+    0%, 8% { left: 12%; }
+    46%, 54% { left: 86%; }
+    92%, 100% { left: 12%; }
+  }
+}
+
+/* FIG. 4: model vs search */
+.srch-vs thead th:last-child { color: var(--live-text); }
+.srch-vs code { overflow-wrap: normal; word-break: normal; }

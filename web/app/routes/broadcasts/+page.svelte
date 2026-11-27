@@ -110,6 +110,22 @@
       <ol class="bc-list" data-reveal data-reveal-delay="80">
 
         <li class="bc-row">
+          <a class="bc-row__link" href="/broadcasts-search-in-pictures.html">
+            <span class="bc-row__lead" aria-hidden="true">
+              <span class="ember">&#9673;</span>
+              <b class="bc-row__no">BROADCAST 017</b>
+            </span>
+            <span class="bc-row__meta">
+              <time class="bc-row__date" datetime="2026-11-26">NOVEMBER 2026 &middot; FIELD GUIDE</time>
+            </span>
+            <span class="bc-row__body">
+              <span class="bc-row__title">How search works on RogerAI, in pictures.</span>
+              <span class="bc-row__dek">One query in, one station answers, and the listing names the engine. Where the index comes from, what we keep, and what a search costs.</span>
+            </span>
+            <span class="bc-row__go" aria-hidden="true">tune in &rarr;</span>
+          </a>
+        </li>
+        <li class="bc-row">
           <a class="bc-row__link" href="/broadcasts-how-llms-work.html">
             <span class="bc-row__lead" aria-hidden="true">
               <span class="ember">&#9673;</span>

@@ -38,7 +38,7 @@ export const MASTERS = [
   "agent-governance-hero", "alt-hero", "alt-tunein", "connect-hero", "gpu-wall-hero",
   "jev-wave-hero", "llm-works-advisory", "llm-works-dials", "llm-works-hero", "llm-works-ladder", "llm-works-library", "llm-works-plant", "llm-works-stack", "mtp-hero", "mtp-knowledge-vs-tools", "mtp-nextn-layer", "mtp-nmax-sweep",
   "mtp-quality-vs-speed", "mtp-spill-vs-speedup", "quantization", "router-airwaves-hero",
-  "router-exact-failover", "router-three-stage", "share-hero", "share-reach", "tower-hero",
+  "router-exact-failover", "router-three-stage", "search-coin", "search-courier", "search-desks", "search-envelope", "search-hero", "search-own", "share-hero", "share-reach", "tower-hero",
   "vram-hero",
 ];
 

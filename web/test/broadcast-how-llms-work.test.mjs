@@ -35,11 +35,12 @@ test("how-llms: the broadcast builds, is indexable, and is in the sitemap and ll
   assert.match(read("llms.txt"), new RegExp(`\\(https://rogerai\\.fm/${PAGE}\\)`));
 });
 
-test("how-llms: the transmission log carries it first, as 016, above 015", () => {
+test("how-llms: the transmission log carries it as 016, under 017 and above 015", () => {
   const log = read("broadcasts.html");
   const rows = [...log.matchAll(/<a class="bc-row__link" href="\/(broadcasts-[\w-]+\.html)">/g)].map((m) => m[1]);
-  assert.equal(rows[0], PAGE, "newest first");
-  assert.equal(rows[1], "broadcasts-jev-vs-wave.html", "016 sits right above 015");
+  assert.equal(rows[0], "broadcasts-search-in-pictures.html", "017 is newest");
+  assert.equal(rows[1], PAGE, "016 sits right under 017");
+  assert.equal(rows[2], "broadcasts-jev-vs-wave.html", "016 sits right above 015");
   assert.match(log, /<b class="bc-row__no">BROADCAST 016<\/b>/);
   assert.match(decodeMarkup(read(PAGE)), /BROADCAST 016 · FIELD GUIDE/);
 });
