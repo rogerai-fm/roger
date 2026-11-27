@@ -378,10 +378,15 @@ Feature: Key limits on the relay - the per-key spend ceiling, window, and allow-
     When a relay carries Authorization "Bearer rog-key_..."
     Then it is a key request: key limit and key allow-lists apply; grant logic never runs
 
-  Scenario: A grant issued BY the key's account does not use the key's limit
-    Given "acct-a" (owner) minted grant "g1" for a friend
-    When the friend's relay bearing "g1" is served at the grant price
-    Then it settles against the grant's wallet rules and "k1" usage is unchanged
+  # Replaced 2026-11-24 (founder: "1, replace"). Under owner-pays this guarded the owner's key
+  # budget from a friend's use. Since 2026-11-23 a priced grant is paid by the caller who added
+  # it (features/grants/priced_grants.feature), so it now guards against billing the owner again.
+  Scenario: A friend who adds the key account's priced grant pays from their own wallet
+    Given "acct-a" (owner) minted a priced grant "g1" for its node
+    And a funded friend added "g1" to their own account
+    When the friend's logged-in relay is served by "acct-a"'s node
+    Then the relay is priced by "g1" and the friend's wallet pays it
+    And "acct-a"'s wallet is not charged and "k1" usage is unchanged
 
   Scenario: A key request served by the key account's own node is billed (not self-use)
     Given "acct-a" owns "n1"

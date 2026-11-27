@@ -26,12 +26,20 @@ func cmdGrant(cfg config, args []string) error {
 	case "create", "new":
 		return cmdGrantCreate(cfg, args[1:])
 	case "list", "ls":
-		return client.GrantList(cfg.Broker)
+		return cmdGrantList(cfg)
 	case "revoke", "rm":
 		if len(args) < 2 {
 			return fmt.Errorf("usage: roger grant revoke <name>")
 		}
-		return client.GrantRevoke(cfg.Broker, args[1])
+		return cmdGrantRevoke(cfg, args[1])
+	case "add":
+		return cmdGrantAdd(cfg, args[1:])
+	case "remove":
+		return cmdGrantRemove(cfg, args[1:])
+	case "reprice":
+		return cmdGrantReprice(cfg, args[1:])
+	case "set":
+		return cmdGrantSet(cfg, args[1:])
 	case "show":
 		// `grant show <name>`           -> scope/caps/usage (no secret).
 		// `grant show --secret <name>`  -> RECOVER a usable key (F4). The broker stores
@@ -62,7 +70,7 @@ func cmdGrant(cfg config, args []string) error {
 		grantUsage()
 		return nil
 	default:
-		return fmt.Errorf("unknown grant command %q (try create|list|revoke|show)", args[0])
+		return fmt.Errorf("unknown grant command %q (try create|list|show|set|revoke|reprice|add|remove)", args[0])
 	}
 }
 
@@ -71,7 +79,7 @@ func cmdGrantCreate(cfg config, args []string) error {
 	// The lean, in-everyone's-face surface: name + free-vs-priced.
 	name := fs.String("name", "", "label shown on your dashboard (required), e.g. my-bots")
 	free := fs.Bool("free", false, "free key - costs nobody (the default)")
-	priceOut := fs.Float64("price-out", 0, "charge $/1M output tokens (makes it a priced/sponsored grant)")
+	priceOut := fs.String("price-out", "", "charge $/1M output tokens (a priced grant: each person who adds it pays)")
 	// Advanced (hidden unless --advanced): the full power, defaulted sanely.
 	advanced := fs.Bool("advanced", false, "show the advanced flags (models, nodes, rpm, caps, expiry, self, price-in)")
 	models := fs.String("models", "", "restrict to these models (comma-separated; default: any)")
@@ -81,17 +89,17 @@ func cmdGrantCreate(cfg config, args []string) error {
 	monthlyCap := fs.Int64("monthly-cap", 0, "max tokens/UTC-month (0 = unlimited)")
 	expires := fs.String("expires", "", "lifetime, e.g. 30d or 2026-12-31 (default: never)")
 	self := fs.Bool("self", false, "a self key for YOUR own headless boxes/agents ($0)")
-	priceIn := fs.Float64("price-in", 0, "charge $/1M input tokens (advanced)")
+	priceIn := fs.String("price-in", "", "charge $/1M input tokens (advanced)")
 	fs.Usage = func() {
 		fmt.Print(`roger grant create - mint a private access key
 
   roger grant create --name my-bots               a FREE key for your bots/family
-  roger grant create --name jane --price-out 0.30 a priced key you sponsor
+  roger grant create --name jane --price-out 0.30 a priced grant: whoever adds it pays
   roger grant create --self --name hermes-box     a $0 key for your own remote box
 
   --name <label>     (required) shown on your dashboard
   --free             free key, costs nobody (default)
-  --price-out <P>    charge $/1M output (makes it a sponsored grant)
+  --price-out <P>    charge $/1M output (a priced grant: each person who adds it pays)
   --advanced         reveal: --models --nodes --rpm --daily-cap --monthly-cap --expires --self --price-in
 
 The secret is printed ONCE. A conservative daily token cap is set by default so a
@@ -106,6 +114,22 @@ forgotten key is self-limiting; override with --daily-cap (or 0 to disable).
 	if *advanced {
 		// --advanced is a help affordance: re-print so the user sees the full set.
 		fmt.Println("advanced flags: --models --nodes --rpm --daily-cap --monthly-cap --expires --self --price-in")
+	}
+	// The same reader as `roger grant reprice` and the console, so all three refuse a bad
+	// price in the same words (features/grants/grant_surfaces.feature S8).
+	var in, out float64
+	for _, p := range []struct {
+		raw string
+		dst *float64
+	}{{*priceIn, &in}, {*priceOut, &out}} {
+		if p.raw == "" {
+			continue
+		}
+		v, err := client.ParseGrantPrice(p.raw)
+		if err != nil {
+			return err
+		}
+		*p.dst = v
 	}
 	var expiresAt int64
 	if *expires != "" {
@@ -125,7 +149,7 @@ forgotten key is self-limiting; override with --daily-cap (or 0 to disable).
 	freeSet := flagPassed(fs, "free")
 	return client.GrantCreate(cfg.Broker, client.GrantCreateOpts{
 		Name: *name, Free: *free, FreeSet: freeSet,
-		PriceIn: *priceIn, PriceOut: *priceOut,
+		PriceIn: in, PriceOut: out,
 		Models: splitCSV(*models), Nodes: splitCSV(*nodes),
 		RPM: *rpm, DailyCap: *dailyCap, MonthlyCap: *monthlyCap,
 		ExpiresAt: expiresAt, Self: *self,
@@ -136,26 +160,36 @@ forgotten key is self-limiting; override with --daily-cap (or 0 to disable).
 // key for a grant whose secret was lost. The broker keeps only a HASH of the secret
 // (it can never be re-displayed), so recovery ROTATES the key: the named grant is
 // revoked and a fresh FREE key is minted under the same name, printing the new secret
-// once. A priced/scoped grant is NOT rotated here (we cannot reconstruct its caps /
-// price / node scope from the CLI without silently dropping them) - the user is
-// pointed at `grant revoke` + `grant create` so nothing is lost by surprise.
+// once. A priced grant is NOT rotated here: the owner is pointed at `grant reprice` at the
+// same price, which keeps everything but the secret (ruling S6).
 func grantRecoverSecret(cfg config, name string) error {
 	rows, err := client.GrantListRows(cfg.Broker)
 	if err != nil {
 		return err
 	}
+	// The live grant is the one meant: a name can be reused after a revoke (as findGrant).
 	var found *client.GrantInfo
 	for i := range rows {
-		if rows[i].Name == name {
+		if rows[i].Name == name && (found == nil || found.Status == "revoked") {
 			found = &rows[i]
-			break
 		}
 	}
 	if found == nil {
 		return fmt.Errorf("no grant named %q (run `roger grant list`)", name)
 	}
 	if found.Price != "free" {
-		return fmt.Errorf("%q is a %s key - its caps/scope can't be reconstructed here. To re-key it: `roger grant revoke %s` then `roger grant create --name %s ...`", name, found.Price, name, name)
+		// A priced grant gets a new secret by a reprice at its current price: the name, scope,
+		// caps and usage are kept (ruling S6). Revoking and creating again would drop everyone
+		// who added it.
+		_, _, in, out, err := client.GrantCurrentPrice(cfg.Broker, name)
+		if err != nil {
+			return err
+		}
+		flags := "--price-out " + fmtPrice(out)
+		if in > 0 {
+			flags += " --price-in " + fmtPrice(in)
+		}
+		return fmt.Errorf("%q is a priced grant. Its secret cannot be shown again. For a new one, keeping its name, stations, caps and usage, run `roger grant reprice %s %s`", name, name, flags)
 	}
 	fmt.Printf("recovering %q: the old key is unrecoverable (only its hash is stored), so this ROTATES it -\n", name)
 	fmt.Println("the previous secret stops working and a fresh one is minted under the same name.")
@@ -220,10 +254,15 @@ func grantUsage() {
 	fmt.Print(`roger grant - private access keys for your bots, family, and friends
 
   roger grant create --name my-bots     a free key (they use your models, no login)
-  roger grant list                      your keys + usage
+  roger grant list                      grants you made and grants you added
   roger grant show <name>               one key's scope, caps, usage
   roger grant show --secret <name>      lost a free key? rotate + reprint a fresh one
-  roger grant revoke <name>             kill a key (effective next request)
+  roger grant revoke <name>             kill a key you made, for everyone (next request)
+  roger grant set <name> --price-out <P>       cut the price or narrow it, same secret
+  roger grant reprice <name> --price-out <P>   a higher price or a wider grant, new secret
+
+  roger grant add                       add a priced grant someone gave you (you pay)
+  roger grant remove <name>             drop a grant you added, from your account only
 
   roger grant create --self --name hermes-box   a $0 key for your own remote box
   roger grant create --help                      the full create surface

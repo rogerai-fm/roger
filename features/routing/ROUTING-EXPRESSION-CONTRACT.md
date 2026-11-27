@@ -180,8 +180,9 @@ money gates (monthly cap, key limit) as today.
   `invalid_routing_value` naming the limit; exactly 256 is accepted. (No length rule existed
   before; the bound is explicit so an id can never be used to carry a payload.)
 - A grant's `price_in` / `price_out` is the price the GRANT BILLS AT, never a cap on station
-  offers: a priced grant bills the served (model, station) pair at the grant's price whichever
-  model serves. The consumer's own `max_price` caps still filter station offers under a grant.
+  offers: a priced grant bills the served (model, station) pair at the grant's price, to the
+  caller who added it, whichever model serves. The consumer's own `max_price` caps still
+  filter station offers under a grant.
 - Each entry may carry variant sugar (§4); sugar applies to that entry only, except a `sort`
   variant, which applies to the whole request (last one wins, as OpenRouter).
 - The plan is built per model in order: up to `ROGERAI_RELAY_ATTEMPTS` stations for the model,
@@ -453,7 +454,7 @@ code), applies on the bridge. $0 (free/self) requests count usage, not spend. A 
 governed by the grant, never by a key. Revoked/expired/disabled: precedence revoked > expired >
 disabled; an in-flight stream completes and settles; fail-closed 503 when the shared store is
 down. Audit: `$0` ledger rows kind `key_event`; in `/account/export`; anonymized on delete.
-Clients: `roger keys list|mint|set|rm`, `roger use --key`, `/usage?by=key`, the web account
+Clients: `roger keys list|mint|set|revoke` (`rm` still works), `roger use --key`, `/usage?by=key`, the web account
 page; `/generation` shows `key_id`. Errors: an unknown secret is 401 `key_invalid`; a revoked /
 expired / disabled key gets its own code (the holder may learn why; the secret is unguessable so
 this is no oracle). Shared store unreachable at key auth OR at the reserve step: 503 fail-closed.

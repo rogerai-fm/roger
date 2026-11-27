@@ -705,20 +705,31 @@ Feature: A consumer names the models it accepts, in order - the broker serves th
     Then the grant's cap is debited once, for "o2"'s served tokens only
 
   # corrected 2026-10-01 (founder-approved): a grant's price_in/price_out is the price the GRANT BILLS AT (resolvePricing), not a cap on station offers; the old expectation that the 2.00-out station is "never planned" was a new rule, not grant semantics.
+  # changed 2026-11-23 (founder-approved, features/grants/priced_grants.feature P1, P5, P7c): a
+  # priced grant is paid by the account that added it, and a priced grant sent as a bare key is
+  # refused. These scenarios keep what they proved, on the caller who added the grant.
   Scenario: a priced grant bills the served pair at the grant's price, whichever model serves
-    Given a sponsored grant with price_out 1.00; O's "o1" serves "a" at 2.00 out and O's "o2" serves "b" at 0.50 out
-    When the grant relays with "model": "a" and "models": ["b"]
+    Given a priced grant with price_out 1.00 that a friend added; O's "o1" serves "a" at 2.00 out and O's "o2" serves "b" at 0.50 out
+    When the friend relays with "model": "a" and "models": ["b"]
     Then the response is 200 from "o1", billed at the grant's 1.00/1.00, and "o2" received nothing
 
   Scenario: a priced grant bills the grant's price when the fallback model serves too
-    Given a sponsored grant with price_out 1.00; O's "o1" serves "a" at 2.00 out and 429s, O's "o2" serves "b" at 0.50 out
-    When the grant relays with "model": "a" and "models": ["b"]
+    Given a priced grant with price_out 1.00 that a friend added; O's "o1" serves "a" at 2.00 out and 429s, O's "o2" serves "b" at 0.50 out
+    When the friend relays with "model": "a" and "models": ["b"]
     Then the response is 200 from "o2", billed at the grant's 1.00/1.00, not the station's 0.50
 
-  Scenario: the consumer's own max_price cap still filters station offers under a priced grant
-    Given a sponsored grant with price_out 1.00; O's "o1" serves "a" at 2.00 out and O's "o2" serves "b" at 0.50 out
-    When the grant relays with max_price.completion 1.00 and "model": "a" and "models": ["b"]
-    Then "o1" is never planned and the response is 200 from "o2"
+  # rewritten 2026-11-23 (founder-approved): the caller's max_price is checked against the price
+  # this caller pays. Under a grant the caller added that is the grant price, not the station's
+  # public price, so "o1" (2.00 public, 1.00 to the friend) is within a 1.00 maximum.
+  Scenario: the friend's own max_price is checked against the grant price the friend pays
+    Given a priced grant with price_out 1.00 that a friend added; O's "o1" serves "a" at 2.00 out and O's "o2" serves "b" at 0.50 out
+    When the friend relays with max_price.completion 1.00 and "model": "a" and "models": ["b"]
+    Then the response is 200 from "o1", billed at the grant's 1.00/1.00, and "o2" received nothing
+
+  Scenario: a max_price below the grant price keeps every station of the grant's owner out
+    Given a priced grant with price_out 1.00 that a friend added; O's "o1" serves "a" at 2.00 out and O's "o2" serves "b" at 0.50 out
+    When the friend relays with max_price.completion 0.80 and "model": "a" and "models": ["b"]
+    Then "o1" and "o2" received nothing and the refusal names the maximum price
 
   Scenario: a private band that denies some listed models serves the allowed one
     Given private band B on "s1" allows models ["b"] and "s1" serves "a" and "b"
@@ -742,6 +753,13 @@ Feature: A consumer names the models it accepts, in order - the broker serves th
     Given "a1" serves "a" at 5.00 out and "b1" serves "b" at 0.50 out
     When a consumer relays with max_price.completion 1.00 and "model": "a" and "models": ["b"]
     Then "a1" is never planned and the response is 200 from "b1"
+
+  # Added 2026-11-24 (founder: "3. yes"): a caller with no grant whose maximum price turns every
+  # station away is told so by name, as the friend above is.
+  Scenario: the consumer's output price cap below every station names the maximum price in the refusal
+    Given "a1" serves "a" at 5.00 out and "b1" serves "b" at 0.50 out
+    When a consumer relays with max_price.completion 0.40 and "model": "a" and "models": ["b"]
+    Then "a1" and "b1" received nothing and the refusal names the maximum price
 
   Scenario: the consumer's input price cap is applied per model
     Given "a1" serves "a" at 5.00 in and "b1" serves "b" at 0.10 in

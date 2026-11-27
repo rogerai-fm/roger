@@ -23,7 +23,7 @@ func fakeBrokerAll(t *testing.T) string {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{
 			"url":"https://pay.example/checkout",
-			"cap":0,"monthly_cap":0,"spend":0,
+			"cap":0,"monthly_cap":0,"spend":0,"logged_in":true,
 			"connected":false,"status":"none",
 			"payout":{"id":1,"amount":0,"state":"pending"},
 			"payouts":[],
@@ -157,7 +157,7 @@ func TestAccountAndGrantsCreate(t *testing.T) {
 	}
 	r.Body.Close()
 
-	rg := webDo(t, s, http.MethodPost, "/api/grants", `{"name":"petlings","free":true}`)
+	rg := webDo(t, s, http.MethodPost, "/api/grants", `{"name":"petlings"}`)
 	if rg.StatusCode != http.StatusOK {
 		t.Errorf("grants create = %d, want 200", rg.StatusCode)
 	}

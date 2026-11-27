@@ -192,6 +192,14 @@ CREATE TABLE IF NOT EXISTS rogerai.grants (
     revoked      BOOLEAN DEFAULT false,
     created_at   BIGINT NOT NULL);
 CREATE INDEX IF NOT EXISTS grants_owner ON rogerai.grants (owner);
+-- priced grants (features/grants/priced_grants.feature): gen is the secret's generation (a
+-- reprice issues a new secret and the next gen); grant_adds is the grants an account added.
+ALTER TABLE rogerai.grants ADD COLUMN IF NOT EXISTS gen BIGINT NOT NULL DEFAULT 0;
+CREATE TABLE IF NOT EXISTS rogerai.grant_adds (
+    wallet TEXT NOT NULL, grant_id TEXT NOT NULL, gen BIGINT NOT NULL DEFAULT 0, added_at BIGINT NOT NULL,
+    covers JSONB NOT NULL DEFAULT '{}',         -- station -> models the add reply showed (P17, P18)
+    PRIMARY KEY (wallet, grant_id));
+CREATE INDEX IF NOT EXISTS grant_adds_grant ON rogerai.grant_adds (grant_id);
 -- per-grant token usage rollup (daily/monthly cap check + dashboard). bucket is the UTC day/month key (window was a
 -- UTC day ("YYYY-MM-DD") or month ("YYYY-MM"); tokens accumulate at settle time.
 CREATE TABLE IF NOT EXISTS rogerai.grant_usage (

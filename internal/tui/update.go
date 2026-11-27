@@ -130,6 +130,10 @@ func (m model) onKey(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.welcome {
 		return m.onWelcomeKey(k)
 	}
+	// The KEYS panel owns every other key too: y answers a revoke, esc closes (keys.go).
+	if m.mode == modeKeys {
+		return m.onKeysKey(k)
+	}
 	// alt+m is the typing-SAFE global minimize: it toggles the dense compact "windowshade"
 	// (the 2000s-MP3-player feel) from ANY mode - including chat / AGENT / the command palette
 	// / numeric editors, where plain m is a literal character. Plain m still toggles compact on
@@ -309,7 +313,12 @@ func (m model) onKey(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 			// Record the sent line in the recall history (raw text, not the sysPrompt-
 			// prefixed turn). Empty sends are filtered above; add() also collapses a repeat
 			// of the previous entry and resets the Up/Down cursor to the bottom.
-			m.chatHist.add(p)
+			// A slash command's secret argument is dropped, as in the palette's history.
+			if strings.HasPrefix(p, "/") {
+				m.chatHist.add(scrubSecretArgs(p))
+			} else {
+				m.chatHist.add(p)
+			}
 			// A leading / in-session is a slash command, not a chat turn.
 			if strings.HasPrefix(p, "/") {
 				return m.runSession(p)
@@ -875,8 +884,8 @@ func (m model) runSession(line string) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		sysLine("endpoint " + m.endpoint + " · key " + m.apikey + " · model " + m.connected.Model)
-		sysLine("/connect for paste-ready opencode/env snippets (auto-copied)")
-		return m, nil
+		sysLine("✓ export block copied to your clipboard · /connect prints the opencode/env snippets")
+		return m, clipboardWrite(connectExport(m.endpoint, m.apikey, m.connected.Model))
 	case "connect", "conn":
 		if m.endpoint == "" || m.connected == nil {
 			sysLine("no endpoint yet - tune into a channel first")
@@ -923,6 +932,10 @@ func (m model) runSession(line string) (tea.Model, tea.Cmd) {
 		// /compact (/min): minimize to the dense windowshade from a channel without losing
 		// your typing - the same toggle as alt+m / m. Run it again (or m) to expand.
 		return m.toggleCompact(), nil
+	case "keys", "key", "grant":
+		// The KEYS panel opens over the channel and esc comes back here. Nothing it shows is
+		// written to this transcript.
+		return m.run(line)
 	case "support":
 		// Opens the site (community + Discord); self-gated on an interactive TTY, URL
 		// printed as the fallback.
@@ -937,6 +950,7 @@ func (m model) runSession(line string) (tea.Model, tea.Cmd) {
 		// Keep this listing in lock-step with what runSession actually accepts (incl. the
 		// aliases), so no real command is hidden from /? (the short help; /help + /commands alias it).
 		sysLine("/agent (run the agent on this model) · /model (/tune /retune) · /clear · /save · /system <p> · /cost · /stats (/detail) · /confidential (/conf)")
+		sysLine("/keys (your own bot's API keys) · /grant (a key for someone else)")
 		sysLine("/connect (/conn) · /endpoint (/ep) · /copy (/y) [all] · /mouse · /compact (/min · alt+m) · /ping (/zen) · /webui (/console) · /support · /disconnect (/leave /dc) · /quit (/q) · /? (/help /h /commands)")
 		sysLine("copy: DRAG to select any text (native) · ctrl+y last reply · /copy all  ·  scroll: PgUp/PgDn · arrows · ctrl+o for wheel")
 		sysLine("esc or /disconnect leaves this channel · /quit exits RogerAI · tab peeks at the band")
@@ -1026,10 +1040,17 @@ func (m model) run(cmd string) (tea.Model, tea.Cmd) {
 		return m.doTopup(fields[1:])
 	case "grant":
 		return m.doGrant(fields[1:])
+	case "keys", "key":
+		return m.doKeys(fields[1:])
 	case "endpoint", "ep":
 		if m.connected == nil {
 			m.status = "tune in first to get an endpoint"
+			break
 		}
+		// The plate under the band list masks the key and points here, so this copies the
+		// paste-ready block. The key itself stays off the status line.
+		m.status = copiedToast("the endpoint, key and model, as export lines")
+		return m, clipboardWrite(connectExport(m.endpoint, m.apikey, m.connected.Model))
 	case "help", "h":
 		m.mode = modeHelp
 		m.helpVP.GotoTop()
@@ -1926,26 +1947,25 @@ func (m model) doTopup(args []string) (tea.Model, tea.Cmd) {
 	}
 }
 
-// doGrant creates or lists owner grant keys in-TUI. `/grant create <name>` mints a
-// FREE key (shown once); `/grant` or `/grant list` lists them.
+// doGrant creates, lists or revokes owner grant keys in-TUI. `/grant create <name>` mints a
+// FREE key, shown once in the KEYS panel; `/grant` or `/grant list` opens that panel;
+// `/grant revoke <name>` asks first (keys.go).
 func (m model) doGrant(args []string) (tea.Model, tea.Cmd) {
+	m.keys.clearSecret()
+	if len(args) >= 1 && (args[0] == "revoke" || args[0] == "rm") {
+		return m.grantRevokeAsk(args[1:])
+	}
 	if len(args) >= 1 && (args[0] == "create" || args[0] == "new") {
-		if m.hooks.GrantCreate == nil {
-			m.status = stDim.Render("grants unavailable in this build - run `roger grant create`")
-			return m, nil
-		}
-		name := "my-bots"
-		if len(args) >= 2 {
-			name = args[1]
-		}
-		broker, create := m.broker, m.hooks.GrantCreate
-		m.status = stDim.Render("creating free grant " + name + "…")
-		return m, func() tea.Msg {
-			secret, err := create(broker, name, true)
-			if err != nil {
-				return flowErrMsg("grant create failed: " + err.Error())
-			}
-			return grantMsg{secret: secret}
+		return m.grantCreate(args[1:])
+	}
+	if len(args) >= 1 {
+		switch args[0] {
+		case "add":
+			return m.grantAdd(args[1:])
+		case "added":
+			return m.grantAddedOpen()
+		case "remove":
+			return m.grantRemoveAsk(args[1:])
 		}
 	}
 	// default: list
@@ -1953,14 +1973,7 @@ func (m model) doGrant(args []string) (tea.Model, tea.Cmd) {
 		m.status = stDim.Render("grants unavailable in this build - run `roger grant list`")
 		return m, nil
 	}
-	broker, list := m.broker, m.hooks.GrantList
-	return m, func() tea.Msg {
-		rows, err := list(broker)
-		if err != nil {
-			return flowErrMsg("grant list failed: " + err.Error())
-		}
-		return grantListMsg(rows)
-	}
+	return m.openKeys()
 }
 
 // doFreq tunes the band browser to a PRIVATE frequency. A bare /freq with an active

@@ -84,6 +84,9 @@ type Server struct {
 	// TUI's: sharing one would mean a write approved in the browser waits for a y/N at
 	// a terminal nobody may be sitting at.
 	agentSess agentSession
+
+	// channel is the console's own open endpoint, if any (channel.go).
+	channel consoleChannel
 }
 
 // New builds a console server over ctrl with a freshly-minted access token. Call
@@ -136,6 +139,13 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("/api/account/limit", s.auth(s.handleLimit)) // GET reads, POST sets
 	s.mux.HandleFunc("/api/chat", s.action(s.handleChat))
 	s.mux.HandleFunc("/api/agent", s.action(s.handleAgent))
+	// The endpoint plate (channel.go): reads are GET, everything that opens, hands over the
+	// key or closes is POST-only.
+	s.mux.HandleFunc("/api/channel", s.auth(s.handleChannel))
+	s.mux.HandleFunc("/api/channel/quote", s.auth(s.handleChannelQuote))
+	s.mux.HandleFunc("/api/channel/open", s.action(s.handleChannelOpen))
+	s.mux.HandleFunc("/api/channel/key", s.action(s.handleChannelKey))
+	s.mux.HandleFunc("/api/channel/close", s.action(s.handleChannelClose))
 	s.mux.HandleFunc("/api/payout", s.auth(s.handlePayout))
 	s.mux.HandleFunc("/api/payout/onboard", s.action(s.handlePayoutOnboard))
 	s.mux.HandleFunc("/api/payout/request", s.action(s.handlePayoutRequest))
@@ -147,6 +157,17 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("/api/bands", s.auth(s.handleBands))
 	s.mux.HandleFunc("/api/bands/", s.action(s.handleBandAction))
 	s.mux.HandleFunc("/api/grants", s.auth(s.handleGrants)) // GET lists, POST creates
+	s.mux.HandleFunc("/api/grants/revoke", s.action(s.handleGrantRevoke))
+	s.mux.HandleFunc("/api/grants/reprice", s.action(s.handleGrantReprice))
+	// Grants this account added (grant_adds.go). A pasted secret is in no reply.
+	s.mux.HandleFunc("/api/grants/added", s.auth(s.handleGrantsAdded))
+	s.mux.HandleFunc("/api/grants/add", s.action(s.handleGrantAdd))
+	s.mux.HandleFunc("/api/grants/remove", s.action(s.handleGrantRemove))
+	// Account keys (rog-key_...): keys.go. A secret is in the mint reply and nowhere else.
+	s.mux.HandleFunc("/api/keys", s.auth(s.handleKeys))
+	s.mux.HandleFunc("/api/keys/mint", s.action(s.handleKeyMint))
+	s.mux.HandleFunc("/api/keys/set", s.action(s.handleKeySet))
+	s.mux.HandleFunc("/api/keys/revoke", s.action(s.handleKeyRevoke))
 	// EDGE: the fleet snapshot (read, GET only) and the owner's adopt (POST only).
 	s.modelRoutes()
 	s.mux.HandleFunc("/api/towers", s.auth(s.handleTowers))
@@ -188,6 +209,8 @@ func (s *Server) Handler() http.Handler { return s.localhostOnly(s.mux) }
 
 // Serve runs the console on ln until the listener closes.
 func (s *Server) Serve(ln net.Listener) error {
+	// The endpoint plate's channel ends with the console that opened it.
+	defer s.closeChannel(false)
 	return (&http.Server{Handler: s.Handler()}).Serve(ln)
 }
 

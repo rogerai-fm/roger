@@ -29,11 +29,19 @@ Feature: Search reaches only search stations, on the same access rules as chat a
       When the consumer sends a signed search for "web-search"
       Then the response status is 200
 
-    Scenario: A grant key is accepted as an OpenAI-style bearer key
+    # Rewritten 2026-11-26 (founder: "approved"): owner-pays ended with
+    # features/grants/priced_grants.feature. A free grant is the API key; a priced one is not.
+    Scenario: A free grant key is accepted as an OpenAI-style bearer key
       Given a search station "web-search" on air owned by the grant's owner
-      When a search arrives with header "Authorization: Bearer <grant key>"
+      When a search arrives with header "Authorization: Bearer <free grant key>"
       Then the response status is 200
-      And the grant's sponsor wallet is charged
+      And nobody is charged
+
+    Scenario: A priced grant key sent as a bearer key is refused
+      Given a search station "web-search" on air owned by the grant's owner
+      When a search arrives with header "Authorization: Bearer <priced grant key>"
+      Then the response status is 401 saying "this grant is priced - log in and add it to your account"
+      And the station is never called and nobody is charged
 
     Scenario Outline: A bad credential is refused before anything else
       When a search arrives with <credential>
@@ -212,7 +220,7 @@ Feature: Search reaches only search stations, on the same access rules as chat a
       And only "@zed" has a search station on air
       When a search arrives with that grant key
       Then the response status is 503
-      And "@zed" is never called and the sponsor is never charged
+      And "@zed" is never called and nobody is charged
 
     Scenario: A grant's model list confines search
       Given a grant owned by "@acme" allowing only model "go-docs"

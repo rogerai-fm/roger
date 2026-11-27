@@ -1,5 +1,8 @@
-# AWAITING FOUNDER APPROVAL (spec-first workflow step 3) — do NOT write step definitions or
-# implementation until approved. RELEASE BLOCKER, audit finding #2 (money/auth).
+# HISTORY (header reworded 2026-11-26, founder: "approved"): this spec was approved and its fix
+# shipped. The notes below describe the hole as it was found, when a priced grant was still
+# billed to its owner. Since 2026-11-23 a priced grant is paid by the caller who added it and
+# cannot be sent as a bearer key at all (features/grants/priced_grants.feature).
+# Was a RELEASE BLOCKER, audit finding #2 (money/auth).
 #
 # THE HOLE: a grant is authenticated on the voice money paths (/v1/audio/speech and
 # /v1/audio/transcriptions, resolveGrant at audio.go), but audioRelayCore routes with
@@ -15,8 +18,8 @@
 #   "A grant confines routing to the issuing owner's nodes — it can never reach another
 #    owner's hardware."
 #
-# MONEY IMPACT (the reason this is a blocker, not a cleanup):
-#   - Sponsored (custom-priced) grant: resolvePricing bills ownerSponsorWallet(A) at A's
+# MONEY IMPACT AS FOUND (the reason this was a blocker, not a cleanup):
+#   - Sponsored (custom-priced) grant, as it then was: resolvePricing billed ownerSponsorWallet(A) at A's
 #     grant price while settleRequest mints the earning lot for the SERVING node's owner B —
 #     grant owner A pays a third-party operator B at A's own (wrong) price.
 #   - Free grant: owner B's node is consumed for $0 with no earning — theft of B's voice
@@ -50,7 +53,7 @@
 Feature: A voice grant is confined to its owner's nodes and model allow-list
   As an operator who mints a voice grant scoped to my own nodes and voices
   I want that grant to reach only my hardware and only the models I allowed
-  So that my sponsored wallet never pays a stranger and no one free-rides another operator
+  So that no one free-rides another operator's hardware
 
   Background:
     Given operator A has an on-air TTS node "a-tts" offering voice "af_heart"
@@ -103,4 +106,19 @@ Feature: A voice grant is confined to its owner's nodes and model allow-list
   Scenario: a grant legitimately scoped to the serving node and model bills unchanged
     When the grant calls POST /v1/audio/speech for "af_heart"
     Then node "a-tts" serves it
-    And the sponsor wallet is billed at the grant price and owner A's node earns the lot
+    # Reworded 2026-11-24 (founder yes): the grant here is free, so nobody pays. Owner-pays
+    # ("the sponsor wallet is billed") ended with features/grants/priced_grants.feature.
+    And the request is free to the caller and node "a-tts" serves it
+
+  # ── A priced grant is not a bearer key (added 2026-11-26, founder: "approved") ─────────
+
+  Scenario Outline: A priced grant key sent as a bearer key is refused on voice
+    Given a priced grant owned by the owner of node "a-tts"
+    When the grant calls POST <path>
+    Then the response status is 401 saying "this grant is priced - log in and add it to your account"
+    And no node is called and nobody is charged
+
+    Examples:
+      | path                     |
+      | /v1/audio/speech         |
+      | /v1/audio/transcriptions |

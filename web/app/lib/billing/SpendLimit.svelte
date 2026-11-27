@@ -62,7 +62,7 @@
   <p class="bx-limit__lede">
     <span class="bx-limit__tag">second guardrail</span>
     One account-wide ceiling on everything you pay for this calendar month -
-    your own tune-ins to paid models and any sponsored grant keys, together.
+    your own tune-ins to paid models, including through priced grants you added, together.
     Per-key token caps limit a single key; this bounds your whole account.
     <a href="/keys.html">Manage keys</a>.
   </p>
@@ -85,7 +85,7 @@
 
     <!-- no cap set: a quiet, honest line. The form below still lets you set one. -->
     <p class="bx-limit__none" id="limitNone" hidden={cap > 0}>No limit set - all paid usage
-      (your own and sponsored keys) bills to your wallet without a monthly ceiling.</p>
+      (your own keys and the priced grants you added) bills to your wallet without a monthly ceiling.</p>
 
     <!-- the set / update / clear form. -->
     <div class="bx-limit__field">

@@ -41,7 +41,7 @@ func TestKeysCalls(t *testing.T) {
 	keys, err := KeysList(srv.URL)
 	require.NoError(t, err)
 	require.Len(t, keys, 1)
-	require.Equal(t, 1.5, keys[0].windowUsage())
+	require.Equal(t, 1.5, keys[0].WindowUsage())
 
 	k, secret, err := KeysMint(srv.URL, map[string]any{"name": "n"})
 	require.NoError(t, err)
@@ -132,4 +132,44 @@ func TestKeyTransportOK(t *testing.T) {
 	for _, bad := range []string{"http://broker.example", "http://192.168.1.69:39009", "ftp://x", "://bad"} {
 		require.Error(t, KeyTransportOK(bad), bad)
 	}
+}
+
+func TestParseKeyLimit(t *testing.T) {
+	for _, tc := range []struct {
+		in   string
+		want float64
+		err  error
+	}{
+		{"5", 5, nil}, {"$5", 5, nil}, {" 5.50 ", 5.5, nil}, {"0.01", 0.01, nil},
+		{"none", 0, nil}, {"unlimited", 0, nil},
+		{"0", 0, ErrKeyLimitZero}, {"$0", 0, ErrKeyLimitZero}, {"0.00", 0, ErrKeyLimitZero}, {"-0", 0, ErrKeyLimitZero},
+		{"-1", 0, ErrKeyLimitNegative}, {"-0.01", 0, ErrKeyLimitNegative}, {"-$5", 0, ErrKeyLimitNegative},
+		{"", 0, ErrKeyLimit}, {"five", 0, ErrKeyLimit}, {"-five", 0, ErrKeyLimit}, {"1e9", 0, ErrKeyLimit},
+		{"0x10", 0, ErrKeyLimit}, {"NaN", 0, ErrKeyLimit}, {"Inf", 0, ErrKeyLimit}, {"5.", 0, ErrKeyLimit},
+		{".5", 0, ErrKeyLimit}, {"+5", 0, ErrKeyLimit}, {"$-5", 0, ErrKeyLimit}, {"None", 0, ErrKeyLimit},
+		{"5 5", 0, ErrKeyLimit}, {"0.0000001", 0, ErrKeyLimit}, {"0.0000004", 0, ErrKeyLimit}, {"1_000", 0, ErrKeyLimit},
+		{"0.000001", 0.000001, nil}, {"0.000000", 0, ErrKeyLimitZero}, {strings.Repeat("9", 400), 0, ErrKeyLimit},
+	} {
+		got, err := ParseKeyLimit(tc.in)
+		require.Equal(t, tc.want, got, "%q", tc.in)
+		require.ErrorIs(t, err, tc.err, "%q", tc.in)
+		if tc.err == nil {
+			require.NoError(t, err, "%q", tc.in)
+		}
+	}
+}
+
+func TestKeyResetOKAndBaseURL(t *testing.T) {
+	for _, ok := range []string{"daily", "weekly", "monthly", "none"} {
+		require.True(t, KeyResetOK(ok), ok)
+	}
+	for _, bad := range []string{"", "yearly", "Daily", "hourly"} {
+		require.False(t, KeyResetOK(bad), bad)
+	}
+	require.True(t, KeyIDOK("key_a1B2"))
+	for _, bad := range []string{"", "key_", "../x", "key_a/b", "key_a?x=1", "rog-key_abc"} {
+		require.False(t, KeyIDOK(bad), bad)
+	}
+	require.Equal(t, "https://b.example/v1", KeysBaseURL("https://b.example/"))
+	require.Equal(t, "https://b.example/v1", KeysBaseURL("https://b.example"))
 }

@@ -95,10 +95,6 @@ type loginMsg string
 
 type topupMsg string
 
-type grantMsg struct{ secret string }
-
-type grantListMsg []GrantRow
-
 type flowErrMsg string
 
 // loginStartedMsg carries the started device flow back to the Update loop so the

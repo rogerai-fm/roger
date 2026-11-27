@@ -242,16 +242,19 @@ Feature: Monthly-cap notices are mailed to the account that crossed the threshol
     When "gh@example.com" is sent the 80% notice
     Then no log line contains "gh@example.com"
 
-  # --- sponsored grants notify the account that pays -------------------------------------
+  # --- priced grants notify the account that pays ----------------------------------------
 
-  # added 2026-10-04 (audit fix): a sponsored grant's spend is charged to the grant owner's
-  # wallet and counts against the owner's cap, so the owner is the account notified; the
-  # grantee (a bot holding only the grant secret) has no address and is never mailed
-  Scenario: A sponsored grant's spend that crosses the owner's cap notifies the grant owner
-    Given a GitHub-linked station owner "owner@example.com" with a monthly cap of $10.00 and $7.90 spent
-    And the owner issued a custom-priced grant
-    When a bot relays a paid request with the grant that brings the owner's spend past $8.00
-    Then exactly one "Monthly spend at 80%" message is sent to "owner@example.com"
+  # added 2026-11-23 (founder-approved), replacing the 2026-10-04 "sponsored grant notifies the
+  # grant owner" scenario: since features/grants/priced_grants.feature (P1, P8, P13) a priced
+  # grant is paid by the account that added it, from its own wallet, and counts against that
+  # account's cap. So that account is the one notified. The grant owner pays nothing for it and
+  # is not mailed.
+  Scenario: A priced grant's spend that crosses the caller's cap notifies the caller, not the grant owner
+    Given a GitHub-linked account "friend@example.com" with a monthly cap of $10.00 and $7.90 spent
+    And a GitHub-linked station owner "owner@example.com" issued a priced grant that the account added
+    When the account relays a paid request through the grant that brings its spend past $8.00
+    Then exactly one "Monthly spend at 80%" message is sent to "friend@example.com"
+    And no message is sent to "owner@example.com"
 
   # added 2026-10-04 (audit fix)
   Scenario: A free grant spends nothing and never notifies (unchanged)

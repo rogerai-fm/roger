@@ -93,8 +93,32 @@ func (m model) View() string {
 		return m.world.View()
 	}
 	w := m.effWidth()
+	out, at, fit, final := m.layout(w)
+	if final {
+		return out
+	}
+	if at >= 0 {
+		out = out[:at] + fit(w, m.fitRows(out)) + out[at:]
+	}
+	return m.finishFrame(out, w)
+}
+
+// fitRows is how many rows the chrome in out leaves a body that fits itself to them. 0 with
+// no measured height: draw it all.
+func (m model) fitRows(out string) int {
+	if m.height <= 0 {
+		return 0
+	}
+	return max(1, m.height-(strings.Count(strings.TrimRight(out, "\n"), "\n")+1))
+}
+
+// layout builds everything but a body that fits itself to the rows left over ([3] EDGE, the
+// KEYS panel): that body goes in at `at`, drawn by fit once the chrome around it has been
+// counted (features/edge/enrolled_edge_look.feature D3). at is -1 when there is none. final
+// reports a frame that is already finished.
+func (m model) layout(w int) (out string, at int, fit func(w, rows int) string, final bool) {
 	var b strings.Builder
-	edgeAt := -1 // where [3] EDGE's body goes, once the chrome around it has been counted
+	at = -1
 	// COMPACT (the "windowshade"): no expanded preset bar and no spacer - the dense
 	// one-line header carries the section + counts + account + the `m:expand` hint, so
 	// the whole top collapses to a single strip + a hairline rule.
@@ -116,7 +140,7 @@ func (m model) View() string {
 			rows = max(1, m.height-lineRows(b.String()))
 		}
 		b.WriteString(m.welcomeView(w, rows))
-		return m.finishFrame(b.String(), w)
+		return m.finishFrame(b.String(), w), -1, nil, true
 	}
 	switch m.mode {
 	case modeHelp:
@@ -130,6 +154,8 @@ func (m model) View() string {
 		}
 	case modeLog:
 		b.WriteString(m.logView(w))
+	case modeKeys:
+		at, fit = b.Len(), m.keysView
 	case modeChat:
 		b.WriteString(m.chatView(w))
 	case modeConnectConfirm:
@@ -142,7 +168,7 @@ func (m model) View() string {
 		b.WriteString(m.limitsView(w))
 	case modeEdge:
 		b.WriteString(m.ownerEdgeView(w))
-		edgeAt = b.Len()
+		at, fit = b.Len(), m.edgeViewH
 	case modeShare:
 		b.WriteString(m.shareView(w))
 	case modeBandCard:
@@ -230,17 +256,7 @@ func (m model) View() string {
 		b.WriteString("\n" + m.promptLine(w))
 	}
 	b.WriteString("\n" + m.footer(w))
-	out := b.String()
-	if edgeAt >= 0 {
-		// [3] EDGE fits itself to the rows the chrome leaves it (features/edge/enrolled_edge_look.feature
-		// D3), so the height backstop never has to cut its top off. No measured height: draw it all.
-		rows := 0
-		if m.height > 0 {
-			rows = max(1, m.height-(strings.Count(strings.TrimRight(out, "\n"), "\n")+1))
-		}
-		out = out[:edgeAt] + m.edgeViewH(w, rows) + out[edgeAt:]
-	}
-	return m.finishFrame(out, w)
+	return b.String(), at, fit, false
 }
 
 // finishFrame bounds a built frame to the terminal and paints the deck ground under it.
@@ -336,7 +352,8 @@ var paletteCmds = []paletteCmd{
 	{"/login", "link GitHub (needed to earn)", "L"},
 	{"/balance", "wallet balance", ""},
 	{"/topup", "add funds", ""},
-	{"/grant", "private free keys for bots/family", ""},
+	{"/keys", "account API keys for your own bot", ""},
+	{"/grant", "a key for someone else to use your stations", ""},
 	{"/confidential", "route only to TEE-attested nodes", "C"},
 	{"/endpoint", "the OpenAI-compatible endpoint + key", ""},
 	{"/config", "broker + identity", ""},
@@ -1009,9 +1026,11 @@ func (m model) helpView() string {
 		{"/balance · /topup", "your wallet balance · add funds (CLI: roger balance)"},
 		{"/edge ([3])", "your Edge: what is on it, and how it is connected"},
 		{"/limits ([4])", "see + edit your per-model spend maxes"},
-		{"/grant [create <name>]", "private free keys for your bots/family"},
+		{"/keys [mint <name> <limit>]", "account API keys for your own bot on a server - list, mint, limit, on, off, revoke"},
+		{"/grant [create|revoke <name>]", "a key for someone else to use your stations - free"},
+		{"/grant add · added · remove", "someone else's priced grant: paste its secret, list, drop one"},
 		{"/confidential", "toggle: route only to TEE-attested nodes"},
-		{"/endpoint · /config", "endpoint + key · broker/identity"},
+		{"/endpoint · /config", "copy the open channel's endpoint + key · broker/identity"},
 		{"/support", "open rogerai.fm - community + Discord (CLI: roger support)"},
 		{"/ping (/zen · z)", "SCREENSAVER: Ping's world fullscreen (CLI: roger --ping) - any key wakes"},
 		{"/theme [" + strings.Join(ThemeModes, "|") + "]", "colors: light is a light page with dark text, dark a dark page, auto follows the terminal (CLI: roger config set theme)"},
@@ -1037,7 +1056,7 @@ func (m model) helpView() string {
 	for _, c := range cmds {
 		b.WriteString("  " + stKey.Render(fmt.Sprintf("%-24s", c[0])) + stDim.Render(c[1]) + "\n")
 	}
-	b.WriteString("\n  " + stDim.Render("in CHANNEL: /model /clear /save /system <p> /cost /endpoint /support /disconnect /quit") + "\n")
+	b.WriteString("\n  " + stDim.Render("in CHANNEL: /model /clear /save /system <p> /cost /connect /endpoint /support /disconnect /quit") + "\n")
 	b.WriteString("  " + stDim.Render("sections: ") + stKey.Render("←/→") + stDim.Render(" switch section (cycle the [0]…[?] bar) · ") +
 		stKey.Render("[2]") + stDim.Render(" SHARE · ") +
 		stKey.Render("tab") + stDim.Render(" peeks at the band from a channel") + "\n")

@@ -24,6 +24,10 @@ description = "Audited false positives (see header). Verified: no real secret co
 # generated coverage/ report or web/dist/ build output) could mask a real secret bundled
 # into generated output, so every suppression here is a precise, audited string.
 regexes = [
+  # --- Audited 2026-11-26 (branch wt/webui-endpoint-plate, PR 52) ---
+  # The fake channel key of internal/tui/endpoint_hint_test.go (hintKey): a "sess-" placeholder
+  # the test puts on a seeded model to check the endpoint hint's text. Never issued by a broker.
+  '''^sess\-0123456789abcdef$''',
   # --- Audited 2026-11-24 (branch wt/upstream-key, PR 32) ---
   # The fake upstream key of internal/agent/tower_upstream_key_bdd_test.go (ukKey): an
   # "sk-test-" placeholder the test's own stub upstream expects, used to prove the key is

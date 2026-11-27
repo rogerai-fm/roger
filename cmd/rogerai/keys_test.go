@@ -22,6 +22,7 @@ type keysStandIn struct {
 	srv   *httptest.Server
 	calls []string
 	last  map[string]any
+	keys  string // the list reply; "" is one key, key_a named ci
 }
 
 func newKeysStandIn(t *testing.T, status int) *keysStandIn {
@@ -38,12 +39,21 @@ func newKeysStandIn(t *testing.T, status int) *keysStandIn {
 		}
 		switch r.Method {
 		case http.MethodGet:
-			_, _ = w.Write([]byte(`{"keys":[{"id":"key_a","name":"ci","hint":"...abcd","limit_usd":5,"reset":"weekly"}]}`))
+			keys := s.keys
+			if keys == "" {
+				keys = `{"id":"key_a","name":"ci","hint":"...abcd","limit_usd":5,"reset":"weekly"}`
+			}
+			_, _ = w.Write([]byte(`{"keys":[` + keys + `]}`))
 		case http.MethodPost:
+			// The reply carries the limit that was asked for, as the broker's does.
 			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":"key_new","name":"ci","secret":"rog-key_s3cret"}`))
+			_ = json.NewEncoder(w).Encode(map[string]any{"id": "key_new", "name": "ci", "secret": "rog-key_s3cret", "limit_usd": s.last["limit_usd"]})
 		case http.MethodPatch:
-			_, _ = w.Write([]byte(`{"id":"key_a","name":"ci","limit_usd":10,"reset":"weekly","disabled":true}`))
+			limit := any(10.0)
+			if v, ok := s.last["limit_usd"]; ok {
+				limit = v
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"id": "key_a", "name": "ci", "limit_usd": limit, "reset": "weekly", "disabled": true})
 		default:
 			w.WriteHeader(http.StatusNoContent)
 		}
@@ -109,6 +119,23 @@ func TestKeysVerbs(t *testing.T) {
 	}
 }
 
+// The CLI, the TUI and the console read a limit with the same code (client.ParseKeyLimit).
+func TestKeysLimitIsReadTheSharedWay(t *testing.T) {
+	s := newKeysStandIn(t, 0)
+	for typed, want := range map[string]float64{"5": 5, "$5": 5, "5.50": 5.5, "none": 0, "unlimited": 0} {
+		_, _, err := runKeysOut(t, s.srv.URL, true, "mint", "--name", "ci", "--limit", typed)
+		require.NoError(t, err, typed)
+		require.Equal(t, want, s.last["limit_usd"], typed)
+	}
+}
+
+func TestKeysSetLimitNoneRemovesTheLimit(t *testing.T) {
+	s := newKeysStandIn(t, 0)
+	_, _, err := runKeysOut(t, s.srv.URL, false, "set", "key_a", "--limit", "none")
+	require.NoError(t, err)
+	require.Equal(t, map[string]any{"limit_usd": 0.0}, s.last)
+}
+
 func TestKeysRefusals(t *testing.T) {
 	s := newKeysStandIn(t, 0)
 	for _, tc := range []struct {
@@ -121,8 +148,18 @@ func TestKeysRefusals(t *testing.T) {
 		{[]string{"set", "key_a", "--disable", "--enable"}, "--disable and --enable together"},
 		{[]string{"set", "key_a", "--expires", "soon"}, ""},
 		{[]string{"mint", "--disable"}, "applies to `roger keys set`"},
-		{[]string{"rm"}, "usage: roger keys rm"},
-		{[]string{"frob"}, `unknown keys command "frob"`},
+		{[]string{"mint", "--name", "ci", "--limit", "five"}, `--limit "five": state a limit in dollars`},
+		{[]string{"mint", "--name", "ci", "--limit", "1e9"}, `--limit "1e9": state a limit in dollars`},
+		{[]string{"mint", "--name", "ci", "--limit", "-1"}, `--limit "-1": a limit cannot be negative`},
+		{[]string{"mint", "--name", "ci", "--limit", "0"}, `--limit "0": 0 would mean unlimited, not no spending - use none for an unlimited key`},
+		{[]string{"set", "key_a", "--limit", "0"}, "0 would mean unlimited"},
+		{[]string{"set", "key_a", "--limit", "ten"}, `--limit "ten": state a limit in dollars`},
+		{[]string{"mint", "--name", "ci", "--reset", "yearly"}, `--reset "yearly": daily, weekly, monthly or none`},
+		{[]string{"set", "key_a", "--limit", "x", "--reset", "yearly"}, `--limit "x"`},
+		{[]string{"rm"}, "usage: roger keys revoke <key>"},
+		{[]string{"revoke"}, "usage: roger keys revoke <key>"},
+		{[]string{"mint", "--name", "ci", "--limit", "0.0000001"}, "state a limit in dollars"},
+		{[]string{"frob"}, `unknown keys command "frob" (try list|mint|set|revoke)`},
 	} {
 		n := len(s.calls)
 		_, _, err := runKeysOut(t, s.srv.URL, false, tc.args...)
@@ -142,6 +179,87 @@ func TestKeysRefusals(t *testing.T) {
 		_, _, err := runKeysOut(t, denied.srv.URL, false, args...)
 		require.ErrorContains(t, err, "log in first - run `roger login`", "%v", args)
 	}
+}
+
+// A key is named by its id or by its name, as in the TUI (client.FindKey). Whatever is typed
+// is looked up in the broker's own list, so it never becomes part of a broker path.
+func TestKeysTakeANameOrAnID(t *testing.T) {
+	s := newKeysStandIn(t, 0)
+	_, _, err := runKeysOut(t, s.srv.URL, false, "set", "ci", "--limit", "10")
+	require.NoError(t, err)
+	require.Equal(t, []string{"GET /account/keys", "PATCH /account/keys/key_a"}, s.calls)
+
+	s.calls = nil
+	out, _, err := runKeysOut(t, s.srv.URL, false, "revoke", "ci")
+	require.NoError(t, err)
+	require.Equal(t, "revoked ci (key_a)\n", out)
+	require.Equal(t, []string{"GET /account/keys", "DELETE /account/keys/key_a"}, s.calls)
+
+	// An id is used as it is, with no list read first.
+	s.calls = nil
+	_, _, err = runKeysOut(t, s.srv.URL, false, "set", "key_a", "--limit", "10")
+	require.NoError(t, err)
+	require.Equal(t, []string{"PATCH /account/keys/key_a"}, s.calls)
+
+	for _, tc := range []struct {
+		keys string
+		args []string
+		want string
+	}{
+		{"", []string{"revoke", "nope"}, "no key named nope - `roger keys list` shows them"},
+		{"", []string{"revoke", "../x"}, "no key named ../x - `roger keys list` shows them"},
+		{"", []string{"set", "key_a/../b", "--limit", "1"}, "no key named key_a/../b - `roger keys list` shows them"},
+		{`{"id":"key_a","name":"ci"},{"id":"key_b","name":"ci"}`, []string{"revoke", "ci"}, "2 keys are named ci - use the id: key_a, key_b"},
+		{`{"id":"key_a","name":"ci"},{"id":"key_b","name":"ci"}`, []string{"set", "ci", "--disable"}, "2 keys are named ci - use the id: key_a, key_b"},
+	} {
+		s.keys, s.calls = tc.keys, nil
+		_, _, err := runKeysOut(t, s.srv.URL, false, tc.args...)
+		require.EqualError(t, err, tc.want, "%v", tc.args)
+		require.Equal(t, []string{"GET /account/keys"}, s.calls, "%v reads the list and changes nothing", tc.args)
+	}
+}
+
+// The verb is revoke, as for a grant. rm and delete still work.
+func TestKeysRevokeIsTheVerb(t *testing.T) {
+	s := newKeysStandIn(t, 0)
+	out, _, err := runKeysOut(t, s.srv.URL, false, "help")
+	require.NoError(t, err)
+	require.Contains(t, out, "roger keys revoke <key>")
+	require.NotContains(t, out, "roger keys rm")
+	for _, verb := range []string{"revoke", "rm", "delete"} {
+		out, _, err := runKeysOut(t, s.srv.URL, false, verb, "key_a")
+		require.NoError(t, err, verb)
+		require.Equal(t, "revoked key_a\n", out, verb)
+	}
+}
+
+// --limit is optional, and a key with no limit says what that means, on stderr so a pipe
+// still gets the secret alone.
+func TestKeysUnlimitedSaysSo(t *testing.T) {
+	const note = "unlimited - this key can spend your whole wallet"
+	s := newKeysStandIn(t, 0)
+	for _, tc := range []struct {
+		args []string
+		warn bool
+	}{
+		{[]string{"mint", "--name", "ci"}, true},
+		{[]string{"mint", "--name", "ci", "--limit", "none"}, true},
+		{[]string{"mint", "--name", "ci", "--limit", "unlimited"}, true},
+		{[]string{"mint", "--name", "ci", "--limit", "5"}, false},
+		{[]string{"set", "key_a", "--limit", "none"}, true},
+		{[]string{"set", "key_a", "--limit", "5"}, false},
+		{[]string{"set", "key_a", "--disable"}, false},
+	} {
+		for _, tty := range []bool{true, false} {
+			out, errOut, err := runKeysOut(t, s.srv.URL, tty, tc.args...)
+			require.NoError(t, err, "%v", tc.args)
+			require.Equal(t, tc.warn, strings.Contains(errOut, note), "%v tty=%v: %q", tc.args, tty, errOut)
+			require.NotContains(t, out, note, "%v: the note is for the person, not the pipe", tc.args)
+		}
+	}
+	out, _, err := runKeysOut(t, s.srv.URL, false, "mint", "--name", "ci")
+	require.NoError(t, err)
+	require.Equal(t, "rog-key_s3cret\n", out)
 }
 
 func TestUseKeyFlags(t *testing.T) {

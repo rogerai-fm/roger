@@ -319,7 +319,7 @@ func (m model) endpointBlock(w int) string {
 	// where it fits (narrow terminals keep the masked key alone).
 	keyHint := ""
 	if w >= 70 {
-		keyHint = stDim.Render("  (roger keys prints the full key)")
+		keyHint = stDim.Render("  (/endpoint copies the full key)")
 	}
 	return row("BASE URL", m.endpoint) + "\n" +
 		row("API KEY", maskKey(m.apikey)+keyHint) + "\n" +

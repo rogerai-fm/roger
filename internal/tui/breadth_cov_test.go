@@ -545,15 +545,16 @@ func TestDoGrantFlows(t *testing.T) {
 	}
 	hm := NewWithHooks("http://broker.local", "tester", nil, hooks)
 	_, ccmd := hm.doGrant([]string{"create", "fleet"})
-	if gm := ccmd().(grantMsg); gm.secret != "rog-grant_secret123" {
-		t.Errorf("grant create should yield the minted secret, got %q", gm.secret)
+	if gm := msgOf[keyMintedMsg](t, ccmd); gm.secret != "rog-grant_secret123" || gm.kind != "grant" || gm.name != "fleet" {
+		t.Errorf("grant create should yield the minted secret, got %+v", gm)
 	}
 	if gotName != "fleet" {
 		t.Errorf("grant create should pass the requested name, got %q", gotName)
 	}
-	_, lcmd := hm.doGrant(nil) // bare /grant => list
-	if rows := lcmd().(grantListMsg); len(rows) != 1 || rows[0].Name != "my-bots" {
-		t.Errorf("bare /grant should list grants, got %#v", lcmd())
+	hm.loggedIn = true         // the panel asks the broker nothing when logged out
+	_, lcmd := hm.doGrant(nil) // bare /grant => the KEYS panel, which reads the list
+	if got := msgOf[keysListMsg](t, lcmd); len(got.grants) != 1 || got.grants[0].Name != "my-bots" {
+		t.Errorf("bare /grant should list grants, got %#v", got)
 	}
 
 	// Create error path.
@@ -561,8 +562,8 @@ func TestDoGrantFlows(t *testing.T) {
 		GrantCreate: func(string, string, bool) (string, error) { return "", errMsgSentinel("nope") },
 	})
 	_, ecmd := em.doGrant([]string{"new"})
-	if fe, ok := ecmd().(flowErrMsg); !ok || !strings.Contains(string(fe), "grant create failed") {
-		t.Errorf("grant create error should be a flowErrMsg, got %#v", ecmd())
+	if got := msgOf[keyMintedMsg](t, ecmd); got.err == nil || !strings.Contains(got.err.Error(), "grant create failed") || !strings.Contains(got.err.Error(), "use /keys mint") {
+		t.Errorf("grant create error should say it failed and point at /keys mint, got %+v", got)
 	}
 }
 

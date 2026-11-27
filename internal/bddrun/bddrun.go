@@ -137,3 +137,26 @@ func Titled(except bool, titles ...string) func(string) bool {
 	}
 	return func(t string) bool { return set[t] != except }
 }
+
+// ScenariosInRule selects by RULE: "file:line" for every Scenario or Scenario Outline under a
+// "Rule:" whose title starts with prefix, so one feature that covers several surfaces can be
+// run by several harnesses, each taking its own Rules. A rule is closed by the next Rule.
+func ScenariosInRule(file, prefix string) []string {
+	raw, err := os.ReadFile(file)
+	if err != nil {
+		return nil
+	}
+	var out []string
+	in := false
+	for i, line := range strings.Split(string(raw), "\n") {
+		t := strings.TrimSpace(line)
+		if r, ok := strings.CutPrefix(t, "Rule:"); ok {
+			in = strings.HasPrefix(strings.TrimSpace(r), prefix)
+			continue
+		}
+		if in && (strings.HasPrefix(t, "Scenario:") || strings.HasPrefix(t, "Scenario Outline:")) {
+			out = append(out, file+":"+strconv.Itoa(i+1))
+		}
+	}
+	return out
+}

@@ -70,7 +70,7 @@
         <div><dt>band</dt><dd>a model on the network. Every model id (for example <code>qwen3-coder-30b</code>) is a band you can tune to. More stations on a band = stronger signal.</dd></div>
         <div><dt>station</dt><dd>a machine serving a model. Usually one home GPU. Owners set their own price; the broker ranks them.</dd></div>
         <div><dt>Tower</dt><dd>the relay that routes requests (RogerAI runs one; you can run your own). It ranks and picks a station for your request, meters what it used, and counter-signs the receipt. The API, this manual and the source call it the <b>broker</b>. Same service, older name. <a href="/tower.html">How it routes and signs &rarr;</a></dd></div>
-        <div><dt>grant key</dt><dd>a private key that lets an app use a band. Owner-issued (<code>rog-grant_...</code>), it lets your bots, family, or your own remote box use your models with no login - free or at a price you sponsor. See §5.</dd></div>
+        <div><dt>grant key</dt><dd>a private key that lets an app use a band. Owner-issued (<code>rog-grant_...</code>), a free one lets your bots, family, or your own remote box use your models with no login; a priced one is added to someone's own account, and they pay your price. See §5.</dd></div>
         <div><dt>channel</dt><dd>Your live connection to a station: a local endpoint + key the radio opens for you, plus the in-app chat session.</dd></div>
         <div><dt>on air</dt><dd>Serving. A station that is on air is advertised in the band and can take traffic.</dd></div>
         <div><dt>tune in</dt><dd>Consuming. You pick a band, set margins, and the radio locks the strongest station.</dd></div>
@@ -609,8 +609,8 @@
               process - keep both running, one per model.)</p>
 
             <p><b>(b) Skip the local proxy - point straight at the broker.</b> The cleaner
-              path when you want <i>many</i> models from <b>one</b> endpoint: with a grant key
-              (§5), aim any OpenAI client at the broker's own <code>/v1</code> and switch
+              path when you want <i>many</i> models from <b>one</b> endpoint: with a free grant
+              key (§5), aim any OpenAI client at the broker's own <code>/v1</code> and switch
               models by setting the <code>model</code> field per request. No local proxy, no
               per-model process, no ports to juggle - the broker routes each request to a
               station for whatever model you named.</p>
@@ -1418,34 +1418,41 @@
           <!-- ============== §5 PRIVATE CHANNELS ============== -->
           <section class="man-sec" id="s5">
             <span class="man-sec__no">§5 · Private channels (grant keys)</span>
-            <h2>Free, private access for your own people</h2>
-            <p class="man-lead">A grant key is a second, private tier on the same node:
-              an owner-issued, labeled bearer credential (<code>rog-grant_...</code>) that
-              your bots, family, friends, or your own remote box use as their API key -
-              with no login, no account, no wallet. The broker resolves the grant to you,
-              routes only to your nodes, applies the grant's price (free or a rate you
-              sponsor), and enforces its caps.</p>
-            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger grant create --name my-bots                   <span class="code-block__comment"># a FREE key for your bots/family</span>
-<span class="code-block__prompt" aria-hidden="true">$</span> roger grant create --name jane --price-out 0.30     <span class="code-block__comment"># a priced key you sponsor</span>
-<span class="code-block__prompt" aria-hidden="true">$</span> roger grant create --self --name hermes-box         <span class="code-block__comment"># a $0 key for YOUR own remote box</span></pre></div>
+            <!-- Caller-pays grants: features/grants/priced_grants.feature (P1 to P20) and
+                 features/grants/grant_surfaces.feature (S1 to S12). The specs win over this text. -->
+            <h2>Private access to your stations, free or priced</h2>
+            <p class="man-lead">A grant is a private key you make for other people
+              (<code>rog-grant_...</code>). It reaches only your stations. A <b>free</b> grant
+              is an API key on its own: whoever holds it uses your stations with no login, no
+              account and no wallet. A <b>priced</b> grant is a price you set for the people you
+              give it to: they add it to their own account once, and they pay that price from
+              their own wallet.</p>
+            <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">free grant</span><span class="man-plate__v">use it as the API key. Nobody pays. Bots, family, your own remote box.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">self grant</span><span class="man-plate__v">a free grant for your own headless boxes and agents, metered at $0.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">priced grant</span><span class="man-plate__v">not an API key. The person you give it to adds it to their account and pays your price. You are paid like any sale, less the marketplace fee.</span></div>
+            </div>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger grant create --name my-bots                   <span class="code-block__comment"># a free key for your bots and family</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger grant create --self --name hermes-box         <span class="code-block__comment"># a $0 key for your own remote box</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger grant create --name friends --price-out 0.30  <span class="code-block__comment"># priced: whoever adds it pays $0.30 / 1M out</span></pre></div>
             <div class="man-note">
               <span class="man-note__tag">the secret is shown once</span>
               The grant secret prints exactly once at create time - copy it then. The
-              dashboard stores only its hash. Lost it? You cannot recover it - mint a new
-              key and revoke the old one.
+              dashboard stores only its hash. Lost a free grant's secret? Mint a new grant and
+              revoke the old one. A priced grant is replaced with a reprice instead (below), so
+              the people who added it see the new secret's price before they pay it.
             </div>
-            <p class="fine">Prefer a screen? Mint, list, edit caps and revoke keys on the
+            <p class="fine">Prefer a screen? Mint, list, edit caps and revoke grants on the
               web <a href="/keys.html">API keys</a> page - same endpoints, same one-time
               secret.</p>
 
-            <h3>Headless and bots: how a key is used</h3>
-            <p>A grant key <b>is</b> an OpenAI-style API key. There is nothing to install on
+            <h3>Headless and bots: how a free grant is used</h3>
+            <p>A free or self grant <b>is</b> an OpenAI-style API key. There is nothing to install on
               the consuming side and no login: a headless bot points an OpenAI-compatible
               client at the broker's <code>/v1</code> endpoint and sends the grant secret
               as its bearer token. The broker recognises the <code>rog-grant_</code> prefix,
-              resolves the key to you, routes only to your nodes, and bills per the grant
-              (free, $0 self, or your sponsored price). The two lines printed at create are
-              all a bot needs:</p>
+              resolves the key to you, routes only to your nodes, and bills nothing. The two
+              lines printed at create are all a bot needs:</p>
             <div class="code-block"><pre><span class="code-block__comment"># printed once by `grant create` (and on the web keys page)</span>
 OPENAI_API_BASE=https://broker.rogerai.fm/v1
 OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
@@ -1472,8 +1479,10 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
     -d '&#123;"model":"qwen3-coder-30b","messages":[&#123;"role":"user","content":"hi"&#125;]&#125;'</pre></div>
             <p>Use <code>--self</code> (above) when the bot calls <i>your own</i> GPU - it is
               metering-only, $0. Drop <code>--self</code> for a plain free key you hand a
-              friend, or set <code>--price-out</code> to sponsor a paid key billed to your
-              wallet. The bot never sees a price; it just calls the endpoint.</p>
+              friend. A bot that should pay for what it uses runs on its own funded account:
+              it uses an <b>account key</b> (§6), and a priced grant added to that account
+              gives it the grant's price. A priced grant sent as the bearer key is refused
+              with <code>this grant is priced - log in and add it to your account</code>.</p>
             <div class="man-note">
               <span class="man-note__tag">rotation</span>
               To rotate, mint a fresh key, swap the one <code>OPENAI_API_KEY</code> line on
@@ -1481,6 +1490,79 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
               on the <a href="/keys.html">keys page</a>). Revocation takes effect on the next
               request. A leaked key cannot be re-shown, so rotate rather than recover.
             </div>
+
+            <h3>Priced grants: the person using it pays</h3>
+            <p>You set the price per 1M tokens, lower or higher than your public price; it
+              applies as you set it. Give the secret to whoever you choose. Each of them adds
+              it to their own account <b>once</b>; from then on their login, their browser
+              session and their own account keys get your grant's price on your stations for
+              chat, and they pay it from their own wallet. Voice and search requests are still
+              charged the public price. Adding needs a logged-in account, not a
+              balance; using it does.</p>
+            <ol class="steps">
+              <li><b>You create it.</b> Name and price. The secret prints once.</li>
+              <li><b>You share the secret.</b> With anyone. It is not tied to a person or an email.</li>
+              <li><b>They add it.</b> Their account shows the price, the stations and the models first, before anything is charged.</li>
+              <li><b>They use it.</b> Their own keys and login get your price on your stations. Their wallet pays.</li>
+            </ol>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger grant add rog-grant_...        <span class="code-block__comment"># add it; leave the secret off to type it hidden</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger grant list                      <span class="code-block__comment"># grants you made, and grants you added</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger grant remove friends            <span class="code-block__comment"># stop using it (by name or id)</span></pre></div>
+            <p class="fine">In the TUI: <code>/grant add</code>, <code>/grant added</code> and
+              <code>/grant remove &lt;name&gt;</code>. In the local console: the <b>Grants you
+              added</b> card on the ACCOUNT tab.</p>
+            <p>What the add shows: each station with its public price beside the grant's, marked
+              when the grant price is the higher of the two. One account can hold up to 10
+              grants; adding the same grant again changes nothing except to refresh what it
+              covers. Adding a free grant is refused (<code>this grant is free - use it as your
+              API key</code>), and so is adding your own (<code>this is your own grant - your
+              own stations are already free to you</code>).</p>
+            <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">who pays</span><span class="man-plate__v">the account that added it, from its own wallet. Your wallet is never charged for anyone else's use.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">what you see</span><span class="man-plate__v">how many accounts added it (<code>added_by</code>), never who.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">what you earn</span><span class="man-plate__v">the grant price, like any sale, less the marketplace fee, on the usual holds and payouts (§6).</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">their limits</span><span class="man-plate__v">their maximum price, their account key limits and their monthly cap all count grant spend.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">two grants</span><span class="man-plate__v">when two added grants cover the same station and model, the lower price applies.</span></div>
+            </div>
+
+            <h3>What a priced grant covers</h3>
+            <p>Exactly what the person was shown when they added it: the stations and models
+              that were on air then. A station or model you bring on air later is charged at its
+              public price to them until they add the grant again, which shows the new list.
+              Stations on a hidden band are never listed, so a grant does not reveal them; a
+              grant never opens a hidden station on its own, which still needs its frequency
+              code. A priced grant someone added also applies on a station you offer free to the
+              public: they pay the grant price there.</p>
+
+            <h3>Changing a priced grant</h3>
+            <p>You do not know who added your grant, so you cannot tell them about a change.
+              The rules follow from that:</p>
+            <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">cut the price</span><span class="man-plate__v">applies at once, same secret.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">narrow it</span><span class="man-plate__v">fewer stations or models: applies at once.</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">raise or widen</span><span class="man-plate__v">a <b>reprice</b>: a new secret, the old one stops. Everyone who added the old one pays the public price until they add the new one, which shows the new price first. Name, caps and usage carry over.</span></div>
+            </div>
+            <div class="code-block"><pre><span class="code-block__prompt" aria-hidden="true">$</span> roger grant set friends --price-out 0.03      <span class="code-block__comment"># cut or narrow: same secret</span>
+<span class="code-block__prompt" aria-hidden="true">$</span> roger grant reprice friends --price-out 0.08  <span class="code-block__comment"># raise or widen: new secret, asks first</span></pre></div>
+            <p class="fine"><code>roger grant set</code> refuses a raise or a widening and names
+              <code>reprice</code>. In the local console, reprice from the grant's row on the
+              ACCOUNT tab; the new secret is shown once.</p>
+            <p>A price is in dollars per 1M tokens, or <code>free</code>. On the CLI, a price you
+              leave out of a reprice stays as it was. A revoked grant cannot be repriced; make a
+              new grant instead.</p>
+
+            <h3>When a grant stops applying</h3>
+            <p>Nobody is charged a price they were not shown. When a grant someone added is
+              revoked, expires or is replaced by a reprice, their requests are priced as public
+              ones, and the reply says so in the <code>X-RogerAI-Grant-Notice</code> header,
+              for example <code>grant "friends" no longer applies - you are charged the public
+              price</code>. Their own maximum price still bounds what they pay.</p>
+            <p>At its token cap a grant gives no price. The caps count everyone's use of the
+              grant together. A caller who named the station (pinned it, or put it in their order
+              or only list and it was picked first) is refused with <code>grant daily token cap reached</code>; anyone
+              else is routed as if they had not added the grant, at the public price. If an
+              account's added grants cannot be read, its request is priced as public and the
+              notice header says that too.</p>
 
             <h3>Self-use is $0</h3>
             <p>When the consuming identity is the node's own owner, billing is $0
@@ -1526,10 +1608,10 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
 <span class="code-block__prompt" aria-hidden="true">$</span> roger grant revoke my-bots     <span class="code-block__comment"># kill it (effective next request)</span></pre></div>
             <div class="man-note">
               <span class="man-note__tag">second guardrail</span>
-              Per-key caps bound one key. Your <b>account-wide monthly spend cap</b> (§6, on
-              the <a href="/billing.html">Billing</a> page) bounds what every sponsored key
-              can cost you put together - so even a runaway fleet of priced grants can never
-              exceed the one number you set for the account.
+              Per-grant caps bound one grant, across everyone who uses it. A grant never
+              charges your wallet: free and self grants cost nobody, and a priced grant is paid
+              by each account that added it, under that account's own monthly cap (§6, on the
+              <a href="/billing.html">Billing</a> page).
             </div>
 
             <h3>A private band: two boxes, one frequency code</h3>
@@ -1582,7 +1664,7 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
               <div class="man-plate__row"><span class="man-plate__k">--private</span><span class="man-plate__v">requires <code>roger login</code> - a private band is tied to your account</span></div>
               <div class="man-plate__row"><span class="man-plate__k">free limit</span><span class="man-plate__v">1 private band per account (the broker enforces it: a second mint is refused with "private band limit reached"). Need it on a different model? <b>Move</b> the band you already have from BASE STATION <code>[p]</code>  -  it keeps its frequency code, so nobody tuned in is cut off. Need a different <em>code</em> on the same band? <b>New code</b> (<kbd>n</kbd>) rotates the key in place and keeps everything else. <b>Revoke</b> frees the slot, burns that code for good, and removes the band from your list.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">--freq</span><span class="man-plate__v">tune a consuming box to a code: the MHz part is cosmetic, the code after it is what matters</span></div>
-              <div class="man-plate__row"><span class="man-plate__k">vs. grant keys</span><span class="man-plate__v">a grant is a bearer API key for many users; a private band is one off-market frequency two boxes share</span></div>
+              <div class="man-plate__row"><span class="man-plate__k">vs. grant keys</span><span class="man-plate__v">a free grant is a bearer API key for many users; a private band is one off-market frequency two boxes share</span></div>
             </div>
 
             <h3>From inside the app</h3>

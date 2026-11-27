@@ -288,8 +288,10 @@ func TestInTUIFlows(t *testing.T) {
 		t.Errorf("login flow did not complete: called=%v\n%s", called.login, lm.View())
 	}
 
-	// /grant list fires the hook (run the returned cmd to execute the closure).
-	gm, _ := tm.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'/'}})
+	// /grant list opens the KEYS panel and fires the hook (run the returned cmd to execute
+	// the closure). Logged in: logged out, the panel asks the broker nothing.
+	gm, _ := tm.Update(balanceMsg{balance: 1, loggedIn: true})
+	gm, _ = gm.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'/'}})
 	for _, r := range "grant list" {
 		gm, _ = gm.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}})
 	}
@@ -301,7 +303,7 @@ func TestInTUIFlows(t *testing.T) {
 	if !called.grant {
 		t.Errorf("grant list hook not called")
 	}
-	if !strings.Contains(gm.View(), "grant") {
+	if !strings.Contains(stripANSI(gm.View()), "petlings") {
 		t.Errorf("grant list result not surfaced:\n%s", gm.View())
 	}
 }

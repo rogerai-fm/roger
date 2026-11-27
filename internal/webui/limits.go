@@ -115,5 +115,6 @@ func (s *Server) setLimit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.opts.WriteLimit(model, SpendLimit{MaxOut: req.MaxOut, MinTPS: req.MinTPS, Quants: req.Quants})
+	s.recapChannel(model)
 	writeJSON(w, map[string]any{"ok": true})
 }

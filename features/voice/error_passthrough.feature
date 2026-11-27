@@ -297,7 +297,8 @@ Feature: Voice relay node-side failure passthrough
     And the response carries X-RogerAI-Cost: 0
 
   Scenario: a node-side failure on a grant-key request records no grant usage
-    Given a grant key funded by "u_test" scoped to "@op/voice-a"
+    # Reworded 2026-11-26 (founder: "approved"): a grant key is not funded by anyone.
+    Given a free grant key owned by "u_test" scoped to "@op/voice-a"
     And the station's local server answers 500 with body:
       """
       {"error": "synth failed"}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -47,6 +48,7 @@ func runKeys(broker string, args []string, stdout, stderr io.Writer, tty bool) e
 		if err != nil {
 			return err
 		}
+		defer keysUnlimitedNote(stderr, k)
 		if !tty {
 			// A pipe gets the secret alone (machine-readable); the warning goes to the person.
 			fmt.Fprintln(stdout, secret)
@@ -57,7 +59,7 @@ func runKeys(broker string, args []string, stdout, stderr io.Writer, tty bool) e
 		return nil
 	case "set":
 		if len(args) < 2 || strings.HasPrefix(args[1], "-") {
-			return fmt.Errorf("usage: roger keys set <key-id> [--name N] [--limit $] [--reset R] [--models a,b] [--nodes a,b] [--expires T] [--disable|--enable]")
+			return fmt.Errorf("usage: roger keys set <key> [--name N] [--limit $] [--reset R] [--models a,b] [--nodes a,b] [--expires T] [--disable|--enable]")
 		}
 		fields, err := keysFields("set", args[2:], true)
 		if err != nil {
@@ -66,26 +68,62 @@ func runKeys(broker string, args []string, stdout, stderr io.Writer, tty bool) e
 		if len(fields) == 0 {
 			return fmt.Errorf("nothing to change - pass at least one flag (see `roger keys`)")
 		}
-		k, err := client.KeysSet(broker, args[1], fields)
+		id, _, err := keysResolve(broker, args[1])
+		if err != nil {
+			return err
+		}
+		k, err := client.KeysSet(broker, id, fields)
 		if err != nil {
 			return err
 		}
 		client.WriteKeysTable(stdout, []client.AccountKey{k})
-		return nil
-	case "rm", "revoke", "delete":
-		if len(args) < 2 {
-			return fmt.Errorf("usage: roger keys rm <key-id>")
+		if _, limited := fields["limit_usd"]; limited {
+			keysUnlimitedNote(stderr, k)
 		}
-		if err := client.KeysRevoke(broker, args[1]); err != nil {
+		return nil
+	case "revoke", "rm", "delete":
+		if len(args) < 2 {
+			return fmt.Errorf("usage: roger keys revoke <key>")
+		}
+		id, label, err := keysResolve(broker, args[1])
+		if err != nil {
 			return err
 		}
-		fmt.Fprintf(stdout, "revoked %s\n", args[1])
+		if err := client.KeysRevoke(broker, id); err != nil {
+			return err
+		}
+		fmt.Fprintf(stdout, "revoked %s\n", label)
 		return nil
 	case "-h", "--help", "help":
 		keysUsage(stdout)
 		return nil
 	}
-	return fmt.Errorf("unknown keys command %q (try list|mint|set|rm)", args[0])
+	return fmt.Errorf("unknown keys command %q (try list|mint|set|revoke)", args[0])
+}
+
+// keysResolve turns what was typed into a key id. An id is used as it is. Anything else is a
+// name, looked up in the account's own list as the TUI does (client.FindKey), so nothing typed
+// becomes part of a broker path. label is how to name the key back to the person.
+func keysResolve(broker, arg string) (id, label string, err error) {
+	if client.KeyIDOK(arg) {
+		return arg, arg, nil
+	}
+	keys, err := client.KeysList(broker)
+	if err != nil {
+		return "", "", err
+	}
+	k, err := client.FindKey(keys, arg)
+	if errors.Is(err, client.ErrKeyNotFound) {
+		err = fmt.Errorf("%w - `roger keys list` shows them", err)
+	}
+	return k.ID, fmt.Sprintf("%s (%s)", k.Name, k.ID), err
+}
+
+// keysUnlimitedNote tells the person, never the pipe, that a key has no limit.
+func keysUnlimitedNote(stderr io.Writer, k client.AccountKey) {
+	if k.LimitUSD <= 0 {
+		fmt.Fprintln(stderr, client.KeyUnlimitedNote)
+	}
 }
 
 // keysFields parses the key flags into the JSON fields the broker takes, naming only the
@@ -93,7 +131,7 @@ func runKeys(broker string, args []string, stdout, stderr io.Writer, tty bool) e
 func keysFields(verb string, args []string, patch bool) (map[string]any, error) {
 	fs := flag.NewFlagSet("keys "+verb, flag.ExitOnError)
 	name := fs.String("name", "", "label shown in the key list")
-	limit := fs.Float64("limit", 0, "spend limit in $ per window (0 = unlimited)")
+	limit := fs.String("limit", "", "spend limit in $ per window (none = unlimited)")
 	reset := fs.String("reset", "", "limit window: daily, weekly, monthly or none")
 	models := fs.String("models", "", "allow only these models (comma-separated; empty = any)")
 	nodes := fs.String("nodes", "", "allow only these stations (comma-separated; empty = any)")
@@ -104,12 +142,24 @@ func keysFields(verb string, args []string, patch bool) (map[string]any, error) 
 	out := map[string]any{}
 	var bad error
 	fs.Visit(func(f *flag.Flag) {
+		if bad != nil {
+			return
+		}
 		switch f.Name {
 		case "name":
 			out["name"] = *name
 		case "limit":
-			out["limit_usd"] = *limit
+			v, err := client.ParseKeyLimit(*limit)
+			if err != nil {
+				bad = fmt.Errorf("--limit %q: %w", *limit, err)
+				return
+			}
+			out["limit_usd"] = v
 		case "reset":
+			if !client.KeyResetOK(*reset) {
+				bad = fmt.Errorf("--reset %q: daily, weekly, monthly or none", *reset)
+				return
+			}
 			out["reset"] = *reset
 		case "models":
 			out["allowed_models"] = nonNilCSV(*models)
@@ -153,12 +203,18 @@ func keysUsage(w io.Writer) {
 
   roger keys list                                    your keys, their limits and use
   roger keys mint --name ci --limit 5 --reset weekly mint a key (the secret is shown ONCE)
-  roger keys set <key-id> --limit 10 --models a,b    change a key
-  roger keys set <key-id> --disable                  turn a key off (--enable to turn it back on)
-  roger keys rm <key-id>                             revoke a key
+  roger keys set <key> --limit 10 --models a,b       change a key
+  roger keys set <key> --disable                     turn a key off (--enable to turn it back on)
+  roger keys revoke <key>                            revoke a key
 
-  --name <label>  --limit <$>  --reset daily|weekly|monthly|none
+A <key> is its id or its name.
+
+  --name <label>  --limit <$|none>  --reset daily|weekly|monthly|none
   --models a,b  --nodes a,b  --expires 30d|2026-12-31|never
+
+A limit is in dollars. Use --limit none for an unlimited key; 0 is refused, because it
+would mean unlimited and not no spending. --limit is optional: leaving it out also mints an
+unlimited key, and says so.
 
 A key pays from your account. Use one with `+"`roger use <model> --key rog-key_...`"+`, or as the
 OpenAI API key for any tool pointed at the broker. Keys need `+"`roger login`"+`.

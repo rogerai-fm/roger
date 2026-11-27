@@ -827,17 +827,16 @@ func tuiHooks(cfg config) tui.Hooks {
 		GrantCreate: func(broker, name string, free bool) (string, error) {
 			return client.GrantCreateSecret(broker, name, free)
 		},
-		GrantList: func(broker string) ([]tui.GrantRow, error) {
-			rows, err := client.GrantListRows(broker)
-			if err != nil {
-				return nil, err
-			}
-			out := make([]tui.GrantRow, 0, len(rows))
-			for _, r := range rows {
-				out = append(out, tui.GrantRow{Name: r.Name, Price: r.Price, Status: r.Status})
-			}
-			return out, nil
-		},
+		GrantList:   client.GrantListRows,
+		KeysList:    client.KeysList,
+		KeysMint:    client.KeysMint,
+		KeysSet:     client.KeysSet,
+		KeysRevoke:  client.KeysRevoke,
+		GrantRevoke: client.GrantRevokeByName,
+		// Grants this account added (features/grants/grant_surfaces.feature, TUI rule).
+		GrantAdd:       client.GrantAdd,
+		GrantAddedList: client.GrantAddedList,
+		GrantRemove:    client.GrantRemove,
 		// Persist a per-model price + schedule the in-TUI editor produced (the host
 		// owns the config write; the TUI does no disk I/O).
 		SavePrice: func(model string, p tui.Pricing) {

@@ -209,10 +209,11 @@ OPENAI_API_KEY=&lt;the key it printed&gt;</code></pre></div>
           </article>
           <article class="tint-panel">
             <h3>A grant key</h3>
-            <p>Mint a key and point a remote or headless tool straight at the broker, with
-               no CLI on that machine. A grant is confined to <b>your own nodes</b> - it
+            <p>Mint a free grant and point a remote or headless tool straight at the broker,
+               with no CLI on that machine. A grant is confined to <b>your own nodes</b> - it
                can never reach another owner's hardware - so this is the shape for "my
-               cloud bot uses the GPU on my desk".</p>
+               cloud bot uses the GPU on my desk". A priced grant is not a key: the person
+               you give it to adds it to their account (<a href="/manual.html#s5">manual §5</a>).</p>
             <div class="code-block ways__code"><pre><code>OPENAI_API_BASE=https://broker.rogerai.fm/v1
 OPENAI_API_KEY=&lt;grant key&gt;</code></pre></div>
           </article>

@@ -568,6 +568,18 @@ type Store interface {
 	GrantUsageOf(id string, now time.Time) (GrantUsage, error)
 	// AddGrantUsage increments a grant's day + month token rollup at settle time.
 	AddGrantUsage(id string, tokens int64, now time.Time) error
+	// RepriceGrant gives an owner's grant a new secret hash, a new price and the next
+	// generation, keeping everything else. A zero price makes it free.
+	RepriceGrant(id, owner, newHash string, in, out float64, scope GrantScope) (Grant, bool, error)
+	// AddGrantToWallet records that an account added a grant under generation gen. It is
+	// idempotent, and ErrGrantAddLimit when the wallet already holds max other grants.
+	AddGrantToWallet(wallet, grantID string, gen int64, covers map[string][]string, max int, now time.Time) error
+	// RemoveGrantFromWallet drops an account's copy of a grant.
+	RemoveGrantFromWallet(wallet, grantID string) (bool, error)
+	// GrantAddsOfWallet lists the grants an account added, oldest first.
+	GrantAddsOfWallet(wallet string) ([]GrantAdd, error)
+	// GrantAddCounts is, per grant of this owner, how many accounts hold its current secret.
+	GrantAddCounts(owner string) (map[string]int, error)
 
 	// --- private bands ("frequency codes": private discovery) - BANDS-DESIGN ----
 

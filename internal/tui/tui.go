@@ -264,6 +264,18 @@ type Hooks struct {
 	TopupURL    func(broker, user string, usd float64) (string, error)
 	GrantCreate func(broker, name string, free bool) (secret string, err error)
 	GrantList   func(broker string) ([]GrantRow, error)
+	// Account keys (rog-key_...) and grant revoke, for the KEYS panel (keys.go). They take and
+	// return the client's own shapes, so the host wires the client functions straight in.
+	KeysList    func(broker string) ([]client.AccountKey, error)
+	KeysMint    func(broker string, fields map[string]any) (client.AccountKey, string, error)
+	KeysSet     func(broker, id string, fields map[string]any) (client.AccountKey, error)
+	KeysRevoke  func(broker, id string) error
+	GrantRevoke func(broker, name string) error
+	// Grants this account ADDED (someone else's priced grant, by its secret), for the KEYS
+	// panel's "grants you added" section (features/grants/grant_surfaces.feature, S7).
+	GrantAdd       func(broker, secret string) (client.AddedGrant, error)
+	GrantAddedList func(broker string) ([]client.AddedGrant, int, error)
+	GrantRemove    func(broker, ref string) (client.AddedGrant, error)
 	// SavePrice persists a per-model price + time-of-use schedule the in-TUI editor
 	// produced, so the choice survives the session (nil = in-session only). The host
 	// owns the config write; the TUI keeps no disk I/O.
@@ -679,6 +691,7 @@ const (
 	modeBandQuants        // the small input for a band's ACCEPTED QUANTS rule (band_config.go)
 	modePingWorld         // [z] / `/ping`: the fullscreen Ping World screensaver; any key wakes back to prevMode
 	modeLog               // /log: the captured node + broker log buffer (any key closes)
+	modeKeys              // /keys, /grant: account keys and grants in one panel (keys.go)
 	modeVoicePreview      // a VOICE band (tts/stt): a sample-play/preview panel, NOT a chat channel (voice.go)
 	modeVoiceBooth        // THE DJ BOOTH: the tts voices lineup, a CHILD screen of THE BAND (esc returns). Voice is a dim footnote off the LLM list, never a peer section (voice.go)
 	modeListeningPost     // THE LISTENING POST: the stt info/how-to screen, drilled into FROM the Booth (esc returns to the Booth). Info only — no preview, no chat (voice.go)
@@ -1302,7 +1315,7 @@ type model struct {
 	earnShown  bool           // the earn disclosure is up in SHARE (an anonymous user asked to earn)
 	ghLogin    string         // linked GitHub login (set at startup if linked, or once /login succeeds); "" = anonymous
 	loggedIn   bool           // true when the broker confirms a real account wallet (gates the balance display)
-	grantList  []GrantRow     // last /grant list result
+	keys       keysPanel      // the KEYS panel: account keys and grants (keys.go)
 	// BASE STATION / remote control (v5.0.0). rcBridge is the live HOST bridge for THIS
 	// machine's agent (nil unless /remote-control is on); rcInfo is its one-time enable info
 	// (for re-copy); rcSessions is the roster cache for modePrivate; rcCursor/rcErr drive the
@@ -2082,6 +2095,8 @@ func (m model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	case balanceMsg:
+		// A KEYS panel opened before the account was known to be logged in read nothing.
+		readKeys := m.mode == modeKeys && !m.loggedInState() && msg.loggedIn
 		m.loggedIn = msg.loggedIn
 		if msg.loggedIn {
 			m.balance, m.haveBal = msg.balance, true
@@ -2093,11 +2108,15 @@ func (m model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		// One-shot: a logged-in owner can have provider earnings, so fetch the payout
 		// snapshot once (off the event loop) to drive the SHARE-view cash-out hint.
+		var cmds []tea.Cmd
+		if readKeys {
+			cmds = append(cmds, m.loadKeys())
+		}
 		if m.loggedInState() && !m.payoutFetched {
 			m.payoutFetched = true
-			return m, fetchPayoutStatus(m.broker)
+			cmds = append(cmds, fetchPayoutStatus(m.broker))
 		}
-		return m, nil
+		return m, tea.Batch(cmds...)
 	case chatMsg:
 		m.relaying = false
 		m.recordEdgeSession(msg.receipt)
@@ -2246,17 +2265,8 @@ func (m model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.status = stEmber.Render("top up: ") + stKey.Render(string(msg)) + stDim.Render(hint)
 		return m, nil
-	case grantMsg:
-		m.status = stLive.Render(glyphLineage+" grant created - secret (shown once): ") + stKey.Render(msg.secret)
-		return m, nil
-	case grantListMsg:
-		m.grantList = []GrantRow(msg)
-		if len(m.grantList) == 0 {
-			m.status = stDim.Render("no grants yet - /grant create <name> mints a free key")
-		} else {
-			m.status = stLive.Render(plural(len(m.grantList), "grant") + " - see the panel")
-		}
-		return m, nil
+	case keysListMsg, keyMintedMsg, keysConfirmMsg, keysDoneMsg, grantAddedMsg:
+		return m.onKeysMsg(msg)
 	case bandActionMsg:
 		// A move/revoke/rotate/forget landed. We return to BASE STATION and re-fetch the
 		// roster, so the list reflects what actually happened rather than what we hoped.
@@ -4945,6 +4955,22 @@ func (m model) footer(w int) string {
 	// Modal sub-screens get their OWN footer keys (TUI-V2-CRITIQUE B) - the browse
 	// "↑↓ tune · / cmd" keys do nothing here and mislead.
 	switch m.mode {
+	case modeKeys:
+		left = stDim.Render("esc close  ·  / command: /keys mint <name> <limit>, /grant create <name>")
+		if m.narrow() {
+			left = stDim.Render("esc close · / command")
+		}
+		if c := m.keys.confirm; c != nil {
+			verb := "revoke"
+			if c.added {
+				verb = "remove"
+			}
+			left = stDim.Render("y " + verb + "  ·  any other key keeps it")
+		}
+		if m.keys.adding {
+			left = stDim.Render("enter add  ·  esc cancel")
+		}
+		return modalFooter(m.effWidth(), left, m.accountTag(true), m.status)
 	case modeConnectConfirm:
 		left = stDim.Render("enter/y accept  ·  esc/n deny  ·  d detail")
 		if m.narrow() {
@@ -5722,6 +5748,9 @@ func scrubSecretArgs(cmd string) string {
 		return cmd
 	}
 	verb := strings.ToLower(strings.TrimLeft(fields[0], "/"))
+	if verb == "grant" && strings.ToLower(fields[1]) == "add" {
+		return fields[0] + " " + fields[1] // `/grant add <secret>`: the grant secret (S3)
+	}
 	if !secretArgCommands[verb] {
 		return cmd
 	}

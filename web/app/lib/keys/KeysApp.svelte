@@ -79,7 +79,7 @@
   let grants = $state([]);
   let gview = $state("loading");     // loading | ready | empty | nooperator | fault
 
-  const BILL_HINT = { free: "Free - costs nobody. Your nodes serve it at $0.", self: "Self - a $0 key for your OWN headless boxes and agents.", priced: "Sponsored - usage bills to your own wallet at the price below." };
+  const BILL_HINT = { free: "Free - costs nobody. Your nodes serve it at $0.", self: "Self - a $0 key for your OWN headless boxes and agents.", priced: "Priced - whoever adds it to their account pays the price below, from their own wallet." };
   function setBill(m) { billMode = m; kFree = m === "free"; }
   function toggleFree(e) {
     if (e.target.checked) billMode = "free";
@@ -263,9 +263,10 @@
   <!-- GRANT KEYS: CREATE -->
   <section class="panel">
     <h2>Grant keys</h2>
-    <p class="fine">Grant keys are private, labeled bearer keys your bots, family, friends, or
-      your own headless boxes use as their API key, with no login of their own. They route only
-      to your nodes, free or at a price you sponsor, under the caps you set.</p>
+    <p class="fine">Grant keys reach only your nodes, under the caps you set. A <b>free</b> grant
+      is an API key on its own: your bots, family, friends or headless boxes use it with no login.
+      A <b>priced</b> grant is for people you give it to: they add it to their own account and pay
+      your price from their own wallet. It never charges yours.</p>
     <p class="fine">The secret is shown <b>once</b>, at create. Only its hash is stored,
       so it can never be re-displayed - copy it then.</p>
 
@@ -285,7 +286,7 @@
           <span class="kf__toggle-txt">Free key</span>
         </label>
         <span class="kf__hint" id="freeHint">Costs nobody. Your nodes serve it at $0.
-          Turn off to sponsor or scope it.</span>
+          Turn off to price or scope it.</span>
       </div>
 
       <!-- everything else: folded away by default -->
@@ -295,14 +296,14 @@
           <div class="kf__field">
             <span class="kf__k">Billing</span>
             <div class="kf__opts" role="group" aria-label="Billing">
-              {#each [["free", "Free"], ["self", "Self ($0)"], ["priced", "Sponsored"]] as [m, label]}
+              {#each [["free", "Free"], ["self", "Self ($0)"], ["priced", "Priced"]] as [m, label]}
                 <button type="button" class="kf__opt{billMode === m ? ' is-active' : ''}" data-bill={m} aria-pressed={billMode === m ? "true" : "false"} onclick={() => setBill(m)}>{label}</button>
               {/each}
             </div>
             <span class="kf__hint" id="billHint">{BILL_HINT[billMode]}</span>
           </div>
 
-          <!-- sponsored price-out, only when "Sponsored" is chosen -->
+          <!-- the price out, only when "Priced" is chosen: the person who adds the grant pays it -->
           <div class="kf__field" id="priceField" hidden={billMode !== "priced"}>
             <label class="kf__k" for="kPriceOut">Price out ($/1M tokens)</label>
             <div class="kf__money">
@@ -310,7 +311,7 @@
               <input id="kPriceOut" class="kf__in" type="number" min="0" step="0.01"
                 inputmode="decimal" placeholder="0.30" bind:value={kPriceOut} />
             </div>
-            <span class="kf__hint">You sponsor it: usage bills to your own wallet at this rate.</span>
+            <span class="kf__hint">Whoever adds it to their account pays this rate, from their own wallet. You are paid it, less the marketplace fee.</span>
           </div>
 
           <div class="kf__field">
@@ -438,8 +439,9 @@ roger share</pre>
 
   <div class="man-note kf__guard">
     <span class="man-note__tag">second guardrail</span>
-    Per-key caps limit one key. A single <b>account-wide monthly spend cap</b> bounds what
-    every sponsored key can cost you together - set it on <a href="/billing.html">Billing</a>.
+    Per-key caps limit one key, across everyone who uses it. Your grants never charge your
+    wallet; what you spend yourself is bounded by one <b>account-wide monthly spend cap</b> - set it
+    on <a href="/billing.html">Billing</a>.
   </div>
 
   <AccountNav current="keys" />
@@ -453,8 +455,9 @@ roger share</pre>
   <section class="acct-state tint-panel">
     <h2>Signed out</h2>
     <p>Grant keys are owner-issued: you sign in once, with GitHub, Apple or an emailed
-      code, then mint private bearer keys for your bots, family, or your own headless
-      boxes. Each key is shown only once.</p>
+      code, then mint free keys for your bots, family, or your own headless boxes, or
+      priced ones that the people you share them with add to their own accounts. Each key is
+      shown only once.</p>
     <p class="research-actions research-actions--lead"><a class="research-button" href="/login.html" use:backHere>Sign in</a></p>
   </section>
 </main>

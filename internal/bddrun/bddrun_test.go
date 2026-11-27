@@ -86,3 +86,14 @@ func TestScenariosSelectsByTitle(t *testing.T) {
 	require.Equal(t, []string{f + ":5"}, Scenarios(f, Titled(true, "one")))
 	require.Nil(t, Scenarios(dir+"/missing.feature", Titled(false)))
 }
+
+func TestScenariosInRuleSelectsByRuleTitle(t *testing.T) {
+	dir := t.TempDir()
+	f := dir + "/x.feature"
+	body := "Feature: x\n\n  Rule: The CLI does a\n\n    Scenario: one\n      Given a\n\n    Scenario Outline: two <n>\n      Given b\n\n  Rule: The TUI does b\n\n    Scenario: three\n      Given c\n"
+	require.NoError(t, os.WriteFile(f, []byte(body), 0o600))
+	require.Equal(t, []string{f + ":5", f + ":8"}, ScenariosInRule(f, "The CLI"))
+	require.Equal(t, []string{f + ":13"}, ScenariosInRule(f, "The TUI"))
+	require.Nil(t, ScenariosInRule(f, "The console"))
+	require.Nil(t, ScenariosInRule(dir+"/missing.feature", "The CLI"))
+}

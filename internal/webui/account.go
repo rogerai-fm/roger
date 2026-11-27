@@ -103,6 +103,7 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.ctrl.Logout()
+	s.closeChannel(true) // a channel on a paid band spends from the wallet just logged out of
 	writeJSON(w, map[string]any{"ok": true})
 }
 
@@ -215,37 +216,6 @@ func (s *Server) handlePayoutHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, recs)
-}
-
-// handleGrants lists grants (GET) or creates one (POST {name,free}), returning the secret
-// once.
-func (s *Server) handleGrants(w http.ResponseWriter, r *http.Request) {
-	if !s.brokerReady(w) {
-		return
-	}
-	if r.Method == http.MethodPost {
-		var req struct {
-			Name string `json:"name"`
-			Free bool   `json:"free"`
-		}
-		if !decode(r, &req) || req.Name == "" {
-			http.Error(w, "name required", http.StatusBadRequest)
-			return
-		}
-		secret, err := client.GrantCreateSecret(s.opts.Broker, req.Name, req.Free)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-		writeJSON(w, map[string]any{"ok": true, "secret": secret})
-		return
-	}
-	rows, err := client.GrantListRows(s.opts.Broker)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
-		return
-	}
-	writeJSON(w, rows)
 }
 
 // handleBrowse returns the broker's open-market discover feed (GET), or in LAN mode the merged

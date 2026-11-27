@@ -1,5 +1,4 @@
-/* =====================================================================
-   Roger - console.css : the embedded "node console", restyled to the
+/* ==============================================================   Roger - console.css : the embedded "node console", restyled to the
    rogerai.fm design system ("The Live Operating Manual").
 
    ~95% warm monochrome + EXACTLY ONE accent: the red on-air beacon
@@ -748,21 +747,32 @@ noscript {
   white-space: pre-wrap;
   line-height: 1.7;
 }
-.grant-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-mono);
-  font-size: var(--t-xs);
-}
-.grant-list li {
+/* account keys and grants (console-keys.js) */
+/* A key row carries five facts and five controls, so the keys card takes two columns. */
+#card-keys { grid-column: span 2; }
+@media (max-width: 640px) { #card-keys { grid-column: auto; } }
+.keys-card { font-size: var(--t-xs); }
+.keys-card .card-desc, .keys-card .muted { color: var(--ink-400); margin: 0 0 var(--s-2); }
+.keys-card .key-list { list-style: none; margin: 0; padding: 0; }
+.keys-card .key-list li {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3);
   padding: var(--s-2) 0;
   border-top: 1px solid var(--hairline);
   color: var(--ink-700);
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
-.grant-list li:first-child { border-top: 0; }
-.grant-list .muted { color: var(--ink-400); }
+.keys-card .key-list li:first-child { border-top: 0; }
+.keys-card .key-list input.inp { width: 9ch; }
+.keys-card .key-list select.inp { width: auto; }
+.keys-card .key-note, .keys-card .key-ask, .keys-card .key-warn { color: var(--ink-700); margin: var(--s-2) 0; }
+.keys-card .key-warn { font-weight: 600; }
+.keys-card .key-reveal {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2);
+  margin: var(--s-2) 0; padding-left: 8px;
+  border-left: 3px solid var(--accent);
+}
+.keys-card .key-reveal-label, .keys-card .key-warn { flex: 1 0 100%; }
+.keys-card .key-reveal .code-value { overflow-wrap: anywhere; user-select: all; }
 
 /* the "broker not configured" notice. */
 .not-configured {
@@ -1645,6 +1655,14 @@ body.is-chat .content { padding-bottom: var(--s-6); }
 #cat-err { color: var(--live); margin: 8px 0 0; }
 .cat-cell { white-space: nowrap; }
 
+/* The endpoint plate under the chat composer (console-channel.js). */
+.channel-plate { margin: 10px 2px 0; font-size: var(--t-xs); }
+.channel-plate .plate-head { margin: 0 0 6px; color: var(--live); font-weight: 600; }
+.channel-plate .plate-row { display: flex; gap: 12px; overflow-wrap: anywhere; }
+.channel-plate .plate-label { flex: 0 0 9ch; color: var(--ink-400); }
+.channel-plate .plate-line, .channel-plate .plate-note, .channel-plate .plate-refusal { margin: 6px 0 0; }
+.channel-plate .plate-actions { display: flex; gap: 8px; margin-top: 8px; }
+.channel-plate .btn, .channel-plate .inp { margin-top: 6px; }
 /* features/details: the about row under a BROWSE row */
 .about-toggle { margin-left: 8px; }
 .about-row td.about { white-space: normal; overflow-wrap: anywhere; padding: 8px 12px 12px; }

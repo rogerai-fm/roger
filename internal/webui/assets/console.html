@@ -97,6 +97,8 @@
             <p class="chat-held" id="chat-held" hidden></p>
             <p class="chat-band mono" id="chat-band" hidden></p>
             <p class="chat-foot mono" id="chat-foot">&mdash;</p>
+            <!-- the endpoint plate: an OpenAI endpoint on this machine for the picked model (console-channel.js) -->
+            <div class="channel-plate" id="channel-plate" aria-live="polite"></div>
           </div>
         </div>
       </section>
@@ -295,15 +297,18 @@
             <div class="history mono small" id="payout-history" hidden></div>
           </div>
 
-          <!-- grants -->
+          <!-- account keys, grants and grants you added: drawn by console-keys.js -->
+          <div class="card" id="card-keys">
+            <div class="card-title">Account keys</div>
+            <div class="keys-card" id="card-keys-body"></div>
+          </div>
           <div class="card" id="card-grants">
             <div class="card-title">Grants</div>
-            <ul class="grant-list mono small" id="grant-list"><li class="muted">none</li></ul>
-            <div class="card-actions">
-              <input class="inp small" id="grant-name" type="text" placeholder="grant name">
-              <label class="chk"><input type="checkbox" id="grant-free"> free</label>
-              <button class="btn" id="btn-grant-create">Create</button>
-            </div>
+            <div class="keys-card" id="card-grants-body"></div>
+          </div>
+          <div class="card" id="card-added">
+            <div class="card-title">Grants you added</div>
+            <div class="keys-card" id="card-added-body"></div>
           </div>
         </div>
 
@@ -730,6 +735,8 @@
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
   <script src="/assets/console-welcome.js" defer></script>
+  <script src="/assets/console-channel.js" defer></script>
+  <script src="/assets/console-keys.js" defer></script>
   <script src="/assets/console-edge-empty.js" defer></script>
   <script src="/assets/console-edge-nearby.js" defer></script>
   <script src="/assets/console-lan.js" defer></script>

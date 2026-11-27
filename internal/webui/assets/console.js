@@ -14,6 +14,8 @@
 
   /* 1. AUTH / TOKEN -------------------------------------------------------- */
   var TOKEN = new URLSearchParams(location.search).get("t") || "";
+  var channelPlate = null; // the endpoint plate's controls, once mounted
+  var keysCard = null;     // the ACCOUNT tab's keys and grants cards, once mounted
 
   /* 2. TINY DOM + FORMAT HELPERS ------------------------------------------ */
   function $(id) { return document.getElementById(id); }
@@ -545,7 +547,7 @@
 
     if (accountDisabled) return;
     loadPayout();
-    loadGrants();
+    if (keysCard) keysCard.load();
   }
 
   function loadPayout() {
@@ -565,45 +567,6 @@
       });
       box.textContent = lines.join("\n") || "no payouts yet";
     }).catch(toastErr);
-  }
-
-  function loadGrants() {
-    apiGet("/api/grants").then(function (g) {
-      var list = $("grant-list");
-      list.innerHTML = "";
-      var items = Array.isArray(g) ? g : (g && g.items) || [];
-      if (!items.length) { list.appendChild(el("li", "muted", "none")); return; }
-      items.forEach(function (it) {
-        var name = it.name || it.id || "grant";
-        var meta = it.free ? " · free" : (it.balance != null ? " · " + fmtUSD(it.balance) : "");
-        list.appendChild(el("li", null, name + meta));
-      });
-    }).catch(function (e) { if (e.status !== 503) {/* quiet */} });
-  }
-  function createGrant() {
-    var name = $("grant-name").value.trim();
-    if (!name) { toast("Name the grant.", "warn"); return; }
-    apiPost("/api/grants", { name: name, free: $("grant-free").checked }).then(function (r) {
-      r = r || {};
-      $("grant-name").value = ""; $("grant-free").checked = false;
-      if (r.secret) revealGrantSecret(name, r.secret);
-      toast((r.message) || "Grant created.", "ok");
-      loadGrants();
-    }).catch(toastErr);
-  }
-  function revealGrantSecret(name, secret) {
-    var list = $("grant-list");
-    var li = el("li", null);
-    li.style.borderLeft = "3px solid var(--accent)";
-    li.style.paddingLeft = "8px";
-    li.appendChild(el("div", "small", name + " — save this secret, shown once:"));
-    var row = el("div", "code-row");
-    var code = el("code", "code-value", secret);
-    var copy = el("button", "btn small", "copy");
-    copy.onclick = function () { copyText(secret, copy); };
-    row.appendChild(code); row.appendChild(copy);
-    li.appendChild(row);
-    list.insertBefore(li, list.firstChild);
   }
 
   // login device flow
@@ -628,7 +591,7 @@
     }).then(function () { btn.disabled = false; });
   }
   function logout() {
-    apiPost("/api/account/logout", {}).then(function () { toast("Signed out.", "ok"); loadAccount(); }).catch(toastErr);
+    apiPost("/api/account/logout", {}).then(function () { toast("Signed out.", "ok"); if (keysCard) keysCard.leave(); loadAccount(); }).catch(toastErr);
   }
   function topup() {
     var usd = parseFloat($("topup-amount").value);
@@ -1466,7 +1429,7 @@
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); chatSend(); }
     });
     if (send) send.addEventListener("click", chatSend);
-    if (model) model.addEventListener("change", function () { chatBandDetail(); chatFoot(); });
+    if (model) model.addEventListener("change", function () { chatBandDetail(); chatFoot(); if (channelPlate) channelPlate.refresh(); });
   }
 
   /* TABS ------------------------------------------------------------------- */
@@ -1489,7 +1452,8 @@
     Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) {
       b.setAttribute("aria-selected", b.getAttribute("data-tab") === name ? "true" : "false");
     });
-    if (name === "account") loadAccount();
+    // A shown-once secret does not outlive the tab it was shown on.
+    if (name === "account") loadAccount(); else if (keysCard) keysCard.leave();
     if (name === "browse") loadBrowse();
     if (name === "settings") loadSettings();
     // The EDGE tab polls and animates ONLY while it is the shown tab (edgeStart/edgeStop
@@ -3777,7 +3741,6 @@
     $("btn-payout-onboard").onclick = payoutOnboard;
     $("btn-payout-request").onclick = payoutRequest;
     $("btn-payout-history").onclick = payoutHistory;
-    $("btn-grant-create").onclick = createGrant;
 
     // browse
     $("btn-browse-refresh").onclick = loadBrowse;
@@ -3804,6 +3767,37 @@
         tab: setTab,
         login: function () { setTab("account"); loginBegin(); },
       });
+    }
+    // Account keys and grants on the ACCOUNT tab (console-keys.js).
+    if (window.RogerConsoleKeys) {
+      window.RogerConsoleKeys.mount(document, {
+        fetch: function (path, opts) {
+          opts = opts || {};
+          opts.headers = Object.assign({ "X-Roger-Token": TOKEN }, opts.headers || {});
+          return fetch(path, opts); // the token rides the header: nothing about a key goes in a URL
+        },
+        clipboard: { writeText: function (t) { return navigator.clipboard.writeText(t); } },
+        login: function () { setTab("account"); loginBegin(); }, // the added card's login button
+      }).then(function (card) {
+        keysCard = card;
+        if (!$("panel-account").hidden) card.load(); // opened straight onto ACCOUNT
+      });
+    }
+    // The endpoint plate for the picked open-market model (console-channel.js). A model this
+    // machine serves itself is talked to directly, so it has no broker channel to open.
+    if (window.RogerConsoleChannel) {
+      window.RogerConsoleChannel.mount(document, {
+        fetch: function (path, opts) {
+          opts = opts || {};
+          opts.headers = Object.assign({ "X-Roger-Token": TOKEN }, opts.headers || {});
+          return fetch(path, opts); // the token rides the header: nothing about a channel goes in a URL
+        },
+        model: function () { var e = chatSelected(); return e && !e.local ? e.model : ""; },
+        clipboard: { writeText: function (t) { return navigator.clipboard.writeText(t); } },
+        toast: toast,
+        tab: setTab,
+        every: function (fn, ms) { setInterval(function () { if (!document.hidden) fn(); }, ms); },
+      }).then(function (plate) { channelPlate = plate; });
     }
   }
 

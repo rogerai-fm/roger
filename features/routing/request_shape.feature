@@ -1024,14 +1024,20 @@ Feature: Routing request shape - the body carriers, their validation, precedence
     Then the response is 200
     And only the floor hold was placed
 
+  # changed 2026-11-23 (founder-approved, features/grants/priced_grants.feature P1 and P5): a
+  # priced grant is paid by the account that added it, and a priced grant sent as a bare key is
+  # refused. This keeps what it proved, on the caller who added the grant.
   Scenario: A per-request cap on a grant-funded relay narrows the grant's own hold, never widens it
-    Given owner "o-1" owns node "n-a" and minted grant "rog-grant_1" for "qwen3-32b" at price_out $0.30
-    When the grant holder posts a chat completion for "qwen3-32b" with max_tokens 100000 and body `"provider": {"max_price": {"request": 0.01}}`
+    Given owner "o-1" owns node "n-a" and minted grant "rog-grant_1" for "qwen3-32b" at price_out $0.30, which "u-1" added
+    When "u-1" posts a chat completion for "qwen3-32b" with max_tokens 100000 and body `"provider": {"max_price": {"request": 0.01}}`
     Then the hold placed is at most $0.01
 
+  # changed 2026-11-23 (founder-approved, features/grants/priced_grants.feature P1 and P5): a
+  # priced grant is paid by the account that added it, and a priced grant sent as a bare key is
+  # refused. This keeps what it proved, on the caller who added the grant.
   Scenario: A per-request cap is enforced against the FIXED grant price, not the market price
-    Given owner "o-1" owns node "n-c" and minted grant "rog-grant_1" for "qwen3-32b" at price_out $0.10
-    When the grant holder posts a chat completion for "qwen3-32b" with max_tokens 1000 and body `"provider": {"max_price": {"request": 0.0002}}`
+    Given owner "o-1" owns node "n-c" and minted grant "rog-grant_1" for "qwen3-32b" at price_out $0.10, which "u-1" added
+    When "u-1" posts a chat completion for "qwen3-32b" with max_tokens 1000 and body `"provider": {"max_price": {"request": 0.0002}}`
     Then the response is 200
 
   Scenario: A settle that would exceed the per-request cap because the station over-reported tokens is clamped to the cap
@@ -1072,9 +1078,16 @@ Feature: Routing request shape - the body carriers, their validation, precedence
     Then the response is 403
     And the error code is "grant_model_denied"
 
+  # changed 2026-11-23 (founder-approved, features/grants/priced_grants.feature P1 and P5): a
+  # priced grant is paid by the account that added it, and a priced grant sent as a bare key is
+  # refused. This keeps what it proved, on the caller who added the grant.
+  # A caller who added a grant can reach every public station, not only the owner's. The
+  # balanced pick explores, so it can land on another station even when n-c is cheapest for
+  # this caller. The request names n-c so the settled price is always the grant's (kept after
+  # the 2026-11-24 audit; founder: "make sure to audit it").
   Scenario: A grant's price cap is not raised by a larger body cap
-    Given owner "o-1" owns node "n-c" and minted grant "rog-grant_1" for "qwen3-32b" at price_out $0.10
-    When the grant holder posts a chat completion for "qwen3-32b" with body `"provider": {"max_price": {"completion": 50}}`
+    Given owner "o-1" owns node "n-c" and minted grant "rog-grant_1" for "qwen3-32b" at price_out $0.10, which "u-1" added
+    When "u-1" posts a chat completion for "qwen3-32b" with body `"provider": {"only": ["n-c"], "max_price": {"completion": 50}}`
     Then the response is 200
     And the settled price out is $0.10/1M
 

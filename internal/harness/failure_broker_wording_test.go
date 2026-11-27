@@ -20,5 +20,7 @@ func TestEveryBrokerNoMatchFilterKeepsItsWords(t *testing.T) {
 	}
 	require.Contains(t, NoMatchFilterNames, "min_tps")
 	require.Equal(t, NoStationServing("m"), ShortFailure("no node offers m", "m"))
-	require.False(t, strings.Contains(strings.Join(NoMatchFilterNames, " "), "max_price"), "the broker never names max_price")
+	// Since 2026-11-23 the broker names a stated price cap that turned every station away, at
+	// the price the caller pays (features/grants/priced_grants.feature P8).
+	require.True(t, strings.Contains(strings.Join(NoMatchFilterNames, " "), "max_price"), "the broker names max_price")
 }

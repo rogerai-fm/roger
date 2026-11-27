@@ -117,7 +117,7 @@ func clipFailure(s string) string {
 // NoMatchFilterNames are the filter names the broker lists in a no_match ("no node offers M
 // under F, ..."), a copy of the broker's noMatchFilterOrder (cmd/rogerai-broker; a broker test
 // pins the two equal: the broker's list lives in package main and cannot be imported).
-var NoMatchFilterNames = []string{"quantizations", "params_b", "min_ctx", "min_tps", "max_ttft_ms", "trust_min", "self_hosted_only", "region"}
+var NoMatchFilterNames = []string{"quantizations", "params_b", "min_ctx", "min_tps", "max_ttft_ms", "trust_min", "self_hosted_only", "region", "max_price"}
 
 // routingConstraintWords are what a no_match says when a routing constraint, not an empty
 // market, excluded every station: the filter names, and the broker's capability and

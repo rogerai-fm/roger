@@ -17,9 +17,7 @@ import (
 )
 
 // GrantRow is a compact grant summary for the in-TUI /grant list.
-type GrantRow struct {
-	Name, Price, Status string
-}
+type GrantRow = client.GrantInfo
 
 // Limit is the per-model spend ceiling (mirrors cmd/rogerai's config.Limit).
 // Zero fields mean "no cap on that knob". Units match /discover.

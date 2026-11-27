@@ -5,11 +5,13 @@
 #   validateOfferInput ("price cannot be negative", cmd/rogerai-broker/pricesafety.go), but the
 #   GRANT paths did NOT. grantCreate (cmd/rogerai-broker/grants_http.go) and UpdateGrant
 #   (internal/store/grant.go applyPatch, via PATCH /grants/{id}) stored price_in/price_out with
-#   no sign check. A custom-priced grant is billed to the OWNER's own unified wallet
-#   (resolvePricing -> ownerSponsorWallet, cmd/rogerai-broker/grant.go). At settle, cost =
+#   no sign check. A custom-priced grant was billed to the OWNER's own unified wallet
+#   until 2026-11-23 (resolvePricing, cmd/rogerai-broker/grant.go). At settle, cost =
 #   tokens * price and balance += held - cost, so a NEGATIVE price yields a NEGATIVE cost and
 #   CREDITS the owner's wallet - minting spendable balance the owner can then spend on OTHER
-#   operators' real nodes. This file pins the fix at both the boundary (mint + edit reject) and
+#   operators' real nodes. (Since 2026-11-23 a priced grant is paid by the caller who added it,
+#   features/grants/priced_grants.feature, so a negative price would credit that caller instead;
+#   the floor matters just as much.) This file pins the fix at both the boundary (mint + edit reject) and
 #   the billing chokepoint (Grant.GrantPrice never returns a negative), forever.
 #
 # GROUND TRUTH:
@@ -71,11 +73,13 @@ Feature: Grant price safety — a grant can never carry a negative price
       Then the request is rejected with "price cannot be negative"
       And the stored grant still has price_in 2 and price_out 3
 
+    # changed 2026-11-23 (founder-approved, features/grants/priced_grants.feature P4): an edit
+    # can no longer raise a price, so this lowers it. A raise needs a reprice and a new secret.
     Scenario: Patching a price to a non-negative value is accepted
       Given an existing grant with price_in 2 and price_out 3
-      When the owner patches price_out to 7
+      When the owner patches price_out to 1
       Then the grant is updated
-      And the stored grant has price_in 2 and price_out 7
+      And the stored grant has price_in 2 and price_out 1
 
     Scenario: A patch that omits the price fields leaves the price unchanged
       Given an existing grant with price_in 2 and price_out 3

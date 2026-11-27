@@ -497,8 +497,11 @@ Feature: Variant sugar on a model id - :free, :floor, :nitro
   Scenario: :free under a priced grant is a no_match - nothing the grant can reach costs the caller nothing
     # added 2026-10-02 (founder ruling): :free means "costs this caller nothing"; a priced grant
     # bills its own price whichever station serves, so no station can satisfy :free under it
-    Given owner "o-1" owns node "n-free" and minted grant "rog-grant_1" for "qwen3-32b" at price_out $0.50
-    When the grant holder posts a chat completion for "qwen3-32b:free"
+    # changed 2026-11-23 (founder-approved, features/grants/priced_grants.feature P1, P5, P7): the
+    # caller is the account that added the grant. The grant price applies as set, so a station
+    # that is free to the public is not free to a caller who added a priced grant on it.
+    Given owner "o-1" owns node "n-free" and minted grant "rog-grant_1" for "qwen3-32b" at price_out $0.50, which "u-1" added
+    When "u-1" posts a chat completion for "qwen3-32b:free"
     Then the response is 503
     And the error code is "no_match"
     And no station received anything

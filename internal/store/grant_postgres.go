@@ -3,6 +3,7 @@ package store
 import (
 	"database/sql"
 	"encoding/json"
+	"strings"
 	"time"
 )
 
@@ -48,7 +49,7 @@ func (p *Postgres) scanGrant(row interface{ Scan(...any) error }) (Grant, error)
 	var nodes, models []byte
 	err := row.Scan(&g.ID, &g.SecretHash, &g.Owner, &g.Label, &nodes, &models,
 		&g.Free, &g.PriceIn, &g.PriceOut, &g.RPM, &g.Burst, &g.DailyCap, &g.MonthlyCap,
-		&g.Self, &g.ExpiresAt, &g.Revoked, &g.CreatedAt)
+		&g.Self, &g.ExpiresAt, &g.Revoked, &g.CreatedAt, &g.Gen)
 	if err != nil {
 		return Grant{}, err
 	}
@@ -57,7 +58,7 @@ func (p *Postgres) scanGrant(row interface{ Scan(...any) error }) (Grant, error)
 	return g, nil
 }
 
-const grantCols = `id,secret_hash,owner,label,nodes,models,free,price_in,price_out,rpm,burst,daily_cap,monthly_cap,self,expires_at,revoked,created_at`
+const grantCols = `id,secret_hash,owner,label,nodes,models,free,price_in,price_out,rpm,burst,daily_cap,monthly_cap,self,expires_at,revoked,created_at,gen`
 
 func (p *Postgres) GrantBySecretHash(hash string) (Grant, bool, error) {
 	g, err := p.scanGrant(p.db.QueryRow(`SELECT `+grantCols+` FROM rogerai.grants WHERE secret_hash=$1`, hash))
@@ -150,4 +151,104 @@ func (p *Postgres) AddGrantUsage(id string, tokens int64, now time.Time) error {
 		}
 	}
 	return tx.Commit()
+}
+
+func (p *Postgres) RepriceGrant(id, owner, newHash string, in, out float64, scope GrantScope) (Grant, bool, error) {
+	list := func(l *[]string) any { // NULL keeps the stored list
+		if l == nil {
+			return nil
+		}
+		b, _ := json.Marshal(append([]string{}, *l...))
+		return string(b)
+	}
+	g, err := p.scanGrant(p.db.QueryRow(`UPDATE rogerai.grants SET secret_hash=$3,price_in=$4,price_out=$5,free=$6,gen=gen+1,
+		nodes=COALESCE($7::jsonb,nodes),models=COALESCE($8::jsonb,models)
+		WHERE id=$1 AND owner=$2 AND NOT revoked RETURNING `+grantCols, id, owner, newHash, in, out, in == 0 && out == 0, list(scope.Nodes), list(scope.Models)))
+	if err == sql.ErrNoRows {
+		return Grant{}, false, nil
+	}
+	if err != nil {
+		return Grant{}, false, err
+	}
+	return g, true, nil
+}
+
+// AddGrantToWallet inserts only while the wallet holds fewer than max grants, or already holds
+// this one. Two adds of DIFFERENT grants racing at the limit can both see room under READ
+// COMMITTED, so the limit can be passed by the racing adds; it bounds clutter, not money.
+func (p *Postgres) AddGrantToWallet(wallet, grantID string, gen int64, covers map[string][]string, max int, now time.Time) error {
+	if covers == nil {
+		covers = map[string][]string{}
+	}
+	nj, _ := json.Marshal(covers)
+	res, err := p.db.Exec(`INSERT INTO rogerai.grant_adds(wallet,grant_id,gen,added_at,covers)
+		SELECT $1,$2,$3,$4,$6::jsonb WHERE (SELECT count(*) FROM rogerai.grant_adds WHERE wallet=$1) < $5
+			OR EXISTS (SELECT 1 FROM rogerai.grant_adds WHERE wallet=$1 AND grant_id=$2)
+		ON CONFLICT (wallet,grant_id) DO UPDATE SET gen=EXCLUDED.gen, covers=EXCLUDED.covers`, wallet, grantID, gen, now.Unix(), max, string(nj))
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return ErrGrantAddLimit
+	}
+	return nil
+}
+
+func (p *Postgres) RemoveGrantFromWallet(wallet, grantID string) (bool, error) {
+	res, err := p.db.Exec(`DELETE FROM rogerai.grant_adds WHERE wallet=$1 AND grant_id=$2`, wallet, grantID)
+	if err != nil {
+		return false, err
+	}
+	n, _ := res.RowsAffected()
+	return n > 0, nil
+}
+
+func (p *Postgres) GrantAddsOfWallet(wallet string) ([]GrantAdd, error) {
+	rows, err := p.db.Query(`SELECT a.gen,a.added_at,a.covers,g.`+strings.ReplaceAll(grantCols, ",", ",g.")+`
+		FROM rogerai.grant_adds a JOIN rogerai.grants g ON g.id=a.grant_id
+		WHERE a.wallet=$1 ORDER BY a.added_at, a.grant_id`, wallet)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []GrantAdd
+	for rows.Next() {
+		var a GrantAdd
+		var covers []byte
+		g, err := p.scanGrant(prefixScan{rows, []any{&a.Gen, &a.AddedAt, &covers}})
+		if err != nil {
+			return nil, err
+		}
+		_ = json.Unmarshal(covers, &a.Covers)
+		a.Grant = g
+		out = append(out, a)
+	}
+	return out, rows.Err()
+}
+
+// prefixScan scans a row whose first columns are not part of the grant.
+type prefixScan struct {
+	row interface{ Scan(...any) error }
+	pre []any
+}
+
+func (s prefixScan) Scan(dest ...any) error { return s.row.Scan(append(s.pre, dest...)...) }
+
+func (p *Postgres) GrantAddCounts(owner string) (map[string]int, error) {
+	rows, err := p.db.Query(`SELECT a.grant_id, count(*) FROM rogerai.grant_adds a
+		JOIN rogerai.grants g ON g.id=a.grant_id AND g.gen=a.gen WHERE g.owner=$1 GROUP BY a.grant_id`, owner)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := map[string]int{}
+	for rows.Next() {
+		var id string
+		var n int
+		if err := rows.Scan(&id, &n); err != nil {
+			return nil, err
+		}
+		out[id] = n
+	}
+	return out, rows.Err()
 }

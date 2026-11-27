@@ -1,6 +1,8 @@
 package store
 
 import (
+	"errors"
+	"sort"
 	"sync"
 	"time"
 )
@@ -30,6 +32,9 @@ type Grant struct {
 	ExpiresAt  int64    `json:"expires_at"`  // unix; 0 = never
 	Revoked    bool     `json:"revoked"`
 	CreatedAt  int64    `json:"created_at"`
+	// Gen is the secret's generation. A reprice gives the grant a new secret and the next
+	// generation, which ends every copy an account added before it (GrantAdd.Current).
+	Gen int64 `json:"gen,omitempty"`
 
 	// --- Edge grant fields (features/edge/control.feature) --------------------------------------
 	// An Edge grant is the same record, SIGNED BY THE EDGE'S AUTHORITY so any member verifies it with
@@ -95,6 +100,33 @@ func (g Grant) GrantPrice() (in, out float64) {
 	return in, out
 }
 
+// GrantAdd is one account's copy of a priced grant: the caller added the grant's secret to
+// their account once, and after that their own login and account keys get the grant's price
+// on the owner's stations (features/grants/priced_grants.feature). It holds no secret.
+type GrantAdd struct {
+	Grant   Grant
+	Gen     int64 // the grant's generation when it was added
+	AddedAt int64
+	// Covers is what the add reply showed the caller: station id -> the models priced there.
+	// The copy gives its price on these pairs only, so a station or model the owner brings on
+	// air later is never charged at a price the caller was not shown (P17, P18). Adding the
+	// grant again refreshes it.
+	Covers map[string][]string
+}
+
+// GrantScope is a reprice's new station and model lists. A nil field keeps the grant's own;
+// an empty list means every station or model.
+type GrantScope struct {
+	Nodes, Models *[]string
+}
+
+// Current reports whether the copy was added under the grant's present secret. A copy from
+// before a reprice is not: it gives no price until the caller adds the new secret.
+func (a GrantAdd) Current() bool { return a.Gen == a.Grant.Gen }
+
+// ErrGrantAddLimit: the wallet already holds the most grants an account may add.
+var ErrGrantAddLimit = errors.New("store: account grant limit")
+
 // applyPatch returns g with the non-nil patch fields applied.
 func (g Grant) applyPatch(p GrantPatch) Grant {
 	if p.Label != nil {
@@ -147,16 +179,18 @@ func monthKey(t time.Time) string { return t.UTC().Format("2006-01") }
 
 type grantStore struct {
 	mu       sync.Mutex
-	grants   map[string]Grant  // id -> grant
-	bySecret map[string]string // secret_hash -> id
-	dayUsage map[string]int64  // "id|YYYY-MM-DD" -> tokens
-	monUsage map[string]int64  // "id|YYYY-MM" -> tokens
+	grants   map[string]Grant               // id -> grant
+	bySecret map[string]string              // secret_hash -> id
+	dayUsage map[string]int64               // "id|YYYY-MM-DD" -> tokens
+	monUsage map[string]int64               // "id|YYYY-MM" -> tokens
+	adds     map[string]map[string]GrantAdd // wallet -> grant id -> the copy (Grant unset)
 }
 
 func newGrantStore() *grantStore {
 	return &grantStore{
 		grants: map[string]Grant{}, bySecret: map[string]string{},
 		dayUsage: map[string]int64{}, monUsage: map[string]int64{},
+		adds: map[string]map[string]GrantAdd{},
 	}
 }
 
@@ -233,4 +267,90 @@ func (m *Mem) AddGrantUsage(id string, tokens int64, now time.Time) error {
 	m.gs.dayUsage[id+"|"+dayKey(now)] += tokens
 	m.gs.monUsage[id+"|"+monthKey(now)] += tokens
 	return nil
+}
+
+func (m *Mem) RepriceGrant(id, owner, newHash string, in, out float64, scope GrantScope) (Grant, bool, error) {
+	m.gs.mu.Lock()
+	defer m.gs.mu.Unlock()
+	g, ok := m.gs.grants[id]
+	if !ok || g.Owner != owner || g.Revoked { // a revoked grant is never given a new secret
+		return Grant{}, false, nil
+	}
+	delete(m.gs.bySecret, g.SecretHash)
+	g.SecretHash, g.PriceIn, g.PriceOut, g.Free, g.Gen = newHash, in, out, in == 0 && out == 0, g.Gen+1
+	if scope.Nodes != nil {
+		g.Nodes = append([]string(nil), *scope.Nodes...)
+	}
+	if scope.Models != nil {
+		g.Models = append([]string(nil), *scope.Models...)
+	}
+	m.gs.grants[id] = g
+	m.gs.bySecret[newHash] = id
+	return g, true, nil
+}
+
+func (m *Mem) AddGrantToWallet(wallet, grantID string, gen int64, covers map[string][]string, max int, now time.Time) error {
+	m.gs.mu.Lock()
+	defer m.gs.mu.Unlock()
+	held := m.gs.adds[wallet]
+	cp := make(map[string][]string, len(covers))
+	for k, v := range covers {
+		cp[k] = append([]string(nil), v...)
+	}
+	covers = cp
+	if cur, ok := held[grantID]; ok {
+		cur.Gen, cur.Covers = gen, covers
+		held[grantID] = cur
+		return nil
+	}
+	if len(held) >= max {
+		return ErrGrantAddLimit
+	}
+	if held == nil {
+		held = map[string]GrantAdd{}
+		m.gs.adds[wallet] = held
+	}
+	held[grantID] = GrantAdd{Gen: gen, AddedAt: now.Unix(), Covers: covers}
+	return nil
+}
+
+func (m *Mem) RemoveGrantFromWallet(wallet, grantID string) (bool, error) {
+	m.gs.mu.Lock()
+	defer m.gs.mu.Unlock()
+	_, ok := m.gs.adds[wallet][grantID]
+	delete(m.gs.adds[wallet], grantID)
+	return ok, nil
+}
+
+func (m *Mem) GrantAddsOfWallet(wallet string) ([]GrantAdd, error) {
+	m.gs.mu.Lock()
+	defer m.gs.mu.Unlock()
+	var out []GrantAdd
+	for id, a := range m.gs.adds[wallet] {
+		if g, ok := m.gs.grants[id]; ok {
+			a.Grant = g
+			out = append(out, a)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].AddedAt != out[j].AddedAt {
+			return out[i].AddedAt < out[j].AddedAt
+		}
+		return out[i].Grant.ID < out[j].Grant.ID
+	})
+	return out, nil
+}
+
+func (m *Mem) GrantAddCounts(owner string) (map[string]int, error) {
+	m.gs.mu.Lock()
+	defer m.gs.mu.Unlock()
+	out := map[string]int{}
+	for _, held := range m.gs.adds {
+		for id, a := range held {
+			if g, ok := m.gs.grants[id]; ok && g.Owner == owner && a.Gen == g.Gen {
+				out[id]++
+			}
+		}
+	}
+	return out, nil
 }
