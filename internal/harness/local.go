@@ -80,6 +80,10 @@ func LocalCompleter(chatURL, key, model string) Completer {
 		}
 		defer resp.Body.Close()
 		raw, _ := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
-		return parseCompletion(raw, resp.StatusCode)
+		msg, err := parseCompletion(raw, resp.StatusCode)
+		if err != nil && len(tools) > 0 && localRefusedTools(resp.StatusCode, err.Error()) {
+			return Message{}, &ToolsRefusedError{Model: model, Err: err}
+		}
+		return msg, err
 	}
 }

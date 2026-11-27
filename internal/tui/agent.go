@@ -642,6 +642,10 @@ func (m *model) bindAgentEndpoint(mdl string) {
 		return
 	}
 	m.agent.localChat, m.agent.localKey = "", ""
+	if m.agent.loop != nil {
+		// A new model may drive tools: the plain-chat fallback belongs to the old one.
+		m.agent.loop.ResetPlainChat()
+	}
 	if r, ok := m.rowForModel(mdl); ok && r.local {
 		m.agent.localChat, m.agent.localKey = r.chat, r.key
 	}

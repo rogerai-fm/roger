@@ -3,6 +3,7 @@ package harness
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -187,6 +188,9 @@ type Loop struct {
 	// observed is what this agent has actually looked at, so a write cannot destroy
 	// content it never read or that changed underneath it (observe.go).
 	observed observations
+	// plainChat is set once this session's model refused tools (plainchat.go): later turns
+	// send none. Cleared by Reset and ResetPlainChat.
+	plainChat bool
 }
 
 // The per-turn retrieval budget (founder-approved 2026-07-27). It bounds the tokens a
@@ -400,6 +404,15 @@ func (l *Loop) Send(ctx context.Context, userText string, emit func(Event)) (str
 	l.emit = emit
 	l.turnCalls = l.turnCalls[:0]
 	compacted := false // auto-compaction fires at most once per turn (see below)
+	// trying is the band whose tools refusal this turn is retrying without tools. Plain chat
+	// sticks only once that retry ANSWERS: the broker words a band that is briefly off air the
+	// same way as one that cannot take tools, so a retry that fails proves nothing and undoes it.
+	var trying *ToolsRefusedError
+	defer func() {
+		if trying != nil {
+			l.plainChat = false
+		}
+	}()
 	l.messages = append(l.messages, Message{Role: "user", Content: userText})
 
 	for step := 0; step < l.MaxSteps; step++ {
@@ -414,7 +427,30 @@ func (l *Loop) Send(ctx context.Context, userText string, emit func(Event)) (str
 			return "", ctx.Err()
 		}
 		l.steps++
-		msg, err := l.complete(ctx, l.messages, ToolSchemas(l.tools))
+		var tools []map[string]any
+		if !l.plainChat {
+			tools = ToolSchemas(l.tools)
+		}
+		msg, err := l.complete(ctx, l.messages, tools)
+		var refused *ToolsRefusedError
+		if err != nil && step == 0 && !l.plainChat && errors.As(err, &refused) {
+			// PLAIN CHAT (plainchat.go). The band refused the tools: ask again without them.
+			// Only on the turn's first call - a refusal after a tool ran means the tools
+			// station left mid-turn, and the history now holds tool calls.
+			l.plainChat, trying = true, refused
+			continue
+		}
+		if err == nil && trying != nil {
+			// The retry answered: the band really cannot drive tools. Say so once, and keep
+			// it plain for the rest of the session on this model.
+			emitStep(Event{Kind: EventNotice, Text: plainChatNotice(trying.Model)})
+			trying = nil
+		}
+		if l.plainChat && len(msg.ToolCalls) > 0 {
+			// No tools were offered, so none run, and none enter the conversation: an
+			// assistant tool_calls with no tool results is a shape strict stations reject.
+			msg.ToolCalls = nil
+		}
 		if err != nil && IsContextOverflow(err.Error()) && !compacted {
 			// AUTO-COMPACTION (founder 2026-08-20). The conversation outgrew the band's
 			// window. Rather than ending the turn and telling the operator to run /clear
@@ -762,6 +798,7 @@ func (l *Loop) lastAssistantText() string {
 // Reset clears the conversation back to just the persona (session-only - a fresh
 // start, no disk history). Used when the user clears the agent transcript.
 func (l *Loop) Reset() {
+	l.plainChat = false // a new session tries tools again
 	l.messages = l.messages[:0]
 	if l.Persona != "" {
 		l.messages = append(l.messages, Message{Role: "system", Content: l.Persona})

@@ -122,19 +122,23 @@ func BrokerCompleterRoute(rt BrokerRoute) Completer {
 			ctx, cancel = context.WithTimeout(ctx, fallbackTimeout)
 			defer cancel()
 		}
-		reqBody, _ := json.Marshal(map[string]any{
-			"model":    model,
-			"messages": messages,
-			"tools":    tools,
-			// Let the model choose whether to call a tool (vs forcing one); a non-tool
-			// model just ignores this field.
-			"tool_choice": "auto",
-			"max_tokens":  agentMaxTokens,
+		body := map[string]any{
+			"model":      model,
+			"messages":   messages,
+			"max_tokens": agentMaxTokens,
 			// Streamed with the final usage chunk: the chunk is the turn's meter and names
 			// the station and model that served it. A JSON reply is still read as before.
 			"stream":         true,
 			"stream_options": map[string]any{"include_usage": true},
-		})
+		}
+		// A plain-chat turn (plainchat.go) sends neither field, as LocalCompleter does: a
+		// tool_choice with no tools is malformed to a strict station.
+		if len(tools) > 0 {
+			body["tools"] = tools
+			// Let the model choose whether to call a tool (vs forcing one).
+			body["tool_choice"] = "auto"
+		}
+		reqBody, _ := json.Marshal(body)
 		routing := rt.Routing
 		routing.Confidential = routing.Confidential || confidential
 		req, _ := http.NewRequestWithContext(ctx, http.MethodPost, broker+"/v1/chat/completions", nil)
@@ -218,7 +222,11 @@ func BrokerCompleterRoute(rt BrokerRoute) Completer {
 				onCost(c, in, out, tps)
 			}
 		}
-		return parseCompletion(raw, resp.StatusCode)
+		msg, err := parseCompletion(raw, resp.StatusCode)
+		if err != nil && len(tools) > 0 && !requiresTools(routing) && brokerRefusedTools(resp.StatusCode, err.Error()) {
+			return Message{}, &ToolsRefusedError{Model: model, Err: err}
+		}
+		return msg, err
 	}
 }
 
