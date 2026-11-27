@@ -16,6 +16,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -430,6 +431,7 @@ func runHubInBackground(st *tower.State, opt hubOptions, out io.Writer, stop <-c
 	var refreshMu sync.Mutex
 	known := map[string]bool{}
 	lastAttempt := time.Time{}
+	refusedState := "" // the Tower refusal state last said, so it is said once per state
 	// debounce=true is the on-demand path: re-checked UNDER the lock (audit M-2, the old
 	// check-then-act let a burst stampede Core), and the attempt time is stamped even on
 	// failure so a down Core is asked at most once a second, not once per waiting consumer.
@@ -442,9 +444,10 @@ func runHubInBackground(st *tower.State, opt hubOptions, out io.Writer, stop <-c
 		lastAttempt = time.Now()
 		nodes, nerr := towerjoin.HubNodes(st)
 		if nerr != nil {
-			fmt.Fprintf(out, "hub: could not refresh node registrations: %v\n", nerr)
+			hubRefreshFailed(out, nerr, &refusedState)
 			return
 		}
+		refusedState = ""
 		seen := registerHubNodes(server, nodes, out)
 		for id := range known {
 			if !seen[id] {
@@ -656,4 +659,37 @@ func reachAt(advertised string) string {
 		return ""
 	}
 	return fmt.Sprintf("; nodes and consumers reach you at %s", advertised)
+}
+
+// Contract: features/tower/tower_canary_offline_station.feature ("once per state").
+//
+// hubRefreshFailed says why a node refresh failed. When Core verified the request as this Tower's
+// own and refused it for the Tower's state (suspended, lapsed), the link loop already tells the
+// operator that state and what to do; the refresh says once, per RECOVERABLE state, in plain words,
+// that it is paused (a terminal state says nothing here: serve says it and exits), instead
+// of Core's route sentence every 30 seconds ("listing hub nodes requires the Tower's own signed
+// request", which reads as if the request were not the Tower's). Any other failure says why, as
+// before, and clears the state so a later refusal is said again.
+func hubRefreshFailed(out io.Writer, err error, last *string) {
+	var rf *towerjoin.Refusal
+	if errors.As(err, &rf) && rf.State != "" {
+		if rf.State == *last {
+			return
+		}
+		*last = rf.State
+		// The same rule serve uses (classifyRefusal): a terminal state never resumes, and serve
+		// prints its words and exits, so the hub adds nothing.
+		if kind, _ := classifyRefusal(err, ""); kind == refusalTerminal {
+			return
+		}
+		word := map[string]string{"state_suspended": "suspended", "lease_lapsed": "its approval lapsed"}[rf.State]
+		if word == "" {
+			word = strings.ReplaceAll(strings.TrimPrefix(rf.State, "state_"), "_", " ")
+		}
+		fmt.Fprintf(out, "hub: node refresh paused while RogerAI is not taking work from this Tower (%s); "+
+			"it resumes by itself\n", word)
+		return
+	}
+	*last = ""
+	fmt.Fprintf(out, "hub: could not refresh node registrations: %v\n", err)
 }
