@@ -19,7 +19,10 @@ concurrency:
 
 jobs:
   scan:
-    runs-on: ubuntu-latest
+    # Where the job runs is one repo variable. CI_RUNNER unset: GitHub's hosted runner. CI_RUNNER=lab: the
+    # lab's own machine (two self-hosted runners labelled lab-heavy and lab-light), which costs no Actions
+    # minutes. Every step below has to work on both: no sudo, no fixed ports, nothing written to $HOME.
+    runs-on: ${{ github.repository == 'rogerai-fm/roger-core' && vars.CI_RUNNER && format('{0}-light', vars.CI_RUNNER) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +33,8 @@ jobs:
         run: |
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
             | tar -xz gitleaks
-          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
-          gitleaks version
+          mkdir -p "$RUNNER_TEMP/bin" && install -m 0755 gitleaks "$RUNNER_TEMP/bin/gitleaks"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/bin/gitleaks" version
       - name: Scan full history
         run: gitleaks detect --source . --config .gitleaks.toml --log-opts="--all" --redact --no-banner

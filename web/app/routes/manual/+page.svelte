@@ -47,7 +47,7 @@
         </p>
         <div class="man-cover__meta">
           <span>Set: <b>roger</b></span>
-          <span>Version: <b data-cli-version>v7.2.1</b></span>
+          <span>Version: <b data-cli-version>v7.2.2</b></span>
           <span>Broker: <b>broker.rogerai.fm</b></span>
           <span>Protocol: <b>OpenAI-compatible</b></span>
         </div>
@@ -1937,7 +1937,7 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
           <section class="man-sec" id="s9">
             <span class="man-sec__no">§9 · Command reference</span>
             <h2>Every command, every key</h2>
-            <p>The full surface as of <b data-cli-version>v7.2.1</b>: the top-level CLI
+            <p>The full surface as of <b data-cli-version>v7.2.2</b>: the top-level CLI
               commands with their key flags, then the in-app keys and slash commands grouped
               by context. Commands with flag surfaces document <code>--help</code>; advanced
               flags hide behind <code>--advanced</code>. Run <code>roger</code> with no
@@ -2580,6 +2580,7 @@ OPENAI_API_KEY=rog-grant_3f9a...c10b</pre></div>
               Newest first. The set self-updates - <code>roger upgrade</code> pulls the
               latest, <code>roger upgrade --check</code> just reports.</p>
             <div class="man-plate">
+              <div class="man-plate__row"><span class="man-plate__k">v7.2.2</span><span class="man-plate__v">Remote control never loses a turn: the host confirms each one it receives, and a turn sent while the host's connection dropped is sent again and run once. After 5 tries with no answer, the viewer is told the host did not receive it.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v7.2.1</span><span class="man-plate__v">One-job models are judged per model everywhere: the app, the console and the Playbox count every station's vote, the same way the broker and <code>roger search</code> do. <code>roger search --kind models</code> no longer asks for the search list. A private share that gets no frequency code yet now says how to get one.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v7.2.0</span><span class="man-plate__v">Search on the market: <code>roger share --search brave|searxng|native</code> puts a search engine on the air, priced per 1,000 queries, and <code>roger search check</code> tests your own index first. <code>roger search</code> lists each kind in its own section and unit (models, one-job models, voices, search stations; <code>--kind</code>, <code>--json</code>). One-job models such as the fire controller are no longer offered as chat partners in the app, the console or the Playbox.</span></div>
               <div class="man-plate__row"><span class="man-plate__k">v7.1.1</span><span class="man-plate__v">Tower follow-ups: each kind of health check keeps its own run of failures, so a passing hub check no longer clears canary failures; a Tower with no approval on record starts at the <b>new</b> stage; one outage seen by two broker instances counts once.</span></div>

@@ -6,11 +6,12 @@ import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const BROKER = "https://broker.rogerai.fm";
+const SITE = `http://127.0.0.1:${Number(process.env.WEB_E2E_PORT) || 4178}`;   // the origin playwright.config.mjs serves the built site on
 const names = readdirSync(fileURLToPath(new URL("../app/pages", import.meta.url))).map((f) => f.replace(/\.js$/, ""));
 
 for (const name of names) {
   test(`${name}: its own scripts run as one module with no error`, async ({ page }) => {
-    await page.route(`${BROKER}/**`, (route) => route.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "http://127.0.0.1:4178", "access-control-allow-credentials": "true" }, body: "{}" }));
+    await page.route(`${BROKER}/**`, (route) => route.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": SITE, "access-control-allow-credentials": "true" }, body: "{}" }));
     const errors = [], scripts = [];
     page.on("request", (r) => { if (r.resourceType() === "script") scripts.push(new URL(r.url()).pathname); });
     page.on("pageerror", (e) => errors.push(String(e)));

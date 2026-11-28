@@ -26,7 +26,10 @@ concurrency:
 
 jobs:
   web:
-    runs-on: ubuntu-latest
+    # Where the job runs is one repo variable. CI_RUNNER unset: GitHub's hosted runner. CI_RUNNER=lab: the
+    # lab's own machine (two self-hosted runners labelled lab-heavy and lab-light), which costs no Actions
+    # minutes. Every step below has to work on both: no sudo, no fixed ports, nothing written to $HOME.
+    runs-on: ${{ github.repository == 'rogerai-fm/roger-core' && vars.CI_RUNNER && format('{0}-light', vars.CI_RUNNER) || 'ubuntu-latest' }}
     defaults:
       run:
         working-directory: web
@@ -35,17 +38,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+          cache: ${{ runner.environment == 'github-hosted' && 'npm' || '' }}
           cache-dependency-path: web/package-lock.json
       - name: toolchain (pinned devDependencies)
         run: npm ci --no-audit --no-fund
       # the guard suite builds the site itself (test/*.test.mjs call build.mjs), then vitest
       - name: guards + component tests
         run: npm test
+      # --with-deps installs system packages with sudo apt: right on the hosted image, not on our own machine
       - name: browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install ${{ runner.environment == 'github-hosted' && '--with-deps' || '' }} chromium
+      # a free port for the built site, picked now: on a machine people work on, a fixed one may be taken,
+      # or held by somebody's own preview of a different build
       - name: browser flows
-        run: npm run test:e2e
+        run: |
+          export WEB_E2E_PORT="$(node -e 'const s=require("net").createServer();s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')"
+          npm run test:e2e
       - name: keep the report when a flow fails
         if: failure()
         uses: actions/upload-artifact@v4

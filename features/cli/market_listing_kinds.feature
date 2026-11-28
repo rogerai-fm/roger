@@ -44,10 +44,9 @@
 #       refuse free-form messages.
 #   K10 `roger share --modality search` is refused with "use --search <engine>": a search
 #       station needs an engine, which only --search sets.
-#   K8  `roger search <words>` (OPEN, needs a ruling): either (a) runs a web search through
-#       POST /v1/search and prints results, or (b) keeps listing the market and says
-#       "to search the web, use `roger web <words>`". Until ruled, extra words print a one-line
-#       hint instead of being silently ignored.
+#   K8  `roger search <words>` keeps listing the market (founder ruling 2026-11-26). It does not
+#       search the web. Extra words print a one-line hint first, pointing to POST /v1/search,
+#       and are otherwise ignored.
 
 @cli @discovery
 Feature: The CLI lists models, voices and search stations apart
@@ -187,7 +186,7 @@ Feature: The CLI lists models, voices and search stations apart
       When I run "roger share --upstream http://127.0.0.1:9000 --modality search"
       Then the command fails with "use --search <engine>"
 
-  Rule: words after search (K8, until ruled)
+  Rule: words after search list the market, after a hint (K8, ruled 2026-11-26)
 
     Scenario: Extra words are not silently ignored
       When I run "roger search tides"

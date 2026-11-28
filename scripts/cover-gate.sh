@@ -57,8 +57,14 @@ cleanup_pg() {
 }
 trap cleanup_pg EXIT
 if [ -z "${ROGERAI_TEST_DATABASE_URL:-}" ]; then
-  command -v podman >/dev/null 2>&1 && RUNTIME=podman
-  [ -z "$RUNTIME" ] && command -v docker >/dev/null 2>&1 && RUNTIME=docker
+  # CONTAINER_RUNTIME names it when the caller must (CI sets it, so Postgres and Valkey share one and the
+  # hosted image, which has both, stays on docker); otherwise podman, then docker.
+  if [ -n "${CONTAINER_RUNTIME:-}" ]; then
+    command -v "$CONTAINER_RUNTIME" >/dev/null 2>&1 && RUNTIME="$CONTAINER_RUNTIME"
+  else
+    command -v podman >/dev/null 2>&1 && RUNTIME=podman
+    [ -z "$RUNTIME" ] && command -v docker >/dev/null 2>&1 && RUNTIME=docker
+  fi
   if [ -n "$RUNTIME" ]; then
     # PER RUN, both the name and the port. This used to be a fixed name that the script
     # force-removed before starting its own - so a second gate starting while a first was
@@ -128,10 +134,13 @@ if [ -z "${ROGERAI_TEST_DATABASE_URL:-}" ]; then
       fi
       export ROGERAI_TEST_DATABASE_URL="postgres://postgres:test@127.0.0.1:$PG_PORT/roger_test?sslmode=disable"
     else
+      # In CI a missing database is a broken gate, not a low number: stop before a wrong figure is published.
+      if [ -n "${CI:-}" ]; then echo "[cover] ERROR: could not start a test Postgres in CI" >&2; PG_CT=""; exit 2; fi
       echo "[cover] WARNING: could not start a test Postgres; postgres.go will count as uncovered" >&2
       PG_CT=""
     fi
   else
+    if [ -n "${CI:-}" ]; then echo "[cover] ERROR: no container runtime in CI and no ROGERAI_TEST_DATABASE_URL" >&2; exit 2; fi
     echo "[cover] WARNING: no podman/docker and no ROGERAI_TEST_DATABASE_URL — postgres.go will count as uncovered" >&2
   fi
 fi

@@ -17,7 +17,18 @@ concurrency:
 
 jobs:
   coverage:
-    runs-on: ubuntu-latest
+    # Where the job runs is one repo variable. CI_RUNNER unset: GitHub's hosted runner. CI_RUNNER=lab: the
+    # lab's own machine (two self-hosted runners labelled lab-heavy and lab-light), which costs no Actions
+    # minutes. Every step below has to work on both: no sudo, no fixed ports, nothing written to $HOME
+    # (our own runners keep their module, npm and temp directories on their own volume, set in the runner's
+    # .env, so the actions' caches are for the hosted runner only). The lab label is honoured in this
+    # repository alone: the public copy of this file always runs on the hosted runner.
+    # The lab runners are system services under a dedicated unprivileged user (ghrunner, no sudo, rootless
+    # podman) whose units make the machine owner's home folder inaccessible, so code from a pull request
+    # cannot read the owner's keys or .env files. Do not register a runner under a personal account.
+    # How to switch, check the runners and write steps that work on both: docs/ci-runners.md (kept in
+    # the private repository; the public copy does not carry it).
+    runs-on: ${{ github.repository == 'rogerai-fm/roger-core' && vars.CI_RUNNER && format('{0}-heavy', vars.CI_RUNNER) || 'ubuntu-latest' }}
     # A guard, not a budget: one run of the suite takes about 30 minutes. Without this a hung
     # setup step or service container could hold the runner for GitHub's 6-hour default.
     timeout-minutes: 75
@@ -25,61 +36,35 @@ jobs:
       GOTOOLCHAIN: local
       # Enables the networked vulnerability scenario in the executable release spec.
       ROGERAI_RELEASE_GATE: "1"
-      # Real Postgres for the store money path (postgres.go) so its coverage is HONEST -
-      # without this, ~half of internal/store counts as uncovered and can never hit the bar.
-      ROGERAI_TEST_DATABASE_URL: postgres://postgres:test@localhost:5432/roger_test?sslmode=disable
-      # Real Valkey for the multi-instance/shared-state suites (liveness churn +
-      # cross-instance relay run against the real protocol server, not only miniredis).
-      ROGERAI_TEST_REDIS_URL: redis://localhost:6379
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: roger_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-      valkey:
-        image: valkey/valkey:8
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "valkey-cli ping"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+      # Postgres: scripts/cover-gate.sh starts its own throwaway one (docker or podman, a port the runtime
+      # picks, fsync off, the `rogerai` schema) when ROGERAI_TEST_DATABASE_URL is unset, the same way the
+      # pre-push gate runs it. Valkey: the step below. Neither is a `services:` block, because a service
+      # container needs docker on the runner and a fixed host port, and a self-hosted runner has neither.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: '1.26'
           check-latest: true   # take the newest 1.26 patch (security fixes), not the runner's cached one
-          cache: true
+          cache: ${{ runner.environment == 'github-hosted' }}
       # The web scenarios' pinning tests run from Go (cmd/rogerai-broker/web_spec_test.go installs
       # web/'s pinned devDependencies with npm ci on first use): the same Node the web job uses.
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+          cache: ${{ runner.environment == 'github-hosted' && 'npm' || '' }}
           cache-dependency-path: web/package-lock.json
 
       # Reject vulnerabilities that are reachable from RogerAI before main can go green.
       - name: reachable vulnerability gate
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 
-      # Provision the `rogerai` schema (prod provisions it out-of-band; NewPostgres only
-      # owns the tables inside it, by design / least privilege).
-      - name: create schema
-        # The throwaway test database skips durability flushes (same as scripts/cover-gate.sh);
-        # all three settings reload without a restart.
-        run: |
-          psql "$ROGERAI_TEST_DATABASE_URL" -c "CREATE SCHEMA IF NOT EXISTS rogerai;"
-          psql "$ROGERAI_TEST_DATABASE_URL" -c "ALTER SYSTEM SET fsync = off" -c "ALTER SYSTEM SET synchronous_commit = off" -c "ALTER SYSTEM SET full_page_writes = off" -c "SELECT pg_reload_conf()"
+      # Real Valkey for the multi-instance/shared-state suites (liveness churn + cross-instance relay run
+      # against the real protocol server, not only miniredis). Its port is read back, never pinned.
+      - name: valkey
+        env:
+          CONTAINER_RUNTIME: ${{ runner.environment == 'github-hosted' && 'docker' || 'podman' }}
+        run: scripts/ci-valkey.sh up
 
       # 1) Tests + coverage profile + the gate's grading, in ONE run of the suite. The gate script
       # runs go test itself (45m per package: the broker package is large and shares the runner,
@@ -90,6 +75,9 @@ jobs:
       # after the report and badge are published, so a red gate never hides the report.
       - name: test + coverage
         id: gate
+        env:
+          # one runtime for Postgres and Valkey: docker on the hosted image (it has both), podman on ours
+          CONTAINER_RUNTIME: ${{ runner.environment == 'github-hosted' && 'docker' || 'podman' }}
         run: |
           set +e
           scripts/cover-gate.sh 2>&1 | tee gate.log
@@ -102,6 +90,12 @@ jobs:
             exit 1
           fi
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: valkey down
+        if: always()
+        env:
+          CONTAINER_RUNTIME: ${{ runner.environment == 'github-hosted' && 'docker' || 'podman' }}
+        run: scripts/ci-valkey.sh down
 
       # 2) Build the report site — ONLY the html + the func summary (not the whole repo).
       - name: build report + badge

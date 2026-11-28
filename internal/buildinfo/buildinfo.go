@@ -9,4 +9,4 @@
 package buildinfo
 
 // Version is the build's version; the release pipeline overrides it at link time.
-var Version = "7.2.1"
+var Version = "7.2.2"

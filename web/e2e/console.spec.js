@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 const BROKER = "https://broker.rogerai.fm";
+const SITE = `http://127.0.0.1:${Number(process.env.WEB_E2E_PORT) || 4178}`;   // the origin playwright.config.mjs serves the built site on
 const json = (route, status, body) => route.fulfill({ status, contentType: "application/json",
-  headers: { "access-control-allow-origin": "http://127.0.0.1:4178", "access-control-allow-credentials": "true" }, body: JSON.stringify(body) });
+  headers: { "access-control-allow-origin": SITE, "access-control-allow-credentials": "true" }, body: JSON.stringify(body) });
 
 test("console: the island hydrates the prerendered card and renders the operator view from the broker", async ({ page }) => {
   const seen = [];

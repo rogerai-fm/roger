@@ -82,6 +82,7 @@ type RCFrame struct {
 
 // RCInbound is what a remote surface (or the broker itself, for backfill) sends TO the host.
 type RCInbound struct {
+	ID        string `json:"id,omitempty"`         // stable per inbound; the host acks it and runs it once (rc_inbox_delivery.feature D3)
 	Kind      string `json:"kind"`                 // one of the RCIn* constants
 	Text      string `json:"text,omitempty"`       // turn text
 	ConfirmID string `json:"confirm_id,omitempty"` // confirm correlation

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -607,16 +608,28 @@ func (rb *RCBridge) Disable() error {
 
 // pollLoop long-polls the broker for inbound messages, delivering each to Inbound(). A 204 is
 // a normal re-poll; a transport error backs off; ctx/stop ends it.
+//
+// Delivery is acknowledged (features/multinode/rc_inbox_delivery.feature): every poll says the
+// host acks, the next poll acks the last inbound (sent again until a poll is answered, so a lost
+// ack costs one redelivery at most), and an id already run is not run again. The dedupe set lives
+// as long as this loop: a restarted host enables a NEW session, so no redelivery can cross it.
 func (rb *RCBridge) pollLoop() {
 	backoff := time.Second
+	seen := NewRCDedupe()
+	ack := ""
 	for {
 		select {
 		case <-rb.stop:
 			return
 		default:
 		}
-		req, _ := http.NewRequestWithContext(rb.ctx, http.MethodGet, rb.broker+"/rc/"+rb.sessionID+"/poll", nil)
+		u := rb.broker + "/rc/" + rb.sessionID + "/poll"
+		if ack != "" {
+			u += "?ack=" + url.QueryEscape(ack)
+		}
+		req, _ := http.NewRequestWithContext(rb.ctx, http.MethodGet, u, nil)
 		req.Header.Set("Authorization", "Bearer "+rb.hostToken)
+		req.Header.Set("X-Roger-RC-Ack", "1")
 		resp, err := rcNoTimeout.Do(req)
 		if err != nil {
 			select {
@@ -637,12 +650,20 @@ func (rb *RCBridge) pollLoop() {
 		}
 		if resp.StatusCode == http.StatusNoContent {
 			resp.Body.Close()
+			ack = "" // the broker has the ack
 			continue
 		}
 		raw, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 		resp.Body.Close()
+		if resp.StatusCode == http.StatusOK {
+			ack = ""
+		}
 		var in protocol.RCInbound
 		if json.Unmarshal(raw, &in) == nil && in.Kind != "" {
+			ack = in.ID
+			if !seen.First(in.ID) {
+				continue // a redelivery after a lost ack: already run
+			}
 			// Guest-operator interlock: while parked, the inbound is consumed AT THE
 			// BRIDGE (dropped/answered) and never reaches the suspended host loop.
 			if rb.parkIntercept(in) {
