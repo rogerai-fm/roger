@@ -502,7 +502,7 @@ rogerai.fm/roger/v7/cmd/rogerai/edgetrouble.go:34:			cmdEdgeTrouble				91.7%
 rogerai.fm/roger/v7/cmd/rogerai/edgetrouble.go:69:			edgePrintTroubleFeed			100.0%
 rogerai.fm/roger/v7/cmd/rogerai/edgetrouble.go:185:			edgeWatchTrouble			86.4%
 rogerai.fm/roger/v7/cmd/rogerai/filelock.go:20:				fileLockConfig				90.0%
-rogerai.fm/roger/v7/cmd/rogerai/filelock.go:67:				staleLock				100.0%
+rogerai.fm/roger/v7/cmd/rogerai/filelock.go:67:				staleLock				87.5%
 rogerai.fm/roger/v7/cmd/rogerai/filelock.go:85:				takeOverStaleLock			100.0%
 rogerai.fm/roger/v7/cmd/rogerai/filelock.go:102:			lockToken				100.0%
 rogerai.fm/roger/v7/cmd/rogerai/grant.go:20:				cmdGrant				100.0%
@@ -1090,7 +1090,7 @@ rogerai.fm/roger/v7/internal/agent/leave.go:88:				sendLeave				94.7%
 rogerai.fm/roger/v7/internal/agent/leave.go:124:			StopAttaching				100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:24:			idFromPriv				100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:32:			NodeID					100.0%
-rogerai.fm/roger/v7/internal/agent/localtower.go:48:			ServeLocalTower				84.2%
+rogerai.fm/roger/v7/internal/agent/localtower.go:48:			ServeLocalTower				81.6%
 rogerai.fm/roger/v7/internal/agent/localtower.go:122:			forJob					87.5%
 rogerai.fm/roger/v7/internal/agent/localtower.go:150:			localPollBackoff			100.0%
 rogerai.fm/roger/v7/internal/agent/localtower.go:171:			pollLocalJob				93.5%
@@ -1530,7 +1530,7 @@ rogerai.fm/roger/v7/internal/client/rc.go:582:				Done					100.0%
 rogerai.fm/roger/v7/internal/client/rc.go:585:				Run					100.0%
 rogerai.fm/roger/v7/internal/client/rc.go:592:				Stop					100.0%
 rogerai.fm/roger/v7/internal/client/rc.go:603:				Disable					100.0%
-rogerai.fm/roger/v7/internal/client/rc.go:616:				pollLoop				87.8%
+rogerai.fm/roger/v7/internal/client/rc.go:616:				pollLoop				85.4%
 rogerai.fm/roger/v7/internal/client/rc.go:683:				eventPump				100.0%
 rogerai.fm/roger/v7/internal/client/rc.go:705:				postEvents				100.0%
 rogerai.fm/roger/v7/internal/client/rcdedupe.go:19:			NewRCDedupe				100.0%
@@ -4416,7 +4416,7 @@ rogerai.fm/roger/v7/internal/towerhub/server.go:471:			writeErr				100.0%
 rogerai.fm/roger/v7/internal/towerhub/server.go:489:			Submit					100.0%
 rogerai.fm/roger/v7/internal/towerhub/server.go:558:			Poll					100.0%
 rogerai.fm/roger/v7/internal/towerhub/server.go:605:			Complete				100.0%
-rogerai.fm/roger/v7/internal/towerhub/server.go:691:			askCoreAboutUnknown			87.5%
+rogerai.fm/roger/v7/internal/towerhub/server.go:691:			askCoreAboutUnknown			93.8%
 rogerai.fm/roger/v7/internal/towerjoin/earnings.go:29:			FetchEarnings				90.9%
 rogerai.fm/roger/v7/internal/towerjoin/enroll.go:74:			enroll					88.0%
 rogerai.fm/roger/v7/internal/towerjoin/enroll.go:171:			requestToken				100.0%
