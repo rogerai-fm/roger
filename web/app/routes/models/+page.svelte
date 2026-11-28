@@ -10,7 +10,7 @@
     title: 'Models - RogerAI model directory',
     desc: 'The live RogerAI model directory: every model is a band, every home GPU a station on air. Sweep the dial, read the signal, and pick up an endpoint. Pay per token on the CLI. Real data only - no station, no signal.',
     canonical: 'https://rogerai.fm/models.html',
-    css: [...CSS_SHARED, 'models.css'],
+    css: [...CSS_SHARED, 'tuner.css', 'models.css'],
     scripts: [{ runtime: true }, { page: "models" }],
   });
 </script>
@@ -104,6 +104,7 @@
              absent - but a reader looking for them had no route off this page. -->
         <p class="dir-sibling"><span>Also on the network:</span>
           <a href="/voices.html">Voices <span aria-hidden="true">&rarr;</span></a>
+          <a href="/search.html">Search <span aria-hidden="true">&rarr;</span></a>
           <a href="/tower.html">The Tower <span aria-hidden="true">&rarr;</span></a>
           <a href="/research-wave-family.html">RogerAI&rsquo;s own models: the Wave Spectrum <span aria-hidden="true">&rarr;</span></a></p>
       </div>

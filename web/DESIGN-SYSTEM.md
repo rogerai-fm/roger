@@ -917,3 +917,12 @@ otherwise; the alert red is only a reading over its line, an alert state and a p
 A timelapse lives once, on its use-case page (fire on the wildfire page at `#timelapse`, oil and gas at
 `#theft-timelapse`). A model page does not repeat it: it carries `ReplayLinks.svelte`, two picture cards
 (`.wm-doors`) that lead there, with the camera frame shown whole and credited under the cards.
+
+## The live roster
+
+A directory of stations on air that is not the Models board (the voices, the search stations) is one
+component, `app/lib/roster/Roster.svelte`, mounted as an island with a `kind`. What differs between kinds
+(the feed, the columns, the words, the command) is one entry in `app/lib/roster/kinds.js`; a new kind is an
+entry there, an island file and a page. The rules it keeps: rows come from the broker only, an empty answer
+is the quiet band, a transient failure holds the last roster for a bounded time, and nothing polls under
+reduced motion. The search box, sort and chips are the shared tuner (`tuner.css`), also on the Models page.

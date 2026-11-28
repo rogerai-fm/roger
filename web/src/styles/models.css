@@ -138,46 +138,7 @@
 @media (max-width: 880px) { .dialwrap .dial { max-width: none; } }
 .dial__lbl--idle { opacity: .4; }
 
-/* ---------- tuner: search + filters ---------------------------- */
-.tuner { margin: 0 0 var(--s-6); display: flex; flex-direction: column; gap: var(--s-4); }
-.tuner__search {
-  display: flex; align-items: center; gap: var(--s-3);
-  border: 1px solid var(--hairline-2); background: var(--paper); padding: 0 var(--s-4);
-  height: 48px; transition: border-color var(--d-2);
-}
-.tuner__search:focus-within { border-color: var(--live); box-shadow: 0 0 0 1px var(--live) inset; }
-.tuner__prompt { color: var(--live-text); font-weight: var(--weight-semi); }
-.tuner__input {
-  flex: 1; min-width: 0; border: 0; background: none; color: var(--ink-900);
-  font-size: var(--t-body); outline: none;
-}
-.tuner__input::placeholder { color: var(--ink-400); }
-/* the field stays 16px (no iOS focus zoom); its placeholder steps down so it is not clipped */
-@media (max-width: 480px) { .tuner__input::placeholder { font-size: var(--t-sm); } }
-.tuner__clear { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-500);
-  text-transform: uppercase; letter-spacing: 0.1em; }
-.tuner__clear:hover { color: var(--live-text); }
-.tuner__filters { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
-.tuner__sel { display: inline-flex; align-items: center; gap: var(--s-2);
-  font-family: var(--font-mono); font-size: var(--t-xs); }
-.tuner__k { color: var(--ink-400); letter-spacing: 0.1em; text-transform: uppercase; }
-.tuner__sel select {
-  font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-900);
-  background: var(--paper); border: 1px solid var(--hairline-2); padding: 6px 26px 6px 10px;
-  border-radius: var(--r-xs); cursor: pointer; appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, var(--ink-400) 50%), linear-gradient(135deg, var(--ink-400) 50%, transparent 50%);
-  background-position: right 12px center, right 7px center; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
-}
-.tuner__sel select:focus-visible { outline: none; border-color: var(--live); box-shadow: 0 0 0 1px var(--live) inset; }
-.tuner__chip {
-  font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-500);
-  border: 1px solid var(--hairline-2); background: var(--paper); padding: 6px 12px;
-  border-radius: var(--r-xs); letter-spacing: 0.02em; transition: color var(--d-1), border-color var(--d-1), background var(--d-1);
-}
-.tuner__chip .cs { color: var(--ink-700); }
-.tuner__chip:hover { border-color: var(--ink-400); color: var(--ink-900); }
-.tuner__chip.is-on { color: var(--live-text); border-color: var(--live); background: var(--live-tint); }
-.tuner__chip.is-on .cs { color: var(--live-text); }
+/* (the tuner, the search box and the filters, is tuner.css: the voices and search rosters use it too) */
 
 /* (the page hero, the directory panel and the band chips are the shared directory
    component, components.css; this sheet places them and draws the rows) */
@@ -530,12 +491,6 @@
 .reportform__status.is-ok { color: var(--ink-700); }
 .reportform__status.is-err { color: var(--live-text); }
 
-/* touch: this sheet's small controls keep their look and grow a --hit tap area
-   (the pattern: the touch hit area block in components.css) */
-@media (pointer: coarse) {
-  :where(.tuner__chip) { position: relative; }
-  :is(.tuner__chip)::before { content: ""; position: absolute; inset: var(--hit-inset); }
-}
 
 /* features/details: what the model is for */
 .qsl__about p { margin: 0 0 4px; overflow-wrap: anywhere; }

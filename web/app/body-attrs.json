@@ -45,6 +45,7 @@
   "/research-wave-family": " data-onair=\"idle\"",
   "/research-wave-nano": " data-onair=\"idle\"",
   "/research-wave-pico": " data-onair=\"idle\"",
+  "/search": " data-onair=\"idle\"",
   "/stations": " class=\"auth\"",
   "/tower": " data-onair=\"idle\"",
   "/usage": " class=\"auth\"",

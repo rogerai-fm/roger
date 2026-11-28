@@ -57,8 +57,10 @@ test("a link set straight in an article's sign-off text wears the in-prose mark 
   assert.deepEqual(bad, []);
 });
 
-test("the Voices quiet line's link is marked at rest, not only on hover", () => {
-  const rule = (css("voices.css").match(/\.voice-quiet a\s*{[^}]*}/) || [""])[0];
+// (the Voices quiet line carried this link until the roster became one component, 2026-11-26; the roster's
+// one inline link is the key line's)
+test("the roster's key line link is marked at rest, not only on hover", () => {
+  const rule = (css("voices.css").match(/\.roster-key a\s*{[^}]*}/) || [""])[0];
   assert.match(rule, /border-bottom:/);
   assert.doesNotMatch(rule, /border-bottom:\s*\S+\s+solid\s+transparent\s*;/, "a transparent rule is no mark at all");
 });

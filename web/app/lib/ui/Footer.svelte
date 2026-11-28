@@ -19,6 +19,7 @@
         <a href="/app.html">App</a>
         <a href="/tower.html">Tower</a>
         <a href="/voices.html">Voices</a>
+        <a href="/search.html">Search</a>
         <a href="/private.html">Base Station</a>
         <a href="{anchors}#spec">Spec</a>
         <a href="{anchors}#monetize">Monetize</a>

@@ -209,7 +209,9 @@ test("models: the band the dial locks is marked in the directory with the red ne
 test("voices: the roster and how to speak are one ink panel", () => {
   const zone = src("voices.html").match(/<div class="tone-zone" data-tone="ink">([\s\S]*?)<!-- \/tone-zone -->/)?.[1] || "";
   assert.match(zone, /<section class="section bands-dir" id="directory">/);
-  assert.match(zone, /class="voice-tune"/, "the command sits in the same panel");
+  // the table and the command are one island since 2026-11-26 (lib/roster/Roster.svelte), still inside the panel
+  assert.match(zone, /<Island name="voices" component=\{Roster\}/, "the roster island sits in the panel");
+  assert.match(readFileSync(path.join(WEB, "app/lib/roster/Roster.svelte"), "utf8"), /class="voice-tune"/, "and it carries the command");
   const css = stripCss(src("styles/voices.css"));
   assert.doesNotMatch(css, /border-top:\s*2px solid var\(--ink-900\)/, "no 2px ink rule on the roster");
 });

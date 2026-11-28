@@ -88,7 +88,7 @@ test("pricing: the empty market-rate field is wide enough for its placeholder", 
 
 test("models: the search placeholder steps down a size on a phone instead of being clipped", () => {
   // the field keeps 16px (no iOS focus zoom); only the placeholder text gets smaller
-  assert.match(css("models.css"), /@media \(max-width: 480px\)\s*\{\s*\.tuner__input::placeholder\s*\{\s*font-size:\s*var\(--t-sm\);\s*\}\s*\}/);
+  assert.match(css("tuner.css"), /@media \(max-width: 480px\)\s*\{\s*\.tuner__input::placeholder\s*\{\s*font-size:\s*var\(--t-sm\);\s*\}\s*\}/);
 });
 
 /* ---- the install line breaks before its pipe ------------------------------------- */

@@ -43,6 +43,7 @@
               <a class="nav__sub" href="/playbox.html#factory"><b>Factory</b><span>A game: keep three machines running, then automate them.</span></a>
             </div>
             <a href="/voices.html" aria-current={cur("voices")}><b>Voices</b><span>On-air text-to-speech voices, each one an operator&rsquo;s station.</span></a>
+            <a href="/search.html" aria-current={cur("search")}><b>Search</b><span>On-air search stations: an operator&rsquo;s own search, paid by the query.</span></a>
             <a href="/tower.html" aria-current={cur("tower")}><b>Tower</b><span>The relay you can run: it carries requests for 5% of what passes through, or runs a free private network of your own.</span></a>
             <a href="/pricing.html" aria-current={cur("pricing")}><b>Pricing</b><span>Who sets the price, what is free, what you can be charged, and what a machine owner keeps.</span></a>
             <a href="/integrations.html" aria-current={cur("integrations")}><b>Integrations</b><span>The local servers it finds by itself, and the agent CLIs it wires for you.</span></a>

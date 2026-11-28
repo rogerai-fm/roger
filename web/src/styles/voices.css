@@ -1,5 +1,5 @@
 /* =====================================================================
-   RogerAI - voices.css : the live VOICE directory (/voices.html).
+   RogerAI - voices.css : the live rosters (/voices.html, and /search.html since 2026-11-26).
    The bands hero (shared with models.css tokens) + the roster table +
    the "how to speak" command box. The hero, the panel and the chips are the
    shared directory component (components.css).
@@ -47,22 +47,22 @@
 .voice-name { font-weight: var(--weight-semi); color: var(--ink-900); letter-spacing: -.01em; word-break: break-word; }
 .voice-op { display: block; font-size: var(--t-xs); color: var(--ink-400); margin-top: 2px; letter-spacing: 0.02em; }
 
+/* a row's name is the control that picks it: it reads as the name, and the picked row is marked */
+.voice-pick { padding: 0; border: 0; background: none; font: inherit; font-weight: var(--weight-semi); text-align: left; cursor: pointer; border-bottom: 1px solid transparent; }
+.voice-pick:hover { border-bottom-color: var(--ink-400); }
+.voice-pick:focus-visible { outline: 2px solid var(--live); outline-offset: 2px; }
+.voice-row.is-picked { background: var(--live-tint); box-shadow: inset 2px 0 0 var(--live); }
+/* what a search station covers, in its operator's own words */
+.voice-sub { display: block; margin-top: 2px; font-size: var(--t-xs); color: var(--ink-500); }
+.roster-key { margin-top: var(--s-3); max-width: 640px; }
+.roster-key a { color: var(--ink-700); border-bottom: 1px solid color-mix(in srgb, var(--live) 55%, transparent); }
+
 .voice-lang { color: var(--ink-700); letter-spacing: 0.02em; }
 .voice-lat { color: var(--ink-900); font-size: .9375rem; }
 .voice-unit { color: var(--ink-400); font-size: var(--t-xs); }
 .voice-unit--idle { color: var(--ink-300); }
 .voice-cell--price b { font-size: .9375rem; }
 .voice-cell--price .band-tag--free { font-size: 0.625rem; }
-
-/* honest empty state row (broker reachable/unreachable, no voices) */
-.voice-quiet {
-  display: block; padding: var(--s-8) var(--s-4); text-align: center;
-  color: var(--ink-500); font-size: var(--t-sm); line-height: var(--lh-body);
-}
-.voice-quiet__txt { display: inline-block; max-width: 52ch; }
-.voice-quiet code { color: var(--ink-900); }
-.voice-quiet a { color: var(--ink-700); border-bottom: 1px solid color-mix(in srgb, var(--live) 55%, transparent); }
-.voice-quiet a:hover { color: var(--live-text); border-bottom-color: var(--live); }
 
 /* skeleton shimmer while the first fetch resolves */
 .voice-skel { height: 54px; border-bottom: 1px solid var(--hairline);
@@ -76,6 +76,8 @@
 .voice-tune { margin-top: var(--s-8); display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-3); max-width: 640px; }
 .voice-tune__lead { color: var(--ink-500); font-size: var(--t-sm); }
 .voice-tune__cmd { width: 100%; }
+/* a long command (the search request) wraps inside its box and is never cut short */
+.voice-tune__cmd .install__code { white-space: pre-wrap; overflow-wrap: anywhere; text-align: left; }
 .voice-tune__cmd.is-copied .install__copy { color: var(--live-text); }
 .voice-tune__note { color: var(--ink-400); font-size: var(--t-xs); }
 
